@@ -1,0 +1,36 @@
+app:
+  environment: development
+  port: 3000
+  globalPrefix: api
+cors:
+  origins: []
+database:
+  enabled: true
+  host: localhost
+  port: 3306
+  username: root
+  password: ''
+  database: scenic_booking
+  synchronize: false
+jwt:
+  secret: ''
+  accessTokenExpiresIn: 15m
+  refreshTokenExpiresIn: 7d
+swagger:
+  enabled: true
+  path: docs
+storage:
+  enabled: false
+  region: ''
+  bucket: ''
+  secretId: ''
+  secretKey: ''
+wechat:
+  enabled: false
+  appId: ''
+  appSecret: ''
+throttler:
+  ttl: 60000
+  limit: 100
+api:
+  versionHeader: application/vnd.scenic.v1+json

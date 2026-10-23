@@ -1,0 +1,9 @@
+node_modules
+dist
+coverage
+.git
+.env
+.env.*.local
+config/config.development.yaml
+config/config.test.yaml
+*.log
