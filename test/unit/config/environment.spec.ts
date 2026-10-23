@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import {
   getEnvironmentFilePaths,
   resolveEnvironmentVariables,
-} from './environment.js';
+} from '../../../src/config/environment.js';
 
 describe('environment loader', () => {
   it('loads development files from high to low precedence while preserving runtime values', () => {

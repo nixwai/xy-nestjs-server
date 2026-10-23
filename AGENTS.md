@@ -20,7 +20,9 @@
 - `src/modules`：领域模块
 - `src/shared`：全局基础设施
 - `config/config.yaml`：唯一 YAML 配置模板
-- `test`：E2E 测试
+- `test/unit`：单元测试
+- `test/e2e`：E2E 测试
+- `test/setup.ts`：测试环境初始化
 - `.agents/skills`：项目 Skill
 
 ## 配置规则

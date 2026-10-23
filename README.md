@@ -66,6 +66,9 @@ pnpm openapi:generate
 - `src/modules`：领域模块边界
 - `src/shared/database`：TypeORM 运行时连接
 - `src/database/migrations`：数据库迁移
+- `test/unit`：单元测试
+- `test/e2e`：E2E 测试
+- `test/setup.ts`：测试环境初始化
 - `.agents/skills/scenic-server-project`：项目专属 Agent Skill
 
 ## 业务边界

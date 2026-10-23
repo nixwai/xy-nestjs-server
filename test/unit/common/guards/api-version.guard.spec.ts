@@ -1,7 +1,7 @@
 import { ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { describe, expect, it } from 'vitest';
-import { ApiVersionGuard } from './api-version.guard.js';
+import { ApiVersionGuard } from '../../../../src/common/guards/api-version.guard.js';
 
 function contextFor(path: string, accept?: string): ExecutionContext {
   return {

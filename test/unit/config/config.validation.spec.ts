@@ -3,7 +3,7 @@ import {
   createApplicationConfigSchema,
   createConfigValidationSchema,
   validateEnvironment,
-} from './config.validation.js';
+} from '../../../src/config/config.validation.js';
 
 describe('config validation', () => {
   it('rejects a missing JWT secret', () => {

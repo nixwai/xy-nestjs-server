@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { loadBaseConfig, mergeConfig } from './config.util.js';
+import {
+  loadBaseConfig,
+  mergeConfig,
+} from '../../../../src/common/utils/config.util.js';
 
 describe('config utilities', () => {
   it('deep merges nested configuration without mutating inputs', () => {
