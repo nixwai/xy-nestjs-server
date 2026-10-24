@@ -1,8 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { Logger } from '@nestjs/common';
-import { NestExpressApplication } from '@nestjs/platform-express';
+import { INestApplication, Logger } from '@nestjs/common';
 import helmet from 'helmet';
 import { AppModule } from './app.module.js';
 import { createStrictValidationPipe } from './common/pipes/index.js';
@@ -29,8 +28,8 @@ export function resolveCorsOrigin(
  *
  * @returns 已完成全局配置但尚未开始监听端口的应用实例。
  */
-export async function createApplication(): Promise<NestExpressApplication> {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+export async function createApplication(): Promise<INestApplication> {
+  const app = await NestFactory.create<INestApplication>(AppModule);
   const configService = app.get(ConfigService);
   const appConfig = configService.getOrThrow<AppConfig>('app');
   const corsConfig = configService.getOrThrow<CorsConfig>('cors');
