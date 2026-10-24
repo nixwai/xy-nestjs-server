@@ -3,6 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { describe, expect, it } from 'vitest';
 import { ApiVersionGuard } from '../../../../src/common/guards/api-version.guard.js';
 
+/** 创建 API 版本守卫使用的 HTTP 执行上下文桩。 */
 function contextFor(path: string, accept?: string): ExecutionContext {
   return {
     switchToHttp: () => ({

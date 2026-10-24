@@ -11,8 +11,18 @@ import { ApiVersion, HttpCode } from '../enums/index.js';
 /** 校验业务 API 使用受支持的 Accept 版本头。 */
 @Injectable()
 export class ApiVersionGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(
+    /** 读取路由上的版本校验豁免元数据。 */
+    private readonly reflector: Reflector,
+  ) {}
 
+  /**
+   * 校验当前请求是否携带受支持的 API 版本头。
+   *
+   * @param context - 当前请求执行上下文。
+   * @returns 请求是否允许继续处理。
+   * @throws 当业务请求缺少受支持的版本头时抛出异常。
+   */
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>();
     const path = request.path;
@@ -33,6 +43,7 @@ export class ApiVersionGuard implements CanActivate {
     return true;
   }
 
+  /** 判断请求路径是否属于版本校验豁免范围。 */
   private isExemptPath(path: string): boolean {
     return (
       path.endsWith('/health') ||

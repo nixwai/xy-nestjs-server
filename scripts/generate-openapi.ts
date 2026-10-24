@@ -2,6 +2,7 @@ import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+/** 使用测试环境配置生成 OpenAPI 文档，避免连接真实数据库。 */
 process.env.NODE_ENV = 'test';
 process.env.DB_ENABLED = 'false';
 process.env.JWT_SECRET = 'test-only-secret-with-at-least-32-chars';

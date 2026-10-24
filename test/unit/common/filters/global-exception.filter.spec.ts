@@ -2,6 +2,7 @@ import { ArgumentsHost, Logger } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import { GlobalExceptionFilter } from '../../../../src/common/filters/global-exception.filter.js';
 
+/** 创建包含请求路径和响应桩的异常过滤器测试上下文。 */
 function hostFor(url: string): ArgumentsHost {
   return {
     switchToHttp: () => ({

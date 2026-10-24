@@ -13,8 +13,15 @@ import type { ApiErrorResponse } from '../types/index.js';
 /** 将异常转换为统一 API 错误响应。 */
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
+  /** 记录未预期的服务端异常。 */
   private readonly logger = new Logger(GlobalExceptionFilter.name);
 
+  /**
+   * 处理请求期间抛出的异常，并返回统一错误响应。
+   *
+   * @param exception - 请求处理期间捕获的异常。
+   * @param host - 当前请求的 Nest 执行上下文。
+   */
   catch(exception: unknown, host: ArgumentsHost): void {
     const context = host.switchToHttp();
     const response = context.getResponse<Response>();
@@ -42,6 +49,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     response.json(payload);
   }
 
+  /** 从异常响应体中提取客户端可见消息。 */
   private getMessage(
     body: string | object | undefined,
     status: number,
@@ -56,6 +64,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     return status >= 500 ? '服务器内部错误' : '请求处理失败';
   }
 
+  /** 从异常响应体中提取业务错误码。 */
   private getBusinessCode(
     body: string | object | undefined,
     status: number,
@@ -71,6 +80,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       : this.statusToBusinessCode(status);
   }
 
+  /** 将 HTTP 状态码映射为应用业务错误码。 */
   private statusToBusinessCode(status: number): number {
     const mapping: Record<number, number> = {
       400: HttpCode.BAD_REQUEST,

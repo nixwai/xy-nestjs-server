@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
 
-/** 景点模块，预留景点图文内容边界。 */
+/** 景点模块。 */
 @Module({})
 export class AttractionModule {}

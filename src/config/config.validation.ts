@@ -1,6 +1,10 @@
 import Joi from 'joi';
 
-/** 创建原始环境变量校验器。 */
+/**
+ * 创建原始环境变量校验器。
+ *
+ * @returns 用于校验进程环境变量的 Joi schema。
+ */
 export function createConfigValidationSchema(): Joi.ObjectSchema {
   return Joi.object({
     NODE_ENV: Joi.string()
@@ -81,7 +85,11 @@ export function createConfigValidationSchema(): Joi.ObjectSchema {
     .unknown(true);
 }
 
-/** 创建最终应用配置校验器。 */
+/**
+ * 创建最终应用配置校验器。
+ *
+ * @returns 用于校验分组应用配置的 Joi schema。
+ */
 export function createApplicationConfigSchema(): Joi.ObjectSchema {
   return Joi.object({
     app: Joi.object({
@@ -184,7 +192,13 @@ export function createApplicationConfigSchema(): Joi.ObjectSchema {
     .unknown(false);
 }
 
-/** 校验并归一化进程环境变量。 */
+/**
+ * 校验并归一化进程环境变量。
+ *
+ * @param environment - 待校验的环境变量记录。
+ * @returns 通过校验并完成类型转换的环境变量记录。
+ * @throws 当环境变量不符合约束时抛出错误。
+ */
 export function validateEnvironment(
   environment: Record<string, unknown>,
 ): Record<string, unknown> {
@@ -202,6 +216,7 @@ export function validateEnvironment(
   return value as Record<string, unknown>;
 }
 
+/** 判断值是否为常见的占位或测试密钥。 */
 function isWeakProductionSecret(value: unknown): boolean {
   if (typeof value !== 'string') return true;
   return /replace-with|change-me|test-only|example|default-secret/i.test(value);

@@ -4,7 +4,7 @@ import { DatabaseModule } from './database.module.js';
 
 const databaseModuleEnabled = shouldLoadDatabaseModule();
 
-/** 全局共享基础设施模块。 */
+/** 根据运行环境提供可选的全局数据库基础设施。 */
 @Global()
 @Module({
   imports: databaseModuleEnabled ? [DatabaseModule] : [],

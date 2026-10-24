@@ -8,20 +8,38 @@ import {
 import { ConfigService } from '@nestjs/config';
 import type { Request } from 'express';
 
+/** 单个客户端的限流计数记录。 */
 interface RateLimitEntry {
+  /** 当前时间窗口内的请求数。 */
   count: number;
+
+  /** 当前时间窗口的到期时间戳。 */
   expiresAt: number;
 }
 
-/** 提供进程级基础请求限流，业务接口接入后再细化策略。 */
+/** 按客户端 IP 在进程内限制请求频率。 */
 @Injectable()
 export class RateLimitGuard implements CanActivate {
+  /** 保存各客户端当前时间窗口的请求计数。 */
   private readonly entries = new Map<string, RateLimitEntry>();
+  /** 上一次清理过期记录的时间戳。 */
   private lastCleanupAt = 0;
+
+  /** 清理过期记录的最短间隔。 */
   private readonly cleanupIntervalMs = 60_000;
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    /** 读取限流窗口和请求上限配置。 */
+    private readonly configService: ConfigService,
+  ) {}
 
+  /**
+   * 检查客户端是否超过请求频率限制，并记录本次请求。
+   *
+   * @param context - 当前请求执行上下文。
+   * @returns 请求是否允许继续处理。
+   * @throws 当客户端超过当前时间窗口的请求上限时抛出异常。
+   */
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>();
     const now = Date.now();
@@ -47,6 +65,8 @@ export class RateLimitGuard implements CanActivate {
     }
     return true;
   }
+
+  /** 删除已经过期的客户端限流记录。 */
   private removeExpiredEntries(now: number): void {
     for (const [entryKey, entry] of this.entries) {
       if (entry.expiresAt <= now) this.entries.delete(entryKey);

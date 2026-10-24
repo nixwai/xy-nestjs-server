@@ -12,14 +12,23 @@ import type {
   SwaggerConfig,
 } from './config/config.types.js';
 
-/** 将 CORS 白名单转换为 Nest 可接受的来源配置。 */
+/**
+ * 将 CORS 白名单转换为 Nest 可接受的来源配置。
+ *
+ * @param origins - CORS 允许的来源列表。
+ * @returns 有来源时返回副本，没有来源时禁用 CORS。
+ */
 export function resolveCorsOrigin(
   origins: readonly string[],
 ): false | string[] {
   return origins.length > 0 ? [...origins] : false;
 }
 
-/** 创建并配置 Nest 应用实例。 */
+/**
+ * 创建并配置 Nest 应用实例。
+ *
+ * @returns 已完成全局配置但尚未开始监听端口的应用实例。
+ */
 export async function createApplication(): Promise<NestExpressApplication> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
@@ -57,7 +66,11 @@ export async function createApplication(): Promise<NestExpressApplication> {
   return app;
 }
 
-/** 启动 HTTP 服务。 */
+/**
+ * 启动 HTTP 服务。
+ *
+ * @returns HTTP 服务启动完成后的 Promise。
+ */
 export async function bootstrap(): Promise<void> {
   const app = await createApplication();
   const appConfig = app.get(ConfigService).getOrThrow<AppConfig>('app');

@@ -26,6 +26,7 @@ import { AuditModule } from './modules/audit/audit.module.js';
 import { StorageModule } from './modules/storage/storage.module.js';
 import { TaskModule } from './modules/task/task.module.js';
 
+/** 注册应用模块、领域模块和全局请求处理能力。 */
 @Module({
   imports: [
     ConfigModule.forRoot({

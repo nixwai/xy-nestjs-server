@@ -5,8 +5,13 @@ import type { AppEnvironment } from './config.types.js';
 
 /** 环境文件加载选项。 */
 export interface EnvironmentLoaderOptions {
+  /** 环境文件所在目录。 */
   cwd?: string;
+
+  /** 要加载的应用环境。 */
   environment?: AppEnvironment;
+
+  /** 用于覆盖环境文件值的运行时环境变量。 */
   runtimeEnvironment?: NodeJS.ProcessEnv;
 }
 
@@ -16,7 +21,13 @@ const APP_ENVIRONMENTS: readonly AppEnvironment[] = [
   'production',
 ];
 
-/** 返回环境文件的优先级顺序，数组前面的文件优先级更高。 */
+/**
+ * 返回环境文件的优先级顺序，数组前面的文件优先级更高。
+ *
+ * @param environment - 要解析的应用环境。
+ * @param cwd - 环境文件所在目录。
+ * @returns 按优先级从高到低排列的环境文件路径。
+ */
 export function getEnvironmentFilePaths(
   environment: AppEnvironment,
   cwd = process.cwd(),
@@ -32,7 +43,12 @@ export function getEnvironmentFilePaths(
   ];
 }
 
-/** 解析环境文件并生成运行时配置，不修改进程环境。 */
+/**
+ * 解析环境文件并生成运行时配置，不修改进程环境。
+ *
+ * @param options - 环境文件、运行环境和工作目录配置。
+ * @returns 合并后的字符串环境变量记录。
+ */
 export function resolveEnvironmentVariables({
   cwd = process.cwd(),
   environment,
@@ -59,7 +75,12 @@ export function resolveEnvironmentVariables({
   };
 }
 
-/** 加载当前环境配置，并让运行时环境变量保持最高优先级。 */
+/**
+ * 加载当前环境配置，并让运行时环境变量保持最高优先级。
+ *
+ * @param options - 环境文件和工作目录配置。
+ * @returns 更新后的进程环境变量。
+ */
 export function loadEnvironment(
   options: Omit<EnvironmentLoaderOptions, 'runtimeEnvironment'> = {},
 ): NodeJS.ProcessEnv {
@@ -70,7 +91,12 @@ export function loadEnvironment(
   return process.env;
 }
 
-/** 判断给定值是否为受支持的应用环境。 */
+/**
+ * 判断给定值是否为受支持的应用环境。
+ *
+ * @param value - 待检查的环境名称。
+ * @returns 值是否属于受支持的应用环境。
+ */
 export function isAppEnvironment(value: unknown): value is AppEnvironment {
   return (
     typeof value === 'string' &&
@@ -78,12 +104,14 @@ export function isAppEnvironment(value: unknown): value is AppEnvironment {
   );
 }
 
+/** 根据输入值解析应用环境，未提供时使用开发环境。 */
 function resolveEnvironmentName(value: unknown): AppEnvironment {
   if (value === undefined || value === '') return 'development';
   if (isAppEnvironment(value)) return value;
   throw new Error(`不支持的运行环境：${JSON.stringify(value)}`);
 }
 
+/** 移除环境变量记录中值为 undefined 的条目。 */
 function toStringRecord(
   environment: NodeJS.ProcessEnv,
 ): Record<string, string> {
