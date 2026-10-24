@@ -10,6 +10,7 @@ export function createConfigValidationSchema(): Joi.ObjectSchema {
     NODE_ENV: Joi.string()
       .valid('development', 'test', 'production')
       .default('development'),
+    PORT: Joi.number().port(),
     APP_PORT: Joi.number().port(),
     CORS_ORIGINS: Joi.string().allow(''),
     DB_ENABLED: Joi.boolean().truthy('true').falsy('false'),

@@ -73,6 +73,6 @@ export async function createApplication(): Promise<INestApplication> {
 export async function bootstrap(): Promise<void> {
   const app = await createApplication();
   const appConfig = app.get(ConfigService).getOrThrow<AppConfig>('app');
-  await app.listen(appConfig.port);
+  await app.listen(appConfig.port, '0.0.0.0');
   Logger.log(`Application is running on port ${appConfig.port}`, 'Bootstrap');
 }

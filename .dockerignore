@@ -4,6 +4,7 @@ coverage
 .git
 .env
 .env.*.local
+.env.*
 config/config.development.yaml
 config/config.test.yaml
 *.log

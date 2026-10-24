@@ -26,6 +26,17 @@ describe('application configuration', () => {
     });
   });
 
+  it('prefers the cloud runtime PORT over APP_PORT', () => {
+    const config = applyEnvironmentOverrides(loadBaseConfig(), {
+      NODE_ENV: 'test',
+      PORT: '9000',
+      APP_PORT: '3100',
+      JWT_SECRET: 'test-only-secret-with-at-least-32-chars',
+    });
+
+    expect(config).toMatchObject({ app: { port: 9000 } });
+  });
+
   it('builds test configuration without a database connection', () => {
     const originalEnvironment = process.env.NODE_ENV;
     const originalSecret = process.env.JWT_SECRET;

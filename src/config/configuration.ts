@@ -67,7 +67,7 @@ export function applyEnvironmentOverrides(
     app: {
       environment: nodeEnvironment,
       port: readNumber(
-        environment.APP_PORT,
+        environment.PORT ?? environment.APP_PORT,
         baseConfigValue(baseConfig, ['app', 'port'], 3000),
       ),
     },
