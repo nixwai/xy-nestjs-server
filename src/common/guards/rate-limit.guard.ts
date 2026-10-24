@@ -17,6 +17,8 @@ interface RateLimitEntry {
 @Injectable()
 export class RateLimitGuard implements CanActivate {
   private readonly entries = new Map<string, RateLimitEntry>();
+  private lastCleanupAt = 0;
+  private readonly cleanupIntervalMs = 60_000;
 
   constructor(private readonly configService: ConfigService) {}
 
@@ -26,6 +28,10 @@ export class RateLimitGuard implements CanActivate {
     const ttl = this.configService.get<number>('throttler.ttl', 60000);
     const limit = this.configService.get<number>('throttler.limit', 100);
     const key = request.ip ?? 'unknown';
+    if (now - this.lastCleanupAt >= this.cleanupIntervalMs) {
+      this.removeExpiredEntries(now);
+      this.lastCleanupAt = now;
+    }
     const current = this.entries.get(key);
     const entry =
       !current || current.expiresAt <= now
@@ -40,5 +46,10 @@ export class RateLimitGuard implements CanActivate {
       );
     }
     return true;
+  }
+  private removeExpiredEntries(now: number): void {
+    for (const [entryKey, entry] of this.entries) {
+      if (entry.expiresAt <= now) this.entries.delete(entryKey);
+    }
   }
 }

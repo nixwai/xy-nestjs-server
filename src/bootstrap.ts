@@ -12,6 +12,13 @@ import type {
   SwaggerConfig,
 } from './config/config.types.js';
 
+/** 将 CORS 白名单转换为 Nest 可接受的来源配置。 */
+export function resolveCorsOrigin(
+  origins: readonly string[],
+): false | string[] {
+  return origins.length > 0 ? [...origins] : false;
+}
+
 /** 创建并配置 Nest 应用实例。 */
 export async function createApplication(): Promise<NestExpressApplication> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -23,7 +30,7 @@ export async function createApplication(): Promise<NestExpressApplication> {
   app.setGlobalPrefix(appConfig.globalPrefix);
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'same-site' } }));
   app.enableCors({
-    origin: corsConfig.origins.length > 0 ? corsConfig.origins : true,
+    origin: resolveCorsOrigin(corsConfig.origins),
     credentials: true,
   });
   app.useGlobalPipes(createStrictValidationPipe());

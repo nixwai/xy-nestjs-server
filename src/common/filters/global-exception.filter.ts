@@ -28,7 +28,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const businessCode = this.getBusinessCode(body, status);
 
     if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
-      this.logger.error(`${request.method} ${request.url}`, exception);
+      this.logger.error(`${request.method} ${request.path}`, exception);
       response.status(HttpStatus.INTERNAL_SERVER_ERROR);
     } else {
       response.status(HttpStatus.OK);
