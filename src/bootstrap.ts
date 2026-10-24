@@ -2,6 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { INestApplication, Logger } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 import helmet from 'helmet';
 import { AppModule } from './app.module.js';
 import { createStrictValidationPipe } from './common/pipes/index.js';
@@ -72,7 +73,28 @@ export async function createApplication(): Promise<INestApplication> {
  */
 export async function bootstrap(): Promise<void> {
   const app = await createApplication();
-  const appConfig = app.get(ConfigService).getOrThrow<AppConfig>('app');
+  const configService = app.get(ConfigService);
+  const appConfig = configService.getOrThrow<AppConfig>('app');
   await app.listen(appConfig.port, '0.0.0.0');
   Logger.log(`Application is running on port ${appConfig.port}`, 'Bootstrap');
+
+  if (configService.get<boolean>('database.enabled', false)) {
+    void initializeDatabase(app.get(DataSource));
+  }
+}
+
+/** 在 HTTP 服务开始监听后初始化数据库连接。 */
+async function initializeDatabase(dataSource: DataSource): Promise<void> {
+  if (dataSource.isInitialized) return;
+
+  try {
+    await dataSource.initialize();
+    Logger.log('Database connection initialized', 'Bootstrap');
+  } catch (error: unknown) {
+    Logger.error(
+      'Database connection initialization failed',
+      error,
+      'Bootstrap',
+    );
+  }
 }
