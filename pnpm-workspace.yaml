@@ -1,0 +1,4 @@
+strictDepBuilds: true
+allowBuilds:
+  '@scarf/scarf': false
+  esbuild: true
