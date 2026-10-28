@@ -32,7 +32,9 @@ export function getEnvironmentFilePaths(
   environment: AppEnvironment,
   cwd = process.cwd(),
 ): string[] {
-  if (environment === 'production') return [];
+  if (environment === 'production') {
+    return [];
+  }
   if (environment === 'test') {
     return [join(cwd, '.env.test.local'), join(cwd, '.env.test')];
   }
@@ -63,7 +65,9 @@ export function resolveEnvironmentVariables({
     resolvedEnvironment,
     cwd,
   ).reverse()) {
-    if (!existsSync(filePath)) continue;
+    if (!existsSync(filePath)) {
+      continue;
+    }
     Object.assign(fileValues, dotenv.parse(readFileSync(filePath, 'utf8')));
   }
 
@@ -86,7 +90,9 @@ export function loadEnvironment(
 ): NodeJS.ProcessEnv {
   const values = resolveEnvironmentVariables(options);
   for (const [key, value] of Object.entries(values)) {
-    if (process.env[key] === undefined) process.env[key] = value;
+    if (process.env[key] === undefined) {
+      process.env[key] = value;
+    }
   }
   return process.env;
 }
@@ -106,8 +112,12 @@ export function isAppEnvironment(value: unknown): value is AppEnvironment {
 
 /** 根据输入值解析应用环境，未提供时使用开发环境。 */
 function resolveEnvironmentName(value: unknown): AppEnvironment {
-  if (value === undefined || value === '') return 'development';
-  if (isAppEnvironment(value)) return value;
+  if (value === undefined || value === '') {
+    return 'development';
+  }
+  if (isAppEnvironment(value)) {
+    return value;
+  }
   throw new Error(`不支持的运行环境：${JSON.stringify(value)}`);
 }
 

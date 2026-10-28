@@ -26,7 +26,8 @@
     "migration:run": "pnpm typeorm migration:run",
     "migration:revert": "pnpm typeorm migration:revert",
     "migration:show": "pnpm typeorm migration:show",
-    "start:prod": "node dist/main.js"
+    "start:prod": "node dist/main.js",
+    "admin:init": "tsx scripts/initialize-admin.ts"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",

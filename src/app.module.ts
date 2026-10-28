@@ -4,6 +4,8 @@ loadEnvironment();
 
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard.js';
+import { RbacGuard } from './modules/authorization/guards/rbac.guard.js';
 import { ConfigModule } from '@nestjs/config';
 import { validateEnvironment } from './config/config.validation.js';
 import configuration from './config/configuration.js';
@@ -15,6 +17,9 @@ import { HealthModule } from './modules/health/health.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { UserModule } from './modules/user/user.module.js';
 import { AdminModule } from './modules/admin/admin.module.js';
+import { PermissionModule } from './modules/permission/permission.module.js';
+import { RoleModule } from './modules/role/role.module.js';
+import { AuthorizationModule } from './modules/authorization/authorization.module.js';
 import { SiteModule } from './modules/site/site.module.js';
 import { AttractionModule } from './modules/attraction/attraction.module.js';
 import { MediaModule } from './modules/media/media.module.js';
@@ -41,6 +46,9 @@ import { TaskModule } from './modules/task/task.module.js';
     AuthModule,
     UserModule,
     AdminModule,
+    PermissionModule,
+    RoleModule,
+    AuthorizationModule,
     SiteModule,
     AttractionModule,
     MediaModule,
@@ -55,6 +63,8 @@ import { TaskModule } from './modules/task/task.module.js';
   providers: [
     { provide: APP_GUARD, useClass: ApiVersionGuard },
     { provide: APP_GUARD, useClass: RateLimitGuard },
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: RbacGuard },
     { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
     { provide: APP_FILTER, useClass: GlobalExceptionFilter },
   ],

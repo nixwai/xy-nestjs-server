@@ -219,6 +219,8 @@ export function validateEnvironment(
 
 /** 判断值是否为常见的占位或测试密钥。 */
 function isWeakProductionSecret(value: unknown): boolean {
-  if (typeof value !== 'string') return true;
+  if (typeof value !== 'string') {
+    return true;
+  }
   return /replace-with|change-me|test-only|example|default-secret/i.test(value);
 }

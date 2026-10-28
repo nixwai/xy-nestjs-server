@@ -26,10 +26,11 @@ export class ApiVersionGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>();
     const path = request.path;
-    if (
-      this.isExemptPath(path) ||
-      this.reflector.get<boolean>('skipApiVersion', context.getHandler())
-    ) {
+    if (this.isExemptPath(path)) {
+      return true;
+    }
+
+    if (this.reflector.get<boolean>('skipApiVersion', context.getHandler())) {
       return true;
     }
 

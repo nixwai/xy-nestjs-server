@@ -21,7 +21,11 @@ import type {
 export function resolveCorsOrigin(
   origins: readonly string[],
 ): false | string[] {
-  return origins.length > 0 ? [...origins] : false;
+  if (origins.length === 0) {
+    return false;
+  }
+
+  return [...origins];
 }
 
 /**
@@ -85,7 +89,9 @@ export async function bootstrap(): Promise<void> {
 
 /** 在 HTTP 服务开始监听后初始化数据库连接。 */
 async function initializeDatabase(dataSource: DataSource): Promise<void> {
-  if (dataSource.isInitialized) return;
+  if (dataSource.isInitialized) {
+    return;
+  }
 
   try {
     await dataSource.initialize();

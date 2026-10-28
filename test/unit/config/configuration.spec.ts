@@ -51,12 +51,21 @@ describe('application configuration', () => {
         database: { enabled: false },
       });
     } finally {
-      if (originalEnvironment === undefined) delete process.env.NODE_ENV;
-      else process.env.NODE_ENV = originalEnvironment;
-      if (originalSecret === undefined) delete process.env.JWT_SECRET;
-      else process.env.JWT_SECRET = originalSecret;
-      if (originalDatabase === undefined) delete process.env.DB_ENABLED;
-      else process.env.DB_ENABLED = originalDatabase;
+      if (originalEnvironment === undefined) {
+        delete process.env.NODE_ENV;
+      } else {
+        process.env.NODE_ENV = originalEnvironment;
+      }
+      if (originalSecret === undefined) {
+        delete process.env.JWT_SECRET;
+      } else {
+        process.env.JWT_SECRET = originalSecret;
+      }
+      if (originalDatabase === undefined) {
+        delete process.env.DB_ENABLED;
+      } else {
+        process.env.DB_ENABLED = originalDatabase;
+      }
     }
   });
 });

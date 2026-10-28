@@ -1,16 +1,13 @@
 import { INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { AppModule } from '../../src/app.module.js';
+import { createTestModule } from './create-test-module.js';
 
 describe('Health API (e2e)', () => {
   let app: INestApplication;
 
   beforeEach(async () => {
-    const moduleRef = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+    const moduleRef = await createTestModule().compile();
     app = moduleRef.createNestApplication();
     app.setGlobalPrefix('api');
     await app.init();

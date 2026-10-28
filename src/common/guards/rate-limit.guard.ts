@@ -50,26 +50,41 @@ export class RateLimitGuard implements CanActivate {
       this.removeExpiredEntries(now);
       this.lastCleanupAt = now;
     }
+
     const current = this.entries.get(key);
-    const entry =
-      !current || current.expiresAt <= now
-        ? { count: 0, expiresAt: now + ttl }
-        : current;
+    const entry = this.createEntry(current, now, ttl);
     const nextEntry = { count: entry.count + 1, expiresAt: entry.expiresAt };
     this.entries.set(key, nextEntry);
-    if (nextEntry.count > limit) {
-      throw new HttpException(
-        '请求过于频繁，请稍后重试',
-        HttpStatus.TOO_MANY_REQUESTS,
-      );
+
+    if (nextEntry.count <= limit) {
+      return true;
     }
-    return true;
+
+    throw new HttpException(
+      '请求过于频繁，请稍后重试',
+      HttpStatus.TOO_MANY_REQUESTS,
+    );
+  }
+
+  /** 创建当前时间窗口的计数记录。 */
+  private createEntry(
+    current: RateLimitEntry | undefined,
+    now: number,
+    ttl: number,
+  ): RateLimitEntry {
+    if (!current || current.expiresAt <= now) {
+      return { count: 0, expiresAt: now + ttl };
+    }
+
+    return current;
   }
 
   /** 删除已经过期的客户端限流记录。 */
   private removeExpiredEntries(now: number): void {
     for (const [entryKey, entry] of this.entries) {
-      if (entry.expiresAt <= now) this.entries.delete(entryKey);
+      if (entry.expiresAt <= now) {
+        this.entries.delete(entryKey);
+      }
     }
   }
 }

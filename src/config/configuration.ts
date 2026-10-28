@@ -27,7 +27,9 @@ export function buildApplicationConfig(): ApplicationConfig {
     abortEarly: false,
     convert: true,
   });
-  if (error) throw new Error(`应用配置校验失败：${error.message}`);
+  if (error) {
+    throw new Error(`应用配置校验失败：${error.message}`);
+  }
   return value as ApplicationConfig;
 }
 
@@ -178,7 +180,9 @@ function baseConfigValue(
 ): unknown {
   let current: unknown = config;
   for (const segment of path) {
-    if (!isRecord(current) || !(segment in current)) return fallback;
+    if (!isRecord(current) || !(segment in current)) {
+      return fallback;
+    }
     current = current[segment];
   }
   return current ?? fallback;
@@ -202,9 +206,15 @@ function readBoolean(
   value: string | undefined,
   fallback: unknown,
 ): boolean | string {
-  if (value === undefined) return Boolean(fallback);
-  if (value === 'true') return true;
-  if (value === 'false') return false;
+  if (value === undefined) {
+    return Boolean(fallback);
+  }
+  if (value === 'true') {
+    return true;
+  }
+  if (value === 'false') {
+    return false;
+  }
   return value;
 }
 
