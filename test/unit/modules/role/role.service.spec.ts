@@ -2,14 +2,14 @@ import { NotFoundException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import { PermissionService } from '../../../../src/modules/permission/permission.service.js';
 import { RoleService } from '../../../../src/modules/role/role.service.js';
-import type { PermissionRecord } from '../../../../src/common/types/permission.types.js';
+import type { PermissionRecord } from '../../../../src/modules/authorization/types/permission.types.js';
 import type { RoleRecord } from '../../../../src/modules/role/types/role.types.js';
 import type { RoleRepository } from '../../../../src/modules/role/repositories/role-repository.port.js';
 import type { AuditService } from '../../../../src/modules/audit/audit.service.js';
 import {
   HttpMethod,
   PermissionResource,
-} from '../../../../src/common/enums/index.js';
+} from '../../../../src/modules/authorization/enums/index.js';
 
 const role: RoleRecord = {
   id: 'role-1',
@@ -49,7 +49,7 @@ function createService(
     findByCode: vi.fn().mockResolvedValue(role),
     create: vi.fn().mockResolvedValue(role),
     update: vi.fn().mockResolvedValue(role),
-    remove: vi.fn().mockResolvedValue(undefined),
+    softDelete: vi.fn().mockResolvedValue(undefined),
     bindPermission: vi.fn().mockResolvedValue(undefined),
     unbindPermission: vi.fn().mockResolvedValue(undefined),
     ...options.repository,
@@ -84,13 +84,13 @@ describe('RoleService', () => {
       name: '普通管理员',
     });
     await service.updateRole('admin-1', 'role-1', { isActive: false });
-    await service.removeRole('admin-1', 'role-1');
+    await service.softDeleteRole('admin-1', 'role-1');
 
     expect(repository.create).toHaveBeenCalled();
     expect(repository.update).toHaveBeenCalledWith('role-1', {
       isActive: false,
     });
-    expect(repository.remove).toHaveBeenCalledWith('role-1');
+    expect(repository.softDelete).toHaveBeenCalledWith('role-1');
     expect(auditService.record).toHaveBeenCalledTimes(3);
   });
 

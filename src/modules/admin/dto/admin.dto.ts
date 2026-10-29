@@ -72,7 +72,7 @@ export class UpdateAdminDto {
   currentPassword?: string;
 }
 /** 删除管理员请求。 */
-export class RemoveAdminDto {
+export class SoftDeleteAdminDto {
   @ApiProperty() @IsString() @IsNotEmpty() id!: string;
   @ApiPropertyOptional()
   @IsOptional()
@@ -81,52 +81,16 @@ export class RemoveAdminDto {
   @MaxLength(72)
   currentPassword?: string;
 }
-/** 创建角色请求。 */
-export class CreateRoleDto {
+
+/** 管理员角色绑定请求。 */
+export class AdminRoleBindingDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  @MaxLength(64)
-  @Matches(/^[a-z][a-z0-9:_-]+$/)
-  code!: string;
-  @ApiProperty() @IsString() @IsNotEmpty() @MaxLength(128) name!: string;
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  @MaxLength(255)
-  description?: string;
-}
-/** 更新角色请求。 */
-export class UpdateRoleDto {
-  @ApiProperty() @IsString() @IsNotEmpty() id!: string;
-  @ApiPropertyOptional()
-  @IsOptional()
+  adminId!: string;
+
+  @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  @MaxLength(128)
-  name?: string;
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  @MaxLength(255)
-  description?: string;
-  @ApiPropertyOptional() @IsOptional() @IsBoolean() isActive?: boolean;
-}
-/** 删除角色请求。 */
-export class RemoveRoleDto {
-  @ApiProperty() @IsString() @IsNotEmpty() id!: string;
-}
-/** 绑定管理员角色请求。 */
-export class AdminRoleBindingDto {
-  @ApiProperty() @IsString() @IsNotEmpty() adminId!: string;
-  @ApiProperty() @IsString() @IsNotEmpty() roleId!: string;
-}
-/** 绑定角色权限请求。 */
-export class RolePermissionBindingDto {
-  @ApiProperty() @IsString() @IsNotEmpty() roleId!: string;
-  @ApiProperty() @IsString() @IsNotEmpty() permissionId!: string;
-}
-/** 权限启停请求。 */
-export class PermissionStatusDto {
-  @ApiProperty() @IsString() @IsNotEmpty() id!: string;
+  roleId!: string;
 }

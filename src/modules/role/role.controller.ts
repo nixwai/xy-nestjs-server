@@ -12,11 +12,11 @@ import type { AdminJwtPayload } from '../auth/tokens/jwt-token.service.js';
 import {
   RequirePermission,
   SuperAdminOnly,
-} from '../../common/decorators/index.js';
-import { PermissionResource } from '../../common/enums/index.js';
+} from '../authorization/decorators/index.js';
+import { PermissionResource } from '../authorization/enums/index.js';
 import {
   CreateRoleDto,
-  RemoveRoleDto,
+  SoftDeleteRoleDto,
   RolePermissionBindingDto,
   UpdateRoleDto,
 } from './dto/index.js';
@@ -57,14 +57,14 @@ export class RoleController {
     return this.roleService.updateRole(admin.sub, body.id, body);
   }
   /** 软删除角色。 */
-  @Post('remove')
+  @Post('soft-delete')
   @HttpCode(HttpStatus.OK)
   @RequirePermission(PermissionResource.ROLE)
-  async remove(
+  async softDelete(
     @CurrentAdmin() admin: AdminJwtPayload,
-    @Body() body: RemoveRoleDto,
+    @Body() body: SoftDeleteRoleDto,
   ) {
-    await this.roleService.removeRole(admin.sub, body.id);
+    await this.roleService.softDeleteRole(admin.sub, body.id);
     return null;
   }
   /** 绑定角色权限。 */

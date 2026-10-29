@@ -1,12 +1,12 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
-import { PermissionResource } from '../../common/enums/index.js';
+import { PermissionResource } from '../authorization/enums/index.js';
 import { PERMISSION_REPOSITORY } from './repositories/permission-repository.port.js';
 import type { PermissionRepository } from './repositories/permission-repository.port.js';
 import type {
   PermissionRecord,
   RegisteredPermission,
-} from '../../common/types/permission.types.js';
-import { REGISTERED_PERMISSIONS } from './permission-registry.js';
+} from '../authorization/types/permission.types.js';
+import { REGISTERED_PERMISSIONS } from './constants/registered-permissions.constant.js';
 import { AuditService } from '../audit/audit.service.js';
 
 /** 权限目录应用服务。 */

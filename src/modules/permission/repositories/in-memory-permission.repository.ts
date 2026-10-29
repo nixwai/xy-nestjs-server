@@ -2,7 +2,7 @@ import { DomainNotFoundError } from '../../../common/errors/index.js';
 import type {
   PermissionRecord,
   RegisteredPermission,
-} from '../../../common/types/permission.types.js';
+} from '../../authorization/types/permission.types.js';
 import type { PermissionRepository } from './permission-repository.port.js';
 
 /** 在单元测试中保存权限目录。 */

@@ -6,6 +6,7 @@ import { PermissionModule } from '../permission/permission.module.js';
 import { RoleController } from './role.controller.js';
 import { RoleService } from './role.service.js';
 import { RolePermissionEntity } from './entities/role-permission.entity.js';
+import { AdminRoleEntity } from '../admin/entities/admin-role.entity.js';
 import { RoleEntity } from './entities/role.entity.js';
 import { ROLE_REPOSITORY } from './repositories/role-repository.port.js';
 import { TypeOrmRoleRepository } from './repositories/typeorm-role.repository.js';
@@ -18,7 +19,13 @@ const databaseEnabled = shouldLoadDatabaseModule();
     PermissionModule,
     AuditModule,
     ...(databaseEnabled
-      ? [TypeOrmModule.forFeature([RoleEntity, RolePermissionEntity])]
+      ? [
+          TypeOrmModule.forFeature([
+            RoleEntity,
+            RolePermissionEntity,
+            AdminRoleEntity,
+          ]),
+        ]
       : []),
   ],
   controllers: [RoleController],

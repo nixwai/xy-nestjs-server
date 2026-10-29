@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { IsNull } from 'typeorm';
 import type { Repository } from 'typeorm';
 import {
   DomainConflictError,
@@ -7,6 +8,7 @@ import {
 } from '../../../common/errors/index.js';
 import { AdminEntity } from '../entities/admin.entity.js';
 import { AdminRoleEntity } from '../entities/admin-role.entity.js';
+import { AdminSessionEntity } from '../entities/admin-session.entity.js';
 import type {
   AdminCreateInput,
   AdminRepository,
@@ -22,6 +24,7 @@ export class TypeOrmAdminRepository implements AdminRepository {
     private readonly admins: Repository<AdminEntity>,
     @InjectRepository(AdminRoleEntity)
     private readonly adminRoles: Repository<AdminRoleEntity>,
+    private readonly adminSessions: Repository<AdminSessionEntity>,
   ) {}
 
   async findByUsername(username: string): Promise<AdminRecord | null> {
@@ -75,9 +78,15 @@ export class TypeOrmAdminRepository implements AdminRepository {
     }
   }
 
-  async remove(id: string): Promise<void> {
+  async softDelete(id: string): Promise<void> {
     const item = await this.findEntityOrThrow(id);
+    const deletedAt = new Date();
     await this.admins.softRemove(item);
+    await this.adminRoles.delete({ adminId: id });
+    await this.adminSessions.update(
+      { adminId: id, revokedAt: IsNull() },
+      { revokedAt: deletedAt, lastUsedAt: deletedAt },
+    );
   }
 
   async countActiveSuperAdmins(): Promise<number> {

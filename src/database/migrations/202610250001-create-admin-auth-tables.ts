@@ -1,10 +1,4 @@
-import {
-  MigrationInterface,
-  QueryRunner,
-  Table,
-  TableForeignKey,
-  TableIndex,
-} from 'typeorm';
+import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
 
 /** 创建管理员、RBAC 和审计数据表。 */
 export class CreateAdminAuthTables202610250001 implements MigrationInterface {
@@ -176,6 +170,13 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
         isUnique: true,
       }),
     );
+    await queryRunner.createIndex(
+      'admin_roles',
+      new TableIndex({
+        name: 'idx_admin_roles_role_id',
+        columnNames: ['role_id'],
+      }),
+    );
     await queryRunner.createTable(
       new Table({
         name: 'role_permissions',
@@ -199,6 +200,13 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
         name: 'uk_role_permissions_role_permission',
         columnNames: ['role_id', 'permission_id'],
         isUnique: true,
+      }),
+    );
+    await queryRunner.createIndex(
+      'role_permissions',
+      new TableIndex({
+        name: 'idx_role_permissions_permission_id',
+        columnNames: ['permission_id'],
       }),
     );
     await queryRunner.createTable(
@@ -254,6 +262,13 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
         columnNames: ['expires_at'],
       }),
     );
+    await queryRunner.createIndex(
+      'admin_sessions',
+      new TableIndex({
+        name: 'idx_admin_sessions_replaced_by_session_id',
+        columnNames: ['replaced_by_session_id'],
+      }),
+    );
     await queryRunner.createTable(
       new Table({
         name: 'audit_logs',
@@ -304,64 +319,11 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
         columnNames: ['resource_type', 'target_id'],
       }),
     );
-    await queryRunner.createForeignKey(
-      'admin_roles',
-      new TableForeignKey({
-        name: 'fk_admin_roles_admin',
-        columnNames: ['admin_id'],
-        referencedTableName: 'admins',
-        referencedColumnNames: ['id'],
-        onDelete: 'CASCADE',
-      }),
-    );
-    await queryRunner.createForeignKey(
-      'admin_roles',
-      new TableForeignKey({
-        name: 'fk_admin_roles_role',
-        columnNames: ['role_id'],
-        referencedTableName: 'roles',
-        referencedColumnNames: ['id'],
-        onDelete: 'CASCADE',
-      }),
-    );
-    await queryRunner.createForeignKey(
-      'role_permissions',
-      new TableForeignKey({
-        name: 'fk_role_permissions_role',
-        columnNames: ['role_id'],
-        referencedTableName: 'roles',
-        referencedColumnNames: ['id'],
-        onDelete: 'CASCADE',
-      }),
-    );
-    await queryRunner.createForeignKey(
-      'role_permissions',
-      new TableForeignKey({
-        name: 'fk_role_permissions_permission',
-        columnNames: ['permission_id'],
-        referencedTableName: 'permissions',
-        referencedColumnNames: ['id'],
-        onDelete: 'CASCADE',
-      }),
-    );
-    await queryRunner.createForeignKey(
-      'admin_sessions',
-      new TableForeignKey({
-        name: 'fk_admin_sessions_admin_id',
-        columnNames: ['admin_id'],
-        referencedTableName: 'admins',
-        referencedColumnNames: ['id'],
-        onDelete: 'CASCADE',
-      }),
-    );
-    await queryRunner.createForeignKey(
+    await queryRunner.createIndex(
       'audit_logs',
-      new TableForeignKey({
-        name: 'fk_audit_logs_actor_admin',
+      new TableIndex({
+        name: 'idx_audit_logs_actor_admin_id',
         columnNames: ['actor_admin_id'],
-        referencedTableName: 'admins',
-        referencedColumnNames: ['id'],
-        onDelete: 'SET NULL',
       }),
     );
   }

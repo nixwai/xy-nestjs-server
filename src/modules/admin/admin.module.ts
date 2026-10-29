@@ -7,6 +7,7 @@ import { AdminController } from './admin.controller.js';
 import { AdminService } from './admin.service.js';
 import { AdminRoleEntity } from './entities/admin-role.entity.js';
 import { AdminEntity } from './entities/admin.entity.js';
+import { AdminSessionEntity } from './entities/admin-session.entity.js';
 import {
   ADMIN_REPOSITORY,
   ADMIN_TRANSACTION_RUNNER,
@@ -22,7 +23,13 @@ const databaseEnabled = shouldLoadDatabaseModule();
     RoleModule,
     AuditModule,
     ...(databaseEnabled
-      ? [TypeOrmModule.forFeature([AdminEntity, AdminRoleEntity])]
+      ? [
+          TypeOrmModule.forFeature([
+            AdminEntity,
+            AdminRoleEntity,
+            AdminSessionEntity,
+          ]),
+        ]
       : []),
   ],
   controllers: [AdminController],

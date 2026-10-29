@@ -47,6 +47,7 @@ describe('TypeOrmAdminRepository', () => {
       repository: new TypeOrmAdminRepository(
         adminRepository as never,
         roleRepository as never,
+        { update: vi.fn().mockResolvedValue(undefined) } as never,
       ),
       adminRepository,
       roleRepository,
@@ -72,7 +73,7 @@ describe('TypeOrmAdminRepository', () => {
     await expect(
       repository.update('1', { username: 'updated' }),
     ).resolves.toMatchObject({ username: 'updated' });
-    await repository.remove('1');
+    await repository.softDelete('1');
 
     expect(adminRepository.softRemove).toHaveBeenCalled();
   });

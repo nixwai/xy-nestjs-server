@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   HttpMethod,
   PermissionResource,
-} from '../../../../../src/common/enums/index.js';
+} from '../../../../../src/modules/authorization/enums/index.js';
 import { RbacGuard } from '../../../../../src/modules/authorization/guards/rbac.guard.js';
 
 function contextFor(

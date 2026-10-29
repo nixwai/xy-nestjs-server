@@ -7,9 +7,12 @@ import { PermissionEntity } from '../src/modules/permission/entities/permission.
 import { RoleEntity } from '../src/modules/role/entities/role.entity.js';
 import { RolePermissionEntity } from '../src/modules/role/entities/role-permission.entity.js';
 import { hashPassword } from '../src/modules/auth/utils/password.util.js';
-import { REGISTERED_PERMISSIONS } from '../src/modules/permission/permission-registry.js';
-import { createPermissionCode } from '../src/common/utils/permission-code.util.js';
-import { HttpMethod, PermissionResource } from '../src/common/enums/index.js';
+import { REGISTERED_PERMISSIONS } from '../src/modules/permission/constants/registered-permissions.constant.js';
+import { createPermissionCode } from '../src/modules/authorization/utils/permission-code.util.js';
+import {
+  HttpMethod,
+  PermissionResource,
+} from '../src/modules/authorization/enums/index.js';
 
 const USERNAME_PATTERN = /^[A-Za-z0-9._-]{3,64}$/;
 const PASSWORD_PATTERN = /^(?=.*[A-Za-z])(?=.*\d).{8,72}$/;

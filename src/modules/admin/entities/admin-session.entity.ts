@@ -13,6 +13,7 @@ import { AdminEntity } from './admin.entity.js';
 @Entity({ name: 'admin_sessions' })
 @Index('uk_admin_sessions_token_hash', ['tokenHash'], { unique: true })
 @Index('idx_admin_sessions_admin_id', ['adminId'])
+@Index('idx_admin_sessions_replaced_by_session_id', ['replacedBySessionId'])
 export class AdminSessionEntity {
   /** 会话主键。 */
   @PrimaryGeneratedColumn({ type: 'bigint', unsigned: true })
@@ -48,7 +49,7 @@ export class AdminSessionEntity {
 
   /** 所属管理员。 */
   @ManyToOne(() => AdminEntity, (admin) => admin.sessions, {
-    onDelete: 'CASCADE',
+    createForeignKeyConstraints: false,
   })
   @JoinColumn({ name: 'admin_id' })
   admin!: AdminEntity;

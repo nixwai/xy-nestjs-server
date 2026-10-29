@@ -151,7 +151,7 @@ pnpm migration:generate
 - `role_permissions`：角色与权限的显式关联表；
 - `audit_logs`：操作审计记录。
 
-管理员和角色使用 `deletedAt` 记录软删除时间。`admin_roles` 和 `role_permissions` 使用显式中间表维护多对多关系，关联关系解除时删除关系记录，不物理删除业务主体。
+管理员和角色使用 `deletedAt` 记录软删除时间。`admin_roles` 和 `role_permissions` 使用显式中间表维护多对多关系，关联字段保留业务 ID，由应用层事务校验和维护，不使用数据库外键或级联约束。关联关系解除时删除关系记录，不物理删除业务主体。
 
 ## API
 
@@ -181,7 +181,7 @@ GET  /api/admin/me
 GET  /api/admin/list
 POST /api/admin/create
 POST /api/admin/update
-POST /api/admin/remove
+POST /api/admin/soft-delete
 POST /api/admin/role-bind
 POST /api/admin/role-unbind
 ```
@@ -192,7 +192,7 @@ POST /api/admin/role-unbind
 GET  /api/role/list
 POST /api/role/create
 POST /api/role/update
-POST /api/role/remove
+POST /api/role/soft-delete
 POST /api/role/permission-bind
 POST /api/role/permission-unbind
 ```

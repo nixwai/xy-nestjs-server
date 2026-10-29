@@ -14,6 +14,7 @@ import { PermissionEntity } from '../../permission/entities/permission.entity.js
 @Index('uk_role_permissions_role_permission', ['roleId', 'permissionId'], {
   unique: true,
 })
+@Index('idx_role_permissions_permission_id', ['permissionId'])
 export class RolePermissionEntity {
   /** 关联主键。 */
   @PrimaryGeneratedColumn({ type: 'bigint', unsigned: true })
@@ -29,14 +30,14 @@ export class RolePermissionEntity {
 
   /** 角色。 */
   @ManyToOne(() => RoleEntity, (role) => role.permissions, {
-    onDelete: 'CASCADE',
+    createForeignKeyConstraints: false,
   })
   @JoinColumn({ name: 'role_id' })
   role!: RoleEntity;
 
   /** 权限。 */
   @ManyToOne(() => PermissionEntity, (permission) => permission.roles, {
-    onDelete: 'CASCADE',
+    createForeignKeyConstraints: false,
   })
   @JoinColumn({ name: 'permission_id' })
   permission!: PermissionEntity;

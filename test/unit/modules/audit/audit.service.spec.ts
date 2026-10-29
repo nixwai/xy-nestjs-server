@@ -13,7 +13,7 @@ describe('AuditService', () => {
     });
     await service.record({
       actorAdminId: null,
-      action: 'admin.remove',
+      action: 'admin.soft-delete',
       resourceType: 'admin',
       succeeded: false,
     });
@@ -21,7 +21,7 @@ describe('AuditService', () => {
     const records = await service.list();
     expect(records).toHaveLength(2);
     expect(records[0]).toMatchObject({
-      action: 'admin.remove',
+      action: 'admin.soft-delete',
       succeeded: false,
     });
     expect(records[1]).toMatchObject({ action: 'admin.create', targetId: '1' });

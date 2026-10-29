@@ -38,11 +38,20 @@ test/{unit,e2e}
 - 业务模块不得直接依赖腾讯云 COS SDK；对象存储通过 `storage` 模块抽象。
 - 未确认领域只保留已存在的模块边界，不创建伪实体、伪 DTO、伪 API 或伪实现。
 
+## 领域与基础设施边界
+
+- `common` 只保存不依赖具体领域的横切能力；领域枚举、领域常量、领域工具和领域契约归属于对应模块。
+- 完整模块可按 `presentation`、`application`、`domain`、`infrastructure` 分离职责；小型模块可保留扁平结构，但不得混淆层职责。
+- Repository Port、应用服务、持久化实现和测试替身应保持清晰边界；生产适配器不得与测试替身混合为同一职责文件。
+- 关联实体、关联仓储和关联事务应归属于维护其核心不变量的模块，避免由无关模块重复维护。
+- 聚合根的删除、恢复和状态变更使用能够表达真实语义的方法名；软删除使用 `softDelete`，物理删除使用 `hardDelete`，避免使用含义不明确的 `remove`。
+
 ## 文件与命名
 
 - 文件名统一使用 kebab-case。
 - 使用约定后缀：`.module.ts`、`.controller.ts`、`.service.ts`、`.entity.ts`、`.dto.ts`、`.enum.ts`、`.util.ts`、`.filter.ts`、`.guard.ts`、`.interceptor.ts`。
 - `index.ts` 仅用于稳定的公共导出；新增导出必须避免循环依赖。
+- 领域常量使用 `<name>.constant.ts`，领域枚举使用 `<name>.enum.ts`，领域工具使用 `<name>.util.ts`。
 - 未来完整业务模块可按以下形式组织：
 
 ```text
@@ -55,6 +64,12 @@ test/{unit,e2e}
 ```
 
 目录只有在实际存在对应代码时创建，不为未确认业务预留空文件。
+
+## 测试文件组织
+
+- 测试目录结构应镜像源码模块和职责边界。
+- 一个测试文件聚焦一个生产模块或一个紧密相关的适配器，不跨多个领域聚合无关 Controller 测试。
+- 测试替身、集成适配器和领域服务分别命名，名称应能表达被验证的行为边界。
 
 ## 导入与路径
 
@@ -76,7 +91,7 @@ test/{unit,e2e}
 - 写操作使用 `POST`，参数通过 `@Body()` 接收。
 - 不使用 `PATCH`、`PUT`、`DELETE` 作为业务写操作方法。
 - 资源路由使用小写单数名词。
-- 创建、更新、删除和批量删除采用明确动作路径，例如 `/resource/create`、`/resource/update`、`/resource/remove`、`/resource/batch-remove`。
+- 创建、更新、删除和批量删除采用明确动作路径，例如 `/resource/create`、`/resource/update`、`/resource/soft-delete`、`/resource/batch-soft-delete`。
 - 更新请求包含资源定位字段；删除请求使用专用 DTO。
 - 所有业务接口遵守统一 API 响应和 `Accept` 版本头规则。
 

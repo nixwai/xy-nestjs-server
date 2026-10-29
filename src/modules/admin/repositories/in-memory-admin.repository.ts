@@ -67,7 +67,7 @@ export class InMemoryAdminRepository implements AdminRepository {
     return { ...updated };
   }
 
-  async remove(id: string): Promise<void> {
+  async softDelete(id: string): Promise<void> {
     const item = await this.findByIdOrThrow(id);
     const deletedAt = new Date();
     this.admins.set(id, {
@@ -75,6 +75,11 @@ export class InMemoryAdminRepository implements AdminRepository {
       deletedAt,
       updatedAt: deletedAt,
     });
+    for (const relation of this.adminRoles) {
+      if (relation.startsWith(`${id}:`)) {
+        this.adminRoles.delete(relation);
+      }
+    }
   }
 
   async countActiveSuperAdmins(): Promise<number> {

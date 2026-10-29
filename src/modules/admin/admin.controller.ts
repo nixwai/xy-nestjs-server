@@ -13,13 +13,13 @@ import type { AdminJwtPayload } from '../auth/tokens/jwt-token.service.js';
 import {
   RequirePermission,
   SuperAdminOnly,
-} from '../../common/decorators/index.js';
-import { PermissionResource } from '../../common/enums/index.js';
+} from '../authorization/decorators/index.js';
+import { PermissionResource } from '../authorization/enums/index.js';
 import {
   AdminRoleBindingDto,
   CreateAdminDto,
   ListQueryDto,
-  RemoveAdminDto,
+  SoftDeleteAdminDto,
   UpdateAdminDto,
 } from './dto/index.js';
 import { AdminService } from './admin.service.js';
@@ -67,15 +67,15 @@ export class AdminController {
     return this.adminService.updateAdmin(admin.sub, body);
   }
   /** 软删除管理员。 */
-  @Post('admin/remove')
+  @Post('admin/soft-delete')
   @HttpCode(HttpStatus.OK)
   @RequirePermission(PermissionResource.ADMIN)
   @SuperAdminOnly()
-  async remove(
+  async softDelete(
     @CurrentAdmin() admin: AdminJwtPayload,
-    @Body() body: RemoveAdminDto,
+    @Body() body: SoftDeleteAdminDto,
   ) {
-    return this.adminService.removeAdmin(
+    return this.adminService.softDeleteAdmin(
       admin.sub,
       body.id,
       body.currentPassword ?? '',

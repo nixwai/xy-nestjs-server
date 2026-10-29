@@ -12,8 +12,8 @@ import type { AdminJwtPayload } from '../auth/tokens/jwt-token.service.js';
 import {
   RequirePermission,
   SuperAdminOnly,
-} from '../../common/decorators/index.js';
-import { PermissionResource } from '../../common/enums/index.js';
+} from '../authorization/decorators/index.js';
+import { PermissionResource } from '../authorization/enums/index.js';
 import { PermissionStatusDto } from './dto/permission.dto.js';
 import { PermissionService } from './permission.service.js';
 

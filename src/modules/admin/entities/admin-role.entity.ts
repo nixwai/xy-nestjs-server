@@ -12,6 +12,7 @@ import { RoleEntity } from '../../role/entities/role.entity.js';
 /** 管理员与角色的关联。 */
 @Entity({ name: 'admin_roles' })
 @Index('uk_admin_roles_admin_role', ['adminId', 'roleId'], { unique: true })
+@Index('idx_admin_roles_role_id', ['roleId'])
 export class AdminRoleEntity {
   /** 关联主键。 */
   @PrimaryGeneratedColumn({ type: 'bigint', unsigned: true })
@@ -26,12 +27,16 @@ export class AdminRoleEntity {
   roleId!: string;
 
   /** 管理员。 */
-  @ManyToOne(() => AdminEntity, (admin) => admin.roles, { onDelete: 'CASCADE' })
+  @ManyToOne(() => AdminEntity, (admin) => admin.roles, {
+    createForeignKeyConstraints: false,
+  })
   @JoinColumn({ name: 'admin_id' })
   admin!: AdminEntity;
 
   /** 角色。 */
-  @ManyToOne(() => RoleEntity, (role) => role.admins, { onDelete: 'CASCADE' })
+  @ManyToOne(() => RoleEntity, (role) => role.admins, {
+    createForeignKeyConstraints: false,
+  })
   @JoinColumn({ name: 'role_id' })
   role!: RoleEntity;
 }

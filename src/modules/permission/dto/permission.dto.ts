@@ -1,6 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
-/** 权限状态请求。 */
+
+/** 权限启停请求。 */
 export class PermissionStatusDto {
-  @ApiProperty() @IsString() @IsNotEmpty() id!: string;
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  id!: string;
 }

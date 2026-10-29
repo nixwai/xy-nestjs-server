@@ -6,6 +6,7 @@ import {
   DomainNotFoundError,
 } from '../../../common/errors/index.js';
 import { RolePermissionEntity } from '../entities/role-permission.entity.js';
+import { AdminRoleEntity } from '../../admin/entities/admin-role.entity.js';
 import { RoleEntity } from '../entities/role.entity.js';
 import type { RoleRecord } from '../types/role.types.js';
 import type { RoleRepository } from './role-repository.port.js';
@@ -18,6 +19,7 @@ export class TypeOrmRoleRepository implements RoleRepository {
     private readonly roles: Repository<RoleEntity>,
     @InjectRepository(RolePermissionEntity)
     private readonly rolePermissions: Repository<RolePermissionEntity>,
+    private readonly adminRoles: Repository<AdminRoleEntity>,
   ) {}
 
   async list(): Promise<RoleRecord[]> {
@@ -93,9 +95,19 @@ export class TypeOrmRoleRepository implements RoleRepository {
     return this.toRecord(await this.roles.save(item));
   }
 
-  async remove(id: string): Promise<void> {
-    const item = await this.findEntityOrThrow(id);
-    await this.roles.softRemove(item);
+  async softDelete(id: string): Promise<void> {
+    await this.roles.manager.transaction(async (manager) => {
+      const roles = manager.getRepository(RoleEntity);
+      const rolePermissions = manager.getRepository(RolePermissionEntity);
+      const adminRoles = manager.getRepository(AdminRoleEntity);
+      const item = await roles.findOne({ where: { id } });
+      if (!item) {
+        throw new DomainNotFoundError('角色');
+      }
+      await roles.softRemove(item);
+      await rolePermissions.delete({ roleId: id });
+      await adminRoles.delete({ roleId: id });
+    });
   }
 
   async bindPermission(roleId: string, permissionId: string): Promise<void> {

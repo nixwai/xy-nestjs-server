@@ -7,7 +7,10 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { HttpMethod, PermissionResource } from '../../../common/enums/index.js';
+import {
+  HttpMethod,
+  PermissionResource,
+} from '../../authorization/enums/index.js';
 import { RolePermissionEntity } from '../../role/entities/role-permission.entity.js';
 
 /** 代码注册的权限目录。 */

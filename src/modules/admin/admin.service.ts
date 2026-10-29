@@ -150,7 +150,7 @@ export class AdminService {
   }
 
   /** 删除管理员。 */
-  async removeAdmin(
+  async softDeleteAdmin(
     actorId: string,
     id: string,
     currentPassword: string,
@@ -168,10 +168,10 @@ export class AdminService {
       (await this.repository.countActiveSuperAdmins()) <= 1
     )
       throw new ForbiddenException('系统必须至少保留一名启用的超级管理员');
-    await this.repository.remove(id);
+    await this.transactionRunner.run((repository) => repository.softDelete(id));
     await this.auditService.record({
       actorAdminId: actorId,
-      action: 'admin.remove',
+      action: 'admin.soft-delete',
       resourceType: 'admin',
       targetId: id,
     });
@@ -207,6 +207,12 @@ export class AdminService {
     adminId: string,
     roleId: string,
   ): Promise<null> {
+    if (!(await this.repository.findById(adminId))) {
+      throw new NotFoundException('管理员不存在');
+    }
+    if (!(await this.roleService.findById(roleId))) {
+      throw new NotFoundException('角色不存在');
+    }
     await this.repository.unbindRole(adminId, roleId);
     await this.auditService.record({
       actorAdminId: actorId,

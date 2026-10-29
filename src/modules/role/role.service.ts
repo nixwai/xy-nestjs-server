@@ -68,11 +68,11 @@ export class RoleService {
   }
 
   /** 删除角色。 */
-  async removeRole(actorId: string, id: string): Promise<void> {
-    await this.repository.remove(id);
+  async softDeleteRole(actorId: string, id: string): Promise<void> {
+    await this.repository.softDelete(id);
     await this.auditService.record({
       actorAdminId: actorId,
-      action: 'role.remove',
+      action: 'role.soft-delete',
       resourceType: 'role',
       targetId: id,
     });
@@ -106,6 +106,12 @@ export class RoleService {
     roleId: string,
     permissionId: string,
   ): Promise<void> {
+    if (!(await this.findById(roleId))) {
+      throw new NotFoundException('角色不存在');
+    }
+    if (!(await this.permissionService.findById(permissionId))) {
+      throw new NotFoundException('权限不存在');
+    }
     await this.repository.unbindPermission(roleId, permissionId);
     await this.auditService.record({
       actorAdminId: actorId,

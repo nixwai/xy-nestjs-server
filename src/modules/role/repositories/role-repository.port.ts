@@ -18,7 +18,7 @@ export interface RoleRepository {
     id: string,
     input: Partial<Pick<RoleRecord, 'name' | 'description' | 'isActive'>>,
   ): Promise<RoleRecord>;
-  remove(id: string): Promise<void>;
+  softDelete(id: string): Promise<void>;
   bindPermission(roleId: string, permissionId: string): Promise<void>;
   unbindPermission(roleId: string, permissionId: string): Promise<void>;
 }

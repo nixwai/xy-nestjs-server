@@ -10,6 +10,7 @@ import {
 @Entity({ name: 'audit_logs' })
 @Index('idx_audit_logs_created_at', ['createdAt'])
 @Index('idx_audit_logs_resource_target', ['resourceType', 'targetId'])
+@Index('idx_audit_logs_actor_admin_id', ['actorAdminId'])
 export class AuditLogEntity {
   /** 审计记录主键。 */
   @PrimaryGeneratedColumn({ type: 'bigint', unsigned: true }) id!: string;

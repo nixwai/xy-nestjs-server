@@ -1,6 +1,6 @@
 import { Controller, Body, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Public } from '../../common/decorators/index.js';
+import { Public } from '../authorization/decorators/index.js';
 import { AuthService } from './auth.service.js';
 import {
   AdminLoginDto,

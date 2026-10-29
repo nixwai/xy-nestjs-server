@@ -64,7 +64,7 @@ export class InMemoryRoleRepository implements RoleRepository {
     return this.copy(updated);
   }
 
-  async remove(id: string): Promise<void> {
+  async softDelete(id: string): Promise<void> {
     const item = await this.findByIdOrThrow(id);
     this.roles.set(id, { ...item, deletedAt: new Date() });
   }

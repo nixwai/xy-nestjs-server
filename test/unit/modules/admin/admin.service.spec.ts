@@ -51,7 +51,7 @@ function createService(
     countActiveSuperAdmins: vi.fn().mockResolvedValue(2),
     create: vi.fn().mockResolvedValue(admin()),
     update: vi.fn().mockResolvedValue(admin()),
-    remove: vi.fn().mockResolvedValue(undefined),
+    softDelete: vi.fn().mockResolvedValue(undefined),
     bindRole: vi.fn().mockResolvedValue(undefined),
     unbindRole: vi.fn().mockResolvedValue(undefined),
     ...options.repository,
@@ -218,11 +218,11 @@ describe('AdminService', () => {
     });
 
     await expect(
-      service.removeAdmin('1', '1', 'Admin1234'),
+      service.softDeleteAdmin('1', '1', 'Admin1234'),
     ).resolves.toBeNull();
-    expect(repository.remove).toHaveBeenCalledWith('1');
+    expect(repository.softDelete).toHaveBeenCalledWith('1');
     expect(auditService.record).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'admin.remove' }),
+      expect.objectContaining({ action: 'admin.soft-delete' }),
     );
   });
 

@@ -14,9 +14,9 @@ import {
   PUBLIC_ROUTE_KEY,
   SUPER_ADMIN_ONLY_KEY,
   type RequiredPermission,
-} from '../../../common/decorators/index.js';
-import { HttpMethod, PermissionResource } from '../../../common/enums/index.js';
-import { isHttpMethod } from '../../../common/utils/http-method.util.js';
+} from '../decorators/index.js';
+import { HttpMethod, PermissionResource } from '../enums/index.js';
+import { isHttpMethod } from '../utils/http-method.util.js';
 
 /** 对业务路由执行统一授权判断。 */
 @Injectable()

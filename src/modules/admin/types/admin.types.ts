@@ -21,5 +21,5 @@ export interface AdminPublicRecord {
 export interface AdminAuthorization {
   admin: AdminPublicRecord;
   roles: import('../../role/types/role.types.js').RoleRecord[];
-  permissions: import('../../../common/types/permission.types.js').PermissionRecord[];
+  permissions: import('../../authorization/types/permission.types.js').PermissionRecord[];
 }

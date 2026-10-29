@@ -1,5 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
-import { Public, SkipApiVersion } from '../../common/decorators/index.js';
+import { Public } from '../authorization/decorators/index.js';
+import { SkipApiVersion } from '../../common/decorators/index.js';
 import { HealthService } from './health.service.js';
 
 /** 提供容器存活和就绪探针。 */

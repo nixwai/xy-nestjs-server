@@ -6,7 +6,7 @@ import type { PermissionService } from '../../../../src/modules/permission/permi
 import {
   HttpMethod,
   PermissionResource,
-} from '../../../../src/common/enums/index.js';
+} from '../../../../src/modules/authorization/enums/index.js';
 import { DomainNotFoundError } from '../../../../src/common/errors/index.js';
 
 const admin = {

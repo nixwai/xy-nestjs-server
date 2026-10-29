@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { AdminRoleEntity } from '../entities/admin-role.entity.js';
+import { AdminSessionEntity } from '../entities/admin-session.entity.js';
 import { AdminEntity } from '../entities/admin.entity.js';
 import { ADMIN_REPOSITORY } from './admin-repository.port.js';
 import type {
@@ -20,6 +21,7 @@ export class TypeOrmAdminTransactionRunner implements AdminTransactionRunner {
         new TypeOrmAdminRepository(
           manager.getRepository(AdminEntity),
           manager.getRepository(AdminRoleEntity),
+          manager.getRepository(AdminSessionEntity),
         ),
       ),
     );

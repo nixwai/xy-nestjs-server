@@ -1,7 +1,7 @@
 import type {
   PermissionRecord,
   RegisteredPermission,
-} from '../../../common/types/permission.types.js';
+} from '../../authorization/types/permission.types.js';
 
 /** 权限仓储注入令牌。 */
 export const PERMISSION_REPOSITORY = Symbol('PERMISSION_REPOSITORY');

@@ -16,7 +16,7 @@ describe('InMemory role and permission repositories', () => {
     const roles = new InMemoryRoleRepository();
     const role = await roles.create({ code: 'removable', name: '可删除角色' });
 
-    await roles.remove(role.id);
+    await roles.softDelete(role.id);
 
     await expect(roles.findById(role.id)).resolves.toBeNull();
     await expect(roles.findByCode('removable')).resolves.toBeNull();

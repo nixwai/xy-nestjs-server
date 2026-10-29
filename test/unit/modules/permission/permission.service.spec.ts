@@ -2,11 +2,11 @@ import { describe, expect, it, vi } from 'vitest';
 import { PermissionService } from '../../../../src/modules/permission/permission.service.js';
 import type { PermissionRepository } from '../../../../src/modules/permission/repositories/permission-repository.port.js';
 import type { AuditService } from '../../../../src/modules/audit/audit.service.js';
-import { REGISTERED_PERMISSIONS } from '../../../../src/modules/permission/permission-registry.js';
+import { REGISTERED_PERMISSIONS } from '../../../../src/modules/permission/constants/registered-permissions.constant.js';
 import {
   PermissionResource,
   HttpMethod,
-} from '../../../../src/common/enums/index.js';
+} from '../../../../src/modules/authorization/enums/index.js';
 
 const permission = {
   id: 'permission-1',

@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   HttpMethod,
   PermissionResource,
-} from '../../../../src/common/enums/index.js';
-import { createPermissionCode } from '../../../../src/common/utils/permission-code.util.js';
+} from '../../../../../src/modules/authorization/enums/index.js';
+import { createPermissionCode } from '../../../../../src/modules/authorization/utils/permission-code.util.js';
 
 describe('createPermissionCode', () => {
   it('converts dotted resources into the registered permission format', () => {

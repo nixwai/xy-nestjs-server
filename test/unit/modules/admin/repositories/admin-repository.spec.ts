@@ -28,7 +28,7 @@ describe('InMemoryAdminRepository', () => {
     const repository = new InMemoryAdminRepository();
     const admin = await repository.create(adminInput('removable'));
 
-    await repository.remove(admin.id);
+    await repository.softDelete(admin.id);
 
     await expect(repository.findById(admin.id)).resolves.toBeNull();
     await expect(repository.findByUsername('removable')).resolves.toBeNull();

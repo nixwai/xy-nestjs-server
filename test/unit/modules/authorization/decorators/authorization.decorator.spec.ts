@@ -7,8 +7,8 @@ import {
   Public,
   SUPER_ADMIN_ONLY_KEY,
   SuperAdminOnly,
-} from '../../../../src/common/decorators/index.js';
-import { PermissionResource } from '../../../../src/common/enums/index.js';
+} from '../../../../../src/modules/authorization/decorators/index.js';
+import { PermissionResource } from '../../../../../src/modules/authorization/enums/index.js';
 
 class TestController {}
 

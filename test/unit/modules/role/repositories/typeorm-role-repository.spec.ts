@@ -31,6 +31,19 @@ describe('TypeOrmRoleRepository', () => {
         where: vi.fn().mockReturnThis(),
         getMany: vi.fn().mockResolvedValue([roleEntity]),
       }),
+      manager: {
+        transaction: vi.fn(async (work) =>
+          work({
+            getRepository: vi.fn((entity) =>
+              entity.name === 'RoleEntity'
+                ? roles
+                : entity.name === 'RolePermissionEntity'
+                  ? rolePermissions
+                  : { delete: vi.fn().mockResolvedValue(undefined) },
+            ),
+          }),
+        ),
+      },
     };
     const rolePermissions = {
       findOne: vi.fn().mockResolvedValue(null),
@@ -42,6 +55,7 @@ describe('TypeOrmRoleRepository', () => {
       repository: new TypeOrmRoleRepository(
         roles as never,
         rolePermissions as never,
+        { delete: vi.fn().mockResolvedValue(undefined) } as never,
       ),
       roles,
       rolePermissions,
@@ -66,7 +80,7 @@ describe('TypeOrmRoleRepository', () => {
     await expect(
       repository.update('role-1', { name: '更新角色' }),
     ).resolves.toMatchObject({ name: '更新角色' });
-    await repository.remove('role-1');
+    await repository.softDelete('role-1');
 
     expect(roles.softRemove).toHaveBeenCalled();
   });

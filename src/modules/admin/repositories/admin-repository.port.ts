@@ -26,7 +26,7 @@ export interface AdminRepository {
   list(): Promise<AdminRecord[]>;
   create(input: AdminCreateInput): Promise<AdminRecord>;
   update(id: string, input: AdminUpdateInput): Promise<AdminRecord>;
-  remove(id: string): Promise<void>;
+  softDelete(id: string): Promise<void>;
   countActiveSuperAdmins(): Promise<number>;
   listRoleIds(adminId: string): Promise<string[]>;
   listRoleIdsByAdminIds(adminIds: string[]): Promise<Map<string, string[]>>;
