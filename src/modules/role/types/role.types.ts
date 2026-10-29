@@ -4,6 +4,6 @@ export interface RoleRecord {
   name: string;
   description: string | null;
   isActive: boolean;
-  isDeleted: boolean;
+  deletedAt: Date | null;
   permissionIds: string[];
 }

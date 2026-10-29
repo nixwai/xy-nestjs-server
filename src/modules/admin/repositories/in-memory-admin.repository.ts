@@ -18,19 +18,19 @@ export class InMemoryAdminRepository implements AdminRepository {
   async findByUsername(username: string): Promise<AdminRecord | null> {
     return (
       [...this.admins.values()].find(
-        (item) => !item.isDeleted && item.username === username,
+        (item) => item.deletedAt === null && item.username === username,
       ) ?? null
     );
   }
 
   async findById(id: string): Promise<AdminRecord | null> {
     const item = this.admins.get(id);
-    return item && !item.isDeleted ? { ...item } : null;
+    return item && item.deletedAt === null ? { ...item } : null;
   }
 
   async list(): Promise<AdminRecord[]> {
     return [...this.admins.values()]
-      .filter((item) => !item.isDeleted)
+      .filter((item) => item.deletedAt === null)
       .map((item) => ({ ...item }));
   }
 
@@ -46,7 +46,7 @@ export class InMemoryAdminRepository implements AdminRepository {
       passwordSalt: input.passwordSalt,
       isSuperAdmin: input.isSuperAdmin ?? false,
       isActive: true,
-      isDeleted: false,
+      deletedAt: null,
       createdAt: now,
       updatedAt: now,
     };
@@ -69,12 +69,17 @@ export class InMemoryAdminRepository implements AdminRepository {
 
   async remove(id: string): Promise<void> {
     const item = await this.findByIdOrThrow(id);
-    this.admins.set(id, { ...item, isDeleted: true, updatedAt: new Date() });
+    const deletedAt = new Date();
+    this.admins.set(id, {
+      ...item,
+      deletedAt,
+      updatedAt: deletedAt,
+    });
   }
 
   async countActiveSuperAdmins(): Promise<number> {
     return [...this.admins.values()].filter(
-      (item) => !item.isDeleted && item.isActive && item.isSuperAdmin,
+      (item) => item.deletedAt === null && item.isActive && item.isSuperAdmin,
     ).length;
   }
 

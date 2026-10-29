@@ -12,6 +12,17 @@ const permission = {
 };
 
 describe('InMemory role and permission repositories', () => {
+  it('removes a role by recording the deletion time', async () => {
+    const roles = new InMemoryRoleRepository();
+    const role = await roles.create({ code: 'removable', name: '可删除角色' });
+
+    await roles.remove(role.id);
+
+    await expect(roles.findById(role.id)).resolves.toBeNull();
+    await expect(roles.findByCode('removable')).resolves.toBeNull();
+    await expect(roles.list()).resolves.toEqual([]);
+  });
+
   it('finds roles and permissions by IDs without exposing mutable arrays', async () => {
     const roles = new InMemoryRoleRepository();
     const permissions = new InMemoryPermissionRepository();

@@ -1,6 +1,7 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   Index,
   OneToMany,
@@ -34,9 +35,9 @@ export class RoleEntity {
   @Column({ type: 'boolean', default: true })
   isActive!: boolean;
 
-  /** 是否已软删除。 */
-  @Column({ type: 'boolean', default: false })
-  isDeleted!: boolean;
+  /** 软删除时间。 */
+  @DeleteDateColumn({ type: 'datetime', nullable: true })
+  deletedAt!: Date | null;
 
   /** 创建时间。 */
   @CreateDateColumn({ type: 'datetime' })

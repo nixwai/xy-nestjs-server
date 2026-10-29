@@ -20,8 +20,8 @@ description: 设计和实现本项目未来的 TypeORM Entity、请求 DTO、响
 
 ## 删除与查询
 
-- 业务实体使用 `isDeleted` 字段实现软删除，不使用 `@DeleteDateColumn`。
-- 查询排除已删除记录；删除通过更新 `isDeleted` 完成，禁止使用 `repository.delete()` 物理删除业务实体。
+- 业务实体使用可空的 `deletedAt` 时间字段记录删除时间；需要 TypeORM 自动过滤时使用 `@DeleteDateColumn`。
+- 查询默认排除 `deletedAt` 非空记录；删除使用 TypeORM 软删除能力或更新 `deletedAt`，禁止对业务实体执行物理删除。
 - 单条查找封装为私有查找方法；资源不存在时抛出 `NotFoundException`。
 - 创建和更新前执行必要的唯一性检查，冲突时抛出 `ConflictException`。
 - 动态列表查询使用 `createQueryBuilder` 和参数绑定，禁止拼接用户输入。

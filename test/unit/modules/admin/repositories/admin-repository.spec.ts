@@ -24,6 +24,17 @@ describe('InMemoryAdminRepository', () => {
     );
   });
 
+  it('removes an administrator by recording the deletion time', async () => {
+    const repository = new InMemoryAdminRepository();
+    const admin = await repository.create(adminInput('removable'));
+
+    await repository.remove(admin.id);
+
+    await expect(repository.findById(admin.id)).resolves.toBeNull();
+    await expect(repository.findByUsername('removable')).resolves.toBeNull();
+    await expect(repository.list()).resolves.toEqual([]);
+  });
+
   it('rejects duplicate usernames with a domain conflict', async () => {
     const repository = new InMemoryAdminRepository();
     await repository.create(adminInput('admin'));

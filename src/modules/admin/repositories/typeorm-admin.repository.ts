@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import {
   DomainConflictError,
   DomainNotFoundError,
@@ -26,18 +26,20 @@ export class TypeOrmAdminRepository implements AdminRepository {
 
   async findByUsername(username: string): Promise<AdminRecord | null> {
     const item = await this.admins.findOne({
-      where: { username, isDeleted: false },
+      where: { username },
     });
     return item ? this.toRecord(item) : null;
   }
 
   async findById(id: string): Promise<AdminRecord | null> {
-    const item = await this.admins.findOne({ where: { id, isDeleted: false } });
+    const item = await this.admins.findOne({
+      where: { id },
+    });
     return item ? this.toRecord(item) : null;
   }
 
   async list(): Promise<AdminRecord[]> {
-    const items = await this.admins.find({ where: { isDeleted: false } });
+    const items = await this.admins.find();
     return items.map((item) => this.toRecord(item));
   }
 
@@ -48,7 +50,7 @@ export class TypeOrmAdminRepository implements AdminRepository {
           ...input,
           isActive: true,
           isSuperAdmin: input.isSuperAdmin ?? false,
-          isDeleted: false,
+          deletedAt: null,
         }),
       );
       return this.toRecord(item);
@@ -75,13 +77,12 @@ export class TypeOrmAdminRepository implements AdminRepository {
 
   async remove(id: string): Promise<void> {
     const item = await this.findEntityOrThrow(id);
-    item.isDeleted = true;
-    await this.admins.save(item);
+    await this.admins.softRemove(item);
   }
 
   async countActiveSuperAdmins(): Promise<number> {
     return this.admins.count({
-      where: { isDeleted: false, isActive: true, isSuperAdmin: true },
+      where: { isActive: true, isSuperAdmin: true },
     });
   }
 
@@ -132,7 +133,9 @@ export class TypeOrmAdminRepository implements AdminRepository {
   }
 
   private async findEntityOrThrow(id: string): Promise<AdminEntity> {
-    const item = await this.admins.findOne({ where: { id, isDeleted: false } });
+    const item = await this.admins.findOne({
+      where: { id },
+    });
     if (!item) {
       throw new DomainNotFoundError('管理员');
     }
@@ -147,7 +150,7 @@ export class TypeOrmAdminRepository implements AdminRepository {
       passwordSalt: item.passwordSalt,
       isActive: item.isActive,
       isSuperAdmin: item.isSuperAdmin,
-      isDeleted: item.isDeleted,
+      deletedAt: item.deletedAt,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
     };

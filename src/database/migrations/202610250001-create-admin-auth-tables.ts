@@ -32,7 +32,7 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
           { name: 'password_salt', type: 'varchar', length: '32' },
           { name: 'is_active', type: 'tinyint', default: '1' },
           { name: 'is_super_admin', type: 'tinyint', default: '0' },
-          { name: 'is_deleted', type: 'tinyint', default: '0' },
+          { name: 'deleted_at', type: 'datetime', isNullable: true },
           {
             name: 'created_at',
             type: 'datetime',
@@ -76,7 +76,7 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
             isNullable: true,
           },
           { name: 'is_active', type: 'tinyint', default: '1' },
-          { name: 'is_deleted', type: 'tinyint', default: '0' },
+          { name: 'deleted_at', type: 'datetime', isNullable: true },
           {
             name: 'created_at',
             type: 'datetime',

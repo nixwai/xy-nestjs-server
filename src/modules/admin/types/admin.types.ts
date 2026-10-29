@@ -5,7 +5,7 @@ export interface AdminRecord {
   passwordSalt: string;
   isActive: boolean;
   isSuperAdmin: boolean;
-  isDeleted: boolean;
+  deletedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }

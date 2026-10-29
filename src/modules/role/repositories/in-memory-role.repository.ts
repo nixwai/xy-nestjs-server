@@ -12,13 +12,13 @@ export class InMemoryRoleRepository implements RoleRepository {
 
   async list(): Promise<RoleRecord[]> {
     return [...this.roles.values()]
-      .filter((item) => !item.isDeleted)
+      .filter((item) => item.deletedAt === null)
       .map((item) => this.copy(item));
   }
 
   async findById(id: string): Promise<RoleRecord | null> {
     const item = this.roles.get(id);
-    return item && !item.isDeleted ? this.copy(item) : null;
+    return item && item.deletedAt === null ? this.copy(item) : null;
   }
 
   async findByIds(ids: string[]): Promise<RoleRecord[]> {
@@ -28,7 +28,7 @@ export class InMemoryRoleRepository implements RoleRepository {
 
   async findByCode(code: string): Promise<RoleRecord | null> {
     const item = [...this.roles.values()].find(
-      (role) => !role.isDeleted && role.code === code,
+      (role) => role.deletedAt === null && role.code === code,
     );
     return item ? this.copy(item) : null;
   }
@@ -47,7 +47,7 @@ export class InMemoryRoleRepository implements RoleRepository {
       name: input.name,
       description: input.description ?? null,
       isActive: true,
-      isDeleted: false,
+      deletedAt: null,
       permissionIds: [],
     };
     this.roles.set(item.id, item);
@@ -66,7 +66,7 @@ export class InMemoryRoleRepository implements RoleRepository {
 
   async remove(id: string): Promise<void> {
     const item = await this.findByIdOrThrow(id);
-    this.roles.set(id, { ...item, isDeleted: true });
+    this.roles.set(id, { ...item, deletedAt: new Date() });
   }
 
   async bindPermission(roleId: string, permissionId: string): Promise<void> {

@@ -1,0 +1,98 @@
+import { ExecutionContext } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { describe, expect, it, vi } from 'vitest';
+import { AdminService } from '../../../../../src/modules/admin/admin.service.js';
+import { InMemoryAdminRepository } from '../../../../../src/modules/admin/repositories/in-memory-admin.repository.js';
+import { InMemoryAdminTransactionRunner } from '../../../../../src/modules/admin/repositories/admin-transaction-runner.js';
+import { AuditService } from '../../../../../src/modules/audit/audit.service.js';
+import { AuthService } from '../../../../../src/modules/auth/auth.service.js';
+import { AdminRoleGuard } from '../../../../../src/modules/auth/guards/admin-role.guard.js';
+import { JwtAuthGuard } from '../../../../../src/modules/auth/guards/jwt-auth.guard.js';
+import { InMemoryAuthSessionRepository } from '../../../../../src/modules/auth/repositories/in-memory-auth-session.repository.js';
+import { JwtTokenService } from '../../../../../src/modules/auth/tokens/jwt-token.service.js';
+import { RoleService } from '../../../../../src/modules/role/role.service.js';
+
+const config = new ConfigService({
+  jwt: {
+    secret: 'test-only-secret-with-at-least-32-chars',
+    accessTokenExpiresIn: '15m',
+    refreshTokenExpiresIn: '7d',
+  },
+});
+
+function contextFor(authorization?: string, user?: object): ExecutionContext {
+  const request = {
+    user,
+    header: () => authorization,
+  };
+  return {
+    getHandler: () => () => undefined,
+    getClass: () => class TestController {},
+    switchToHttp: () => ({ getRequest: () => request }),
+  } as unknown as ExecutionContext;
+}
+
+function createAuthService(): AuthService {
+  const repository = new InMemoryAdminRepository();
+  const adminService = new AdminService(
+    repository,
+    {
+      findByCode: async () => null,
+      findById: async () => null,
+    } as unknown as RoleService,
+    new AuditService(),
+    new InMemoryAdminTransactionRunner(repository),
+  );
+  return new AuthService(
+    adminService,
+    new InMemoryAuthSessionRepository(),
+    config,
+    new JwtTokenService(config),
+  );
+}
+
+describe('JwtAuthGuard', () => {
+  it('应放行标记为公共接口的路由', async () => {
+    const reflector = {
+      getAllAndOverride: vi.fn().mockReturnValue(true),
+    };
+    const guard = new JwtAuthGuard(
+      createAuthService(),
+      new JwtTokenService(config),
+      reflector as never,
+    );
+
+    await expect(guard.canActivate(contextFor())).resolves.toBe(true);
+  });
+
+  it('应验证访问令牌并写入当前管理员身份', async () => {
+    const authService = createAuthService();
+    await authService.createInitialAdmin('admin', 'Admin1234');
+    const tokenService = new JwtTokenService(config);
+    const token = tokenService.signAccessToken('1');
+    const guard = new JwtAuthGuard(authService, tokenService);
+    const request = { header: () => `Bearer ${token}` } as { user?: object };
+    const context = {
+      switchToHttp: () => ({ getRequest: () => request }),
+    } as unknown as ExecutionContext;
+
+    await expect(guard.canActivate(context)).resolves.toBe(true);
+    expect(request.user).toMatchObject({ sub: '1', isSuperAdmin: true });
+  });
+});
+
+describe('AdminRoleGuard', () => {
+  it('未标记管理员路由时应放行', () => {
+    const reflector = { getAllAndOverride: vi.fn().mockReturnValue(false) };
+    const guard = new AdminRoleGuard(reflector as never);
+
+    expect(guard.canActivate(contextFor())).toBe(true);
+  });
+
+  it('标记管理员路由但缺少身份时应拒绝', () => {
+    const reflector = { getAllAndOverride: vi.fn().mockReturnValue(true) };
+    const guard = new AdminRoleGuard(reflector as never);
+
+    expect(() => guard.canActivate(contextFor())).toThrow('无权访问');
+  });
+});

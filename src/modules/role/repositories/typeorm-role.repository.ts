@@ -22,7 +22,6 @@ export class TypeOrmRoleRepository implements RoleRepository {
 
   async list(): Promise<RoleRecord[]> {
     const items = await this.roles.find({
-      where: { isDeleted: false },
       relations: { permissions: true },
     });
     return items.map((item) => this.toRecord(item));
@@ -30,7 +29,7 @@ export class TypeOrmRoleRepository implements RoleRepository {
 
   async findById(id: string): Promise<RoleRecord | null> {
     const item = await this.roles.findOne({
-      where: { id, isDeleted: false },
+      where: { id },
       relations: { permissions: true },
     });
     return item ? this.toRecord(item) : null;
@@ -44,7 +43,6 @@ export class TypeOrmRoleRepository implements RoleRepository {
       .createQueryBuilder('role')
       .leftJoinAndSelect('role.permissions', 'rolePermission')
       .where('role.id IN (:...ids)', { ids })
-      .andWhere('role.isDeleted = :isDeleted', { isDeleted: false })
       .getMany();
     const records = new Map(
       items.map((item) => [String(item.id), this.toRecord(item)]),
@@ -57,7 +55,7 @@ export class TypeOrmRoleRepository implements RoleRepository {
 
   async findByCode(code: string): Promise<RoleRecord | null> {
     const item = await this.roles.findOne({
-      where: { code, isDeleted: false },
+      where: { code },
       relations: { permissions: true },
     });
     return item ? this.toRecord(item) : null;
@@ -74,7 +72,7 @@ export class TypeOrmRoleRepository implements RoleRepository {
           ...input,
           description: input.description ?? null,
           isActive: true,
-          isDeleted: false,
+          deletedAt: null,
         }),
       );
       return this.toRecord(item);
@@ -97,8 +95,7 @@ export class TypeOrmRoleRepository implements RoleRepository {
 
   async remove(id: string): Promise<void> {
     const item = await this.findEntityOrThrow(id);
-    item.isDeleted = true;
-    await this.roles.save(item);
+    await this.roles.softRemove(item);
   }
 
   async bindPermission(roleId: string, permissionId: string): Promise<void> {
@@ -126,7 +123,9 @@ export class TypeOrmRoleRepository implements RoleRepository {
   }
 
   private async findEntityOrThrow(id: string): Promise<RoleEntity> {
-    const item = await this.roles.findOne({ where: { id, isDeleted: false } });
+    const item = await this.roles.findOne({
+      where: { id },
+    });
     if (!item) {
       throw new DomainNotFoundError('角色');
     }
@@ -140,7 +139,7 @@ export class TypeOrmRoleRepository implements RoleRepository {
       name: item.name,
       description: item.description,
       isActive: item.isActive,
-      isDeleted: item.isDeleted,
+      deletedAt: item.deletedAt,
       permissionIds:
         item.permissions?.map((relation) => String(relation.permissionId)) ??
         [],

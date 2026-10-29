@@ -47,7 +47,7 @@ async function main(): Promise<void> {
       );
       const roleRepository = manager.getRepository(RoleEntity);
       let role = await roleRepository.findOne({
-        where: { code: 'operator', isDeleted: false },
+        where: { code: 'operator' },
       });
       if (!role) {
         role = await roleRepository.save(
@@ -56,7 +56,6 @@ async function main(): Promise<void> {
             name: '普通管理员',
             description: '默认普通管理员角色',
             isActive: true,
-            isDeleted: false,
           }),
         );
       }
@@ -81,7 +80,7 @@ async function main(): Promise<void> {
       }
       const adminRepository = manager.getRepository(AdminEntity);
       const existingAdmins = await adminRepository.find({
-        where: { isDeleted: false, isSuperAdmin: false },
+        where: { isSuperAdmin: false },
       });
       const adminRoleRepository = manager.getRepository(AdminRoleEntity);
       for (const admin of existingAdmins) {
@@ -95,7 +94,7 @@ async function main(): Promise<void> {
         }
       }
       const existing = await adminRepository.findOne({
-        where: { username, isDeleted: false },
+        where: { username },
       });
       const { hash, salt } = await hashPassword(password);
       if (existing) {
@@ -113,7 +112,6 @@ async function main(): Promise<void> {
             passwordSalt: salt,
             isActive: true,
             isSuperAdmin: true,
-            isDeleted: false,
           }),
         );
         console.log(`超级管理员 ${username} 创建成功`);
