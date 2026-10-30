@@ -8,17 +8,21 @@ import {
 } from 'typeorm';
 
 /** 角色与权限的关联。 */
-@Entity({ name: 'role_permission' })
-@Index('uk_role_permission_role_id_permission_id', ['roleId', 'permissionId'], {
-  unique: true,
-})
-@Index('idx_role_permission_permission_id', ['permissionId'])
-export class RolePermissionEntity {
+@Entity({ name: 'role_permission_assignment' })
+@Index(
+  'uk_role_permission_assignment_role_id_permission_id',
+  ['roleId', 'permissionId'],
+  {
+    unique: true,
+  },
+)
+@Index('idx_role_permission_assignment_permission_id', ['permissionId'])
+export class RolePermissionAssignmentEntity {
   /** 关联主键。 */
   @PrimaryGeneratedColumn({
     type: 'bigint',
     unsigned: true,
-    primaryKeyConstraintName: 'pk_role_permission_id',
+    primaryKeyConstraintName: 'pk_role_permission_assignment_id',
   })
   id!: string;
 

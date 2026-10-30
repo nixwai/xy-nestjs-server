@@ -1,9 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { AdminRoleEntity } from '../entities/admin-role.entity.js';
+import { AdminRoleAssignmentEntity } from '../entities/admin-role-assignment.entity.js';
 import { AdminSessionEntity } from '../entities/admin-session.entity.js';
 import { AdminEntity } from '../entities/admin.entity.js';
-import { ADMIN_REPOSITORY } from './admin-repository.port.js';
 import type {
   AdminRepository,
   AdminTransactionRunner,
@@ -20,21 +19,10 @@ export class TypeOrmAdminTransactionRunner implements AdminTransactionRunner {
       work(
         new TypeOrmAdminRepository(
           manager.getRepository(AdminEntity),
-          manager.getRepository(AdminRoleEntity),
+          manager.getRepository(AdminRoleAssignmentEntity),
           manager.getRepository(AdminSessionEntity),
         ),
       ),
     );
-  }
-}
-
-/** 在内存测试仓储上执行管理员账户事务回调。 */
-export class InMemoryAdminTransactionRunner implements AdminTransactionRunner {
-  constructor(
-    @Inject(ADMIN_REPOSITORY) private readonly repository: AdminRepository,
-  ) {}
-
-  run<T>(work: (repository: AdminRepository) => Promise<T>): Promise<T> {
-    return work(this.repository);
   }
 }

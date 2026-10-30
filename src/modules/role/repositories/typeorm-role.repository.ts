@@ -5,8 +5,8 @@ import {
   DomainConflictError,
   DomainNotFoundError,
 } from '../../../common/errors/index.js';
-import { RolePermissionEntity } from '../entities/role-permission.entity.js';
-import { AdminRoleEntity } from '../../admin/entities/admin-role.entity.js';
+import { RolePermissionAssignmentEntity } from '../entities/role-permission-assignment.entity.js';
+import { AdminRoleAssignmentEntity } from '../../admin/entities/admin-role-assignment.entity.js';
 import { RoleEntity } from '../entities/role.entity.js';
 import type { RoleRecord } from '../types/role.types.js';
 import type { RoleRepository } from './role-repository.port.js';
@@ -17,10 +17,10 @@ export class TypeOrmRoleRepository implements RoleRepository {
   constructor(
     @InjectRepository(RoleEntity)
     private readonly roles: Repository<RoleEntity>,
-    @InjectRepository(RolePermissionEntity)
-    private readonly rolePermissions: Repository<RolePermissionEntity>,
-    @InjectRepository(AdminRoleEntity)
-    private readonly adminRoles: Repository<AdminRoleEntity>,
+    @InjectRepository(RolePermissionAssignmentEntity)
+    private readonly rolePermissions: Repository<RolePermissionAssignmentEntity>,
+    @InjectRepository(AdminRoleAssignmentEntity)
+    private readonly adminRoles: Repository<AdminRoleAssignmentEntity>,
   ) {}
 
   async list(): Promise<RoleRecord[]> {
@@ -89,8 +89,10 @@ export class TypeOrmRoleRepository implements RoleRepository {
   async softDelete(id: string): Promise<void> {
     await this.roles.manager.transaction(async (manager) => {
       const roles = manager.getRepository(RoleEntity);
-      const rolePermissions = manager.getRepository(RolePermissionEntity);
-      const adminRoles = manager.getRepository(AdminRoleEntity);
+      const rolePermissions = manager.getRepository(
+        RolePermissionAssignmentEntity,
+      );
+      const adminRoles = manager.getRepository(AdminRoleAssignmentEntity);
       const item = await roles.findOne({ where: { id } });
       if (!item) {
         throw new DomainNotFoundError('角色');

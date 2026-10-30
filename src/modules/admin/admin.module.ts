@@ -5,15 +5,17 @@ import { RoleModule } from '../role/role.module.js';
 import { shouldLoadDatabaseModule } from '../../config/configuration.js';
 import { AdminController } from './admin.controller.js';
 import { AdminService } from './admin.service.js';
-import { AdminRoleEntity } from './entities/admin-role.entity.js';
+import { AdminRoleAssignmentEntity } from './entities/admin-role-assignment.entity.js';
 import { AdminEntity } from './entities/admin.entity.js';
 import { AdminSessionEntity } from './entities/admin-session.entity.js';
 import {
   ADMIN_REPOSITORY,
   ADMIN_TRANSACTION_RUNNER,
 } from './repositories/admin-repository.port.js';
+import { InMemoryAdminRepository } from './repositories/in-memory-admin.repository.js';
 import { TypeOrmAdminRepository } from './repositories/typeorm-admin.repository.js';
-import { TypeOrmAdminTransactionRunner } from './repositories/admin-transaction-runner.js';
+import { InMemoryAdminTransactionRunner } from './repositories/in-memory-admin-transaction-runner.js';
+import { TypeOrmAdminTransactionRunner } from './repositories/typeorm-admin-transaction-runner.js';
 
 const databaseEnabled = shouldLoadDatabaseModule();
 
@@ -26,7 +28,7 @@ const databaseEnabled = shouldLoadDatabaseModule();
       ? [
           TypeOrmModule.forFeature([
             AdminEntity,
-            AdminRoleEntity,
+            AdminRoleAssignmentEntity,
             AdminSessionEntity,
           ]),
         ]
@@ -37,11 +39,15 @@ const databaseEnabled = shouldLoadDatabaseModule();
     AdminService,
     {
       provide: ADMIN_REPOSITORY,
-      useClass: TypeOrmAdminRepository,
+      useClass: databaseEnabled
+        ? TypeOrmAdminRepository
+        : InMemoryAdminRepository,
     },
     {
       provide: ADMIN_TRANSACTION_RUNNER,
-      useClass: TypeOrmAdminTransactionRunner,
+      useClass: databaseEnabled
+        ? TypeOrmAdminTransactionRunner
+        : InMemoryAdminTransactionRunner,
     },
   ],
   exports: [AdminService, ADMIN_REPOSITORY, ADMIN_TRANSACTION_RUNNER],

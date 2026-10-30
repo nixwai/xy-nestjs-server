@@ -9,12 +9,12 @@ interface MysqlDriverError {
 
 const DUPLICATE_INDEX_KEY_MAP: Readonly<Record<string, string>> = Object.freeze(
   {
-    uk_admins_username: 'username',
-    uk_admin_sessions_token_hash: 'tokenHash',
-    uk_admin_roles_admin_role: 'adminRole',
-    uk_roles_code: 'roleCode',
-    uk_permissions_code: 'permissionCode',
-    uk_role_permissions_role_permission: 'rolePermission',
+    uk_admin_username: 'username',
+    uk_admin_session_token_hash: 'tokenHash',
+    uk_admin_role_assignment_admin_id_role_id: 'adminRole',
+    uk_role_code: 'roleCode',
+    uk_permission_code: 'permissionCode',
+    uk_role_permission_assignment_role_id_permission_id: 'rolePermission',
   },
 );
 

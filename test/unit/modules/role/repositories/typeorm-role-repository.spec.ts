@@ -37,7 +37,7 @@ describe('TypeOrmRoleRepository', () => {
             getRepository: vi.fn((entity) =>
               entity.name === 'RoleEntity'
                 ? roles
-                : entity.name === 'RolePermissionEntity'
+                : entity.name === 'RolePermissionAssignmentEntity'
                   ? rolePermissions
                   : { delete: vi.fn().mockResolvedValue(undefined) },
             ),

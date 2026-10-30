@@ -124,7 +124,7 @@ describe('GlobalExceptionFilter', () => {
     const error = createQueryFailedError(
       Object.assign(new Error('Duplicate entry'), {
         code: 'ER_DUP_ENTRY',
-        sqlMessage: "Duplicate entry 'admin' for key 'uk_admins_username'",
+        sqlMessage: "Duplicate entry 'admin' for key 'uk_admin_username'",
       }),
     );
 

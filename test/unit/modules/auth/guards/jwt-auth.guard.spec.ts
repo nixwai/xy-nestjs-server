@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { describe, expect, it } from 'vitest';
 import { AdminService } from '../../../../../src/modules/admin/admin.service.js';
 import { InMemoryAdminRepository } from '../../../../../src/modules/admin/repositories/in-memory-admin.repository.js';
-import { InMemoryAdminTransactionRunner } from '../../../../../src/modules/admin/repositories/admin-transaction-runner.js';
+import { InMemoryAdminTransactionRunner } from '../../../../../src/modules/admin/repositories/in-memory-admin-transaction-runner.js';
 import { AuditService } from '../../../../../src/modules/audit/audit.service.js';
 import { AuthService } from '../../../../../src/modules/auth/auth.service.js';
 import { InMemoryAuthSessionRepository } from '../../../../../src/modules/auth/repositories/in-memory-auth-session.repository.js';

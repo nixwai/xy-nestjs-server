@@ -2,10 +2,10 @@ import { createInterface } from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 import dataSource from '../src/data-source.js';
 import { AdminEntity } from '../src/modules/admin/entities/admin.entity.js';
-import { AdminRoleEntity } from '../src/modules/admin/entities/admin-role.entity.js';
+import { AdminRoleAssignmentEntity } from '../src/modules/admin/entities/admin-role-assignment.entity.js';
 import { PermissionEntity } from '../src/modules/permission/entities/permission.entity.js';
 import { RoleEntity } from '../src/modules/role/entities/role.entity.js';
-import { RolePermissionEntity } from '../src/modules/role/entities/role-permission.entity.js';
+import { RolePermissionAssignmentEntity } from '../src/modules/role/entities/role-permission-assignment.entity.js';
 import { hashPassword } from '../src/modules/auth/utils/password.util.js';
 import { REGISTERED_PERMISSIONS } from '../src/modules/permission/constants/registered-permissions.constant.js';
 import { createPermissionCode } from '../src/modules/authorization/utils/permission-code.util.js';
@@ -68,7 +68,9 @@ async function main(): Promise<void> {
           createPermissionCode(PermissionResource.ADMIN_SELF, HttpMethod.GET),
       );
       if (selfPermission) {
-        const relationRepository = manager.getRepository(RolePermissionEntity);
+        const relationRepository = manager.getRepository(
+          RolePermissionAssignmentEntity,
+        );
         const exists = await relationRepository.findOne({
           where: { roleId: role.id, permissionId: selfPermission.id },
         });
@@ -85,7 +87,9 @@ async function main(): Promise<void> {
       const existingAdmins = await adminRepository.find({
         where: { isSuperAdmin: false },
       });
-      const adminRoleRepository = manager.getRepository(AdminRoleEntity);
+      const adminRoleRepository = manager.getRepository(
+        AdminRoleAssignmentEntity,
+      );
       for (const admin of existingAdmins) {
         const relation = await adminRoleRepository.findOne({
           where: { adminId: admin.id, roleId: role.id },

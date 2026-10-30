@@ -5,7 +5,7 @@ import {
   ADMIN_TRANSACTION_RUNNER,
 } from '../../src/modules/admin/repositories/admin-repository.port.js';
 import { InMemoryAdminRepository } from '../../src/modules/admin/repositories/in-memory-admin.repository.js';
-import { InMemoryAdminTransactionRunner } from '../../src/modules/admin/repositories/admin-transaction-runner.js';
+import { InMemoryAdminTransactionRunner } from '../../src/modules/admin/repositories/in-memory-admin-transaction-runner.js';
 import { AUTH_SESSION_REPOSITORY } from '../../src/modules/auth/repositories/auth-session-repository.port.js';
 import { InMemoryAuthSessionRepository } from '../../src/modules/auth/repositories/in-memory-auth-session.repository.js';
 import { ROLE_REPOSITORY } from '../../src/modules/role/repositories/role-repository.port.js';

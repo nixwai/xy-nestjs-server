@@ -11,6 +11,7 @@ import { AuthService } from './auth.service.js';
 import { JwtTokenService } from './tokens/jwt-token.service.js';
 import { AUTH_SESSION_REPOSITORY } from './repositories/auth-session-repository.port.js';
 import type { AuthSessionRepository } from './repositories/auth-session-repository.port.js';
+import { InMemoryAuthSessionRepository } from './repositories/in-memory-auth-session.repository.js';
 import { TypeOrmAuthSessionRepository } from './repositories/typeorm-auth-session.repository.js';
 import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
 
@@ -31,7 +32,9 @@ const databaseEnabled = shouldLoadDatabaseModule();
     JwtAuthGuard,
     {
       provide: AUTH_SESSION_REPOSITORY,
-      useClass: TypeOrmAuthSessionRepository,
+      useClass: databaseEnabled
+        ? TypeOrmAuthSessionRepository
+        : InMemoryAuthSessionRepository,
     },
     {
       provide: AuthService,

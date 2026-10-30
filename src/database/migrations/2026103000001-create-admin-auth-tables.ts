@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
 
 /** 创建管理员、RBAC 和审计数据表。 */
-export class CreateAdminAuthTables202610250001 implements MigrationInterface {
+export class CreateAdminAuthTables2026103000001 implements MigrationInterface {
   /** 创建认证、授权和审计表。 */
   async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
@@ -172,7 +172,7 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
 
     await queryRunner.createTable(
       new Table({
-        name: 'admin_role',
+        name: 'admin_role_assignment',
         columns: [
           {
             name: 'id',
@@ -181,7 +181,7 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
             isPrimary: true,
             isGenerated: true,
             generationStrategy: 'increment',
-            primaryKeyConstraintName: 'pk_admin_role_id',
+            primaryKeyConstraintName: 'pk_admin_role_assignment_id',
           },
           { name: 'admin_id', type: 'bigint', unsigned: true },
           { name: 'role_id', type: 'bigint', unsigned: true },
@@ -200,24 +200,24 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
       }),
     );
     await queryRunner.createIndex(
-      'admin_role',
+      'admin_role_assignment',
       new TableIndex({
-        name: 'uk_admin_role_admin_id_role_id',
+        name: 'uk_admin_role_assignment_admin_id_role_id',
         columnNames: ['admin_id', 'role_id'],
         isUnique: true,
       }),
     );
     await queryRunner.createIndex(
-      'admin_role',
+      'admin_role_assignment',
       new TableIndex({
-        name: 'idx_admin_role_role_id',
+        name: 'idx_admin_role_assignment_role_id',
         columnNames: ['role_id'],
       }),
     );
 
     await queryRunner.createTable(
       new Table({
-        name: 'role_permission',
+        name: 'role_permission_assignment',
         columns: [
           {
             name: 'id',
@@ -226,7 +226,7 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
             isPrimary: true,
             isGenerated: true,
             generationStrategy: 'increment',
-            primaryKeyConstraintName: 'pk_role_permission_id',
+            primaryKeyConstraintName: 'pk_role_permission_assignment_id',
           },
           { name: 'role_id', type: 'bigint', unsigned: true },
           { name: 'permission_id', type: 'bigint', unsigned: true },
@@ -245,17 +245,17 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
       }),
     );
     await queryRunner.createIndex(
-      'role_permission',
+      'role_permission_assignment',
       new TableIndex({
-        name: 'uk_role_permission_role_id_permission_id',
+        name: 'uk_role_permission_assignment_role_id_permission_id',
         columnNames: ['role_id', 'permission_id'],
         isUnique: true,
       }),
     );
     await queryRunner.createIndex(
-      'role_permission',
+      'role_permission_assignment',
       new TableIndex({
-        name: 'idx_role_permission_permission_id',
+        name: 'idx_role_permission_assignment_permission_id',
         columnNames: ['permission_id'],
       }),
     );
@@ -398,8 +398,8 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
   async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.dropTable('audit_log', true, true, true);
     await queryRunner.dropTable('admin_session', true, true, true);
-    await queryRunner.dropTable('role_permission', true, true, true);
-    await queryRunner.dropTable('admin_role', true, true, true);
+    await queryRunner.dropTable('role_permission_assignment', true, true, true);
+    await queryRunner.dropTable('admin_role_assignment', true, true, true);
     await queryRunner.dropTable('permission', true, true, true);
     await queryRunner.dropTable('role', true, true, true);
     await queryRunner.dropTable('admin', true, true, true);

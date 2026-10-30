@@ -3,12 +3,9 @@ import {
   CreateDateColumn,
   Entity,
   Index,
-  JoinColumn,
-  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { AdminEntity } from './admin.entity.js';
 
 /** 管理员刷新令牌会话。 */
 @Entity({ name: 'admin_session' })
@@ -56,9 +53,4 @@ export class AdminSessionEntity {
   /** 最近一次使用时间。 */
   @Column({ type: 'datetime', nullable: true })
   lastUsedAt!: Date | null;
-
-  /** 所属管理员。 */
-  @ManyToOne(() => AdminEntity, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'admin_id' })
-  admin!: AdminEntity;
 }

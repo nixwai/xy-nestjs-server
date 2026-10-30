@@ -7,7 +7,7 @@ import {
   DomainNotFoundError,
 } from '../../../common/errors/index.js';
 import { AdminEntity } from '../entities/admin.entity.js';
-import { AdminRoleEntity } from '../entities/admin-role.entity.js';
+import { AdminRoleAssignmentEntity } from '../entities/admin-role-assignment.entity.js';
 import { AdminSessionEntity } from '../entities/admin-session.entity.js';
 import type {
   AdminCreateInput,
@@ -22,8 +22,9 @@ export class TypeOrmAdminRepository implements AdminRepository {
   constructor(
     @InjectRepository(AdminEntity)
     private readonly admins: Repository<AdminEntity>,
-    @InjectRepository(AdminRoleEntity)
-    private readonly adminRoles: Repository<AdminRoleEntity>,
+    @InjectRepository(AdminRoleAssignmentEntity)
+    private readonly adminRoles: Repository<AdminRoleAssignmentEntity>,
+    @InjectRepository(AdminSessionEntity)
     private readonly adminSessions: Repository<AdminSessionEntity>,
   ) {}
 

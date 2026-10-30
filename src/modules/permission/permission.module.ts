@@ -6,6 +6,7 @@ import { PermissionEntity } from './entities/permission.entity.js';
 import { PermissionController } from './permission.controller.js';
 import { PermissionService } from './permission.service.js';
 import { PERMISSION_REPOSITORY } from './repositories/permission-repository.port.js';
+import { InMemoryPermissionRepository } from './repositories/in-memory-permission.repository.js';
 import { TypeOrmPermissionRepository } from './repositories/typeorm-permission.repository.js';
 
 const databaseEnabled = shouldLoadDatabaseModule();
@@ -21,7 +22,9 @@ const databaseEnabled = shouldLoadDatabaseModule();
     PermissionService,
     {
       provide: PERMISSION_REPOSITORY,
-      useClass: TypeOrmPermissionRepository,
+      useClass: databaseEnabled
+        ? TypeOrmPermissionRepository
+        : InMemoryPermissionRepository,
     },
   ],
   exports: [PermissionService, PERMISSION_REPOSITORY],
