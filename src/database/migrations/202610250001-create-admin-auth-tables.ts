@@ -6,7 +6,7 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
   async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'admins',
+        name: 'admin',
         columns: [
           {
             name: 'id',
@@ -15,6 +15,7 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
             isPrimary: true,
             isGenerated: true,
             generationStrategy: 'increment',
+            primaryKeyConstraintName: 'pk_admin_id',
           },
           {
             name: 'username',
@@ -24,16 +25,21 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
           },
           { name: 'password_hash', type: 'varchar', length: '128' },
           { name: 'password_salt', type: 'varchar', length: '32' },
-          { name: 'is_active', type: 'tinyint', default: '1' },
-          { name: 'is_super_admin', type: 'tinyint', default: '0' },
+          { name: 'is_active', type: 'tinyint', unsigned: true, default: '1' },
+          {
+            name: 'is_super_admin',
+            type: 'tinyint',
+            unsigned: true,
+            default: '0',
+          },
           { name: 'deleted_at', type: 'datetime', isNullable: true },
           {
-            name: 'created_at',
+            name: 'gmt_create',
             type: 'datetime',
             default: 'CURRENT_TIMESTAMP',
           },
           {
-            name: 'updated_at',
+            name: 'gmt_modified',
             type: 'datetime',
             default: 'CURRENT_TIMESTAMP',
             onUpdate: 'CURRENT_TIMESTAMP',
@@ -42,16 +48,24 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
       }),
     );
     await queryRunner.createIndex(
-      'admins',
+      'admin',
       new TableIndex({
-        name: 'uk_admins_username',
+        name: 'uk_admin_username',
         columnNames: ['username'],
         isUnique: true,
       }),
     );
+    await queryRunner.createIndex(
+      'admin',
+      new TableIndex({
+        name: 'idx_admin_deleted_at',
+        columnNames: ['deleted_at'],
+      }),
+    );
+
     await queryRunner.createTable(
       new Table({
-        name: 'roles',
+        name: 'role',
         columns: [
           {
             name: 'id',
@@ -60,6 +74,7 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
             isPrimary: true,
             isGenerated: true,
             generationStrategy: 'increment',
+            primaryKeyConstraintName: 'pk_role_id',
           },
           { name: 'code', type: 'varchar', length: '64' },
           { name: 'name', type: 'varchar', length: '128' },
@@ -69,15 +84,15 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
             length: '255',
             isNullable: true,
           },
-          { name: 'is_active', type: 'tinyint', default: '1' },
+          { name: 'is_active', type: 'tinyint', unsigned: true, default: '1' },
           { name: 'deleted_at', type: 'datetime', isNullable: true },
           {
-            name: 'created_at',
+            name: 'gmt_create',
             type: 'datetime',
             default: 'CURRENT_TIMESTAMP',
           },
           {
-            name: 'updated_at',
+            name: 'gmt_modified',
             type: 'datetime',
             default: 'CURRENT_TIMESTAMP',
             onUpdate: 'CURRENT_TIMESTAMP',
@@ -86,16 +101,24 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
       }),
     );
     await queryRunner.createIndex(
-      'roles',
+      'role',
       new TableIndex({
-        name: 'uk_roles_code',
+        name: 'uk_role_code',
         columnNames: ['code'],
         isUnique: true,
       }),
     );
+    await queryRunner.createIndex(
+      'role',
+      new TableIndex({
+        name: 'idx_role_deleted_at',
+        columnNames: ['deleted_at'],
+      }),
+    );
+
     await queryRunner.createTable(
       new Table({
-        name: 'permissions',
+        name: 'permission',
         columns: [
           {
             name: 'id',
@@ -104,6 +127,7 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
             isPrimary: true,
             isGenerated: true,
             generationStrategy: 'increment',
+            primaryKeyConstraintName: 'pk_permission_id',
           },
           { name: 'code', type: 'varchar', length: '128' },
           { name: 'resource', type: 'varchar', length: '64' },
@@ -115,14 +139,14 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
             length: '255',
             isNullable: true,
           },
-          { name: 'is_active', type: 'tinyint', default: '1' },
+          { name: 'is_active', type: 'tinyint', unsigned: true, default: '1' },
           {
-            name: 'created_at',
+            name: 'gmt_create',
             type: 'datetime',
             default: 'CURRENT_TIMESTAMP',
           },
           {
-            name: 'updated_at',
+            name: 'gmt_modified',
             type: 'datetime',
             default: 'CURRENT_TIMESTAMP',
             onUpdate: 'CURRENT_TIMESTAMP',
@@ -131,23 +155,24 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
       }),
     );
     await queryRunner.createIndex(
-      'permissions',
+      'permission',
       new TableIndex({
-        name: 'uk_permissions_code',
+        name: 'uk_permission_code',
         columnNames: ['code'],
         isUnique: true,
       }),
     );
     await queryRunner.createIndex(
-      'permissions',
+      'permission',
       new TableIndex({
-        name: 'idx_permissions_resource_method',
+        name: 'idx_permission_resource_method',
         columnNames: ['resource', 'method'],
       }),
     );
+
     await queryRunner.createTable(
       new Table({
-        name: 'admin_roles',
+        name: 'admin_role',
         columns: [
           {
             name: 'id',
@@ -156,30 +181,43 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
             isPrimary: true,
             isGenerated: true,
             generationStrategy: 'increment',
+            primaryKeyConstraintName: 'pk_admin_role_id',
           },
           { name: 'admin_id', type: 'bigint', unsigned: true },
           { name: 'role_id', type: 'bigint', unsigned: true },
+          {
+            name: 'gmt_create',
+            type: 'datetime',
+            default: 'CURRENT_TIMESTAMP',
+          },
+          {
+            name: 'gmt_modified',
+            type: 'datetime',
+            default: 'CURRENT_TIMESTAMP',
+            onUpdate: 'CURRENT_TIMESTAMP',
+          },
         ],
       }),
     );
     await queryRunner.createIndex(
-      'admin_roles',
+      'admin_role',
       new TableIndex({
-        name: 'uk_admin_roles_admin_role',
+        name: 'uk_admin_role_admin_id_role_id',
         columnNames: ['admin_id', 'role_id'],
         isUnique: true,
       }),
     );
     await queryRunner.createIndex(
-      'admin_roles',
+      'admin_role',
       new TableIndex({
-        name: 'idx_admin_roles_role_id',
+        name: 'idx_admin_role_role_id',
         columnNames: ['role_id'],
       }),
     );
+
     await queryRunner.createTable(
       new Table({
-        name: 'role_permissions',
+        name: 'role_permission',
         columns: [
           {
             name: 'id',
@@ -188,30 +226,43 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
             isPrimary: true,
             isGenerated: true,
             generationStrategy: 'increment',
+            primaryKeyConstraintName: 'pk_role_permission_id',
           },
           { name: 'role_id', type: 'bigint', unsigned: true },
           { name: 'permission_id', type: 'bigint', unsigned: true },
+          {
+            name: 'gmt_create',
+            type: 'datetime',
+            default: 'CURRENT_TIMESTAMP',
+          },
+          {
+            name: 'gmt_modified',
+            type: 'datetime',
+            default: 'CURRENT_TIMESTAMP',
+            onUpdate: 'CURRENT_TIMESTAMP',
+          },
         ],
       }),
     );
     await queryRunner.createIndex(
-      'role_permissions',
+      'role_permission',
       new TableIndex({
-        name: 'uk_role_permissions_role_permission',
+        name: 'uk_role_permission_role_id_permission_id',
         columnNames: ['role_id', 'permission_id'],
         isUnique: true,
       }),
     );
     await queryRunner.createIndex(
-      'role_permissions',
+      'role_permission',
       new TableIndex({
-        name: 'idx_role_permissions_permission_id',
+        name: 'idx_role_permission_permission_id',
         columnNames: ['permission_id'],
       }),
     );
+
     await queryRunner.createTable(
       new Table({
-        name: 'admin_sessions',
+        name: 'admin_session',
         columns: [
           {
             name: 'id',
@@ -220,6 +271,7 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
             isPrimary: true,
             isGenerated: true,
             generationStrategy: 'increment',
+            primaryKeyConstraintName: 'pk_admin_session_id',
           },
           { name: 'admin_id', type: 'bigint', unsigned: true },
           { name: 'token_hash', type: 'char', length: '64' },
@@ -232,46 +284,53 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
             isNullable: true,
           },
           {
-            name: 'created_at',
+            name: 'gmt_create',
             type: 'datetime',
             default: 'CURRENT_TIMESTAMP',
+          },
+          {
+            name: 'gmt_modified',
+            type: 'datetime',
+            default: 'CURRENT_TIMESTAMP',
+            onUpdate: 'CURRENT_TIMESTAMP',
           },
           { name: 'last_used_at', type: 'datetime', isNullable: true },
         ],
       }),
     );
     await queryRunner.createIndex(
-      'admin_sessions',
+      'admin_session',
       new TableIndex({
-        name: 'uk_admin_sessions_token_hash',
+        name: 'uk_admin_session_token_hash',
         columnNames: ['token_hash'],
         isUnique: true,
       }),
     );
     await queryRunner.createIndex(
-      'admin_sessions',
+      'admin_session',
       new TableIndex({
-        name: 'idx_admin_sessions_admin_id',
+        name: 'idx_admin_session_admin_id',
         columnNames: ['admin_id'],
       }),
     );
     await queryRunner.createIndex(
-      'admin_sessions',
+      'admin_session',
       new TableIndex({
-        name: 'idx_admin_sessions_expires_at',
+        name: 'idx_admin_session_expires_at',
         columnNames: ['expires_at'],
       }),
     );
     await queryRunner.createIndex(
-      'admin_sessions',
+      'admin_session',
       new TableIndex({
-        name: 'idx_admin_sessions_replaced_by_session_id',
+        name: 'idx_admin_session_replaced_by_session_id',
         columnNames: ['replaced_by_session_id'],
       }),
     );
+
     await queryRunner.createTable(
       new Table({
-        name: 'audit_logs',
+        name: 'audit_log',
         columns: [
           {
             name: 'id',
@@ -280,6 +339,7 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
             isPrimary: true,
             isGenerated: true,
             generationStrategy: 'increment',
+            primaryKeyConstraintName: 'pk_audit_log_id',
           },
           {
             name: 'actor_admin_id',
@@ -296,45 +356,52 @@ export class CreateAdminAuthTables202610250001 implements MigrationInterface {
             isNullable: true,
           },
           { name: 'details', type: 'json', isNullable: true },
-          { name: 'succeeded', type: 'tinyint', default: '1' },
+          { name: 'succeeded', type: 'tinyint', unsigned: true, default: '1' },
           {
-            name: 'created_at',
+            name: 'gmt_create',
             type: 'datetime',
             default: 'CURRENT_TIMESTAMP',
+          },
+          {
+            name: 'gmt_modified',
+            type: 'datetime',
+            default: 'CURRENT_TIMESTAMP',
+            onUpdate: 'CURRENT_TIMESTAMP',
           },
         ],
       }),
     );
     await queryRunner.createIndex(
-      'audit_logs',
+      'audit_log',
       new TableIndex({
-        name: 'idx_audit_logs_created_at',
-        columnNames: ['created_at'],
+        name: 'idx_audit_log_created_at',
+        columnNames: ['gmt_create'],
       }),
     );
     await queryRunner.createIndex(
-      'audit_logs',
+      'audit_log',
       new TableIndex({
-        name: 'idx_audit_logs_resource_target',
+        name: 'idx_audit_log_resource_type_target_id',
         columnNames: ['resource_type', 'target_id'],
       }),
     );
     await queryRunner.createIndex(
-      'audit_logs',
+      'audit_log',
       new TableIndex({
-        name: 'idx_audit_logs_actor_admin_id',
+        name: 'idx_audit_log_actor_admin_id',
         columnNames: ['actor_admin_id'],
       }),
     );
   }
+
   /** 删除认证、授权和审计表。 */
   async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('audit_logs', true, true, true);
-    await queryRunner.dropTable('admin_sessions', true, true, true);
-    await queryRunner.dropTable('role_permissions', true, true, true);
-    await queryRunner.dropTable('admin_roles', true, true, true);
-    await queryRunner.dropTable('permissions', true, true, true);
-    await queryRunner.dropTable('roles', true, true, true);
-    await queryRunner.dropTable('admins', true, true, true);
+    await queryRunner.dropTable('audit_log', true, true, true);
+    await queryRunner.dropTable('admin_session', true, true, true);
+    await queryRunner.dropTable('role_permission', true, true, true);
+    await queryRunner.dropTable('admin_role', true, true, true);
+    await queryRunner.dropTable('permission', true, true, true);
+    await queryRunner.dropTable('role', true, true, true);
+    await queryRunner.dropTable('admin', true, true, true);
   }
 }

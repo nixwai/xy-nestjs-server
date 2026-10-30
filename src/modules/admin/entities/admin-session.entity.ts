@@ -6,17 +6,23 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { AdminEntity } from './admin.entity.js';
 
 /** 管理员刷新令牌会话。 */
-@Entity({ name: 'admin_sessions' })
-@Index('uk_admin_sessions_token_hash', ['tokenHash'], { unique: true })
-@Index('idx_admin_sessions_admin_id', ['adminId'])
-@Index('idx_admin_sessions_replaced_by_session_id', ['replacedBySessionId'])
+@Entity({ name: 'admin_session' })
+@Index('uk_admin_session_token_hash', ['tokenHash'], { unique: true })
+@Index('idx_admin_session_admin_id', ['adminId'])
+@Index('idx_admin_session_expires_at', ['expiresAt'])
+@Index('idx_admin_session_replaced_by_session_id', ['replacedBySessionId'])
 export class AdminSessionEntity {
   /** 会话主键。 */
-  @PrimaryGeneratedColumn({ type: 'bigint', unsigned: true })
+  @PrimaryGeneratedColumn({
+    type: 'bigint',
+    unsigned: true,
+    primaryKeyConstraintName: 'pk_admin_session_id',
+  })
   id!: string;
 
   /** 所属管理员主键。 */
@@ -40,17 +46,19 @@ export class AdminSessionEntity {
   replacedBySessionId!: string | null;
 
   /** 会话创建时间。 */
-  @CreateDateColumn({ type: 'datetime' })
+  @CreateDateColumn({ name: 'gmt_create', type: 'datetime' })
   createdAt!: Date;
+
+  /** 会话更新时间。 */
+  @UpdateDateColumn({ name: 'gmt_modified', type: 'datetime' })
+  updatedAt!: Date;
 
   /** 最近一次使用时间。 */
   @Column({ type: 'datetime', nullable: true })
   lastUsedAt!: Date | null;
 
   /** 所属管理员。 */
-  @ManyToOne(() => AdminEntity, (admin) => admin.sessions, {
-    createForeignKeyConstraints: false,
-  })
+  @ManyToOne(() => AdminEntity, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'admin_id' })
   admin!: AdminEntity;
 }

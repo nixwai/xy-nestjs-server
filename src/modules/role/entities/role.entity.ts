@@ -4,19 +4,21 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { AdminRoleEntity } from '../../admin/entities/admin-role.entity.js';
-import { RolePermissionEntity } from './role-permission.entity.js';
 
 /** RBAC 角色。 */
-@Entity({ name: 'roles' })
-@Index('uk_roles_code', ['code'], { unique: true })
+@Entity({ name: 'role' })
+@Index('uk_role_code', ['code'], { unique: true })
+@Index('idx_role_deleted_at', ['deletedAt'])
 export class RoleEntity {
   /** 角色主键。 */
-  @PrimaryGeneratedColumn({ type: 'bigint', unsigned: true })
+  @PrimaryGeneratedColumn({
+    type: 'bigint',
+    unsigned: true,
+    primaryKeyConstraintName: 'pk_role_id',
+  })
   id!: string;
 
   /** 角色编码。 */
@@ -32,26 +34,18 @@ export class RoleEntity {
   description!: string | null;
 
   /** 是否启用。 */
-  @Column({ type: 'boolean', default: true })
+  @Column({ type: 'tinyint', unsigned: true, default: 1 })
   isActive!: boolean;
 
   /** 软删除时间。 */
-  @DeleteDateColumn({ type: 'datetime', nullable: true })
+  @DeleteDateColumn({ name: 'deleted_at', type: 'datetime', nullable: true })
   deletedAt!: Date | null;
 
   /** 创建时间。 */
-  @CreateDateColumn({ type: 'datetime' })
+  @CreateDateColumn({ name: 'gmt_create', type: 'datetime' })
   createdAt!: Date;
 
   /** 更新时间。 */
-  @UpdateDateColumn({ type: 'datetime' })
+  @UpdateDateColumn({ name: 'gmt_modified', type: 'datetime' })
   updatedAt!: Date;
-
-  /** 绑定管理员。 */
-  @OneToMany(() => AdminRoleEntity, (relation) => relation.role)
-  admins!: AdminRoleEntity[];
-
-  /** 绑定权限。 */
-  @OneToMany(() => RolePermissionEntity, (relation) => relation.role)
-  permissions!: RolePermissionEntity[];
 }

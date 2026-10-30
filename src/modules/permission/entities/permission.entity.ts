@@ -3,7 +3,6 @@ import {
   CreateDateColumn,
   Entity,
   Index,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -11,15 +10,18 @@ import {
   HttpMethod,
   PermissionResource,
 } from '../../authorization/enums/index.js';
-import { RolePermissionEntity } from '../../role/entities/role-permission.entity.js';
 
 /** 代码注册的权限目录。 */
-@Entity({ name: 'permissions' })
-@Index('uk_permissions_code', ['code'], { unique: true })
-@Index('idx_permissions_resource_method', ['resource', 'method'])
+@Entity({ name: 'permission' })
+@Index('uk_permission_code', ['code'], { unique: true })
+@Index('idx_permission_resource_method', ['resource', 'method'])
 export class PermissionEntity {
   /** 权限主键。 */
-  @PrimaryGeneratedColumn({ type: 'bigint', unsigned: true })
+  @PrimaryGeneratedColumn({
+    type: 'bigint',
+    unsigned: true,
+    primaryKeyConstraintName: 'pk_permission_id',
+  })
   id!: string;
 
   /** 权限唯一编码。 */
@@ -43,18 +45,14 @@ export class PermissionEntity {
   description!: string | null;
 
   /** 是否启用。 */
-  @Column({ type: 'boolean', default: true })
+  @Column({ type: 'tinyint', unsigned: true, default: 1 })
   isActive!: boolean;
 
   /** 创建时间。 */
-  @CreateDateColumn({ type: 'datetime' })
+  @CreateDateColumn({ name: 'gmt_create', type: 'datetime' })
   createdAt!: Date;
 
   /** 更新时间。 */
-  @UpdateDateColumn({ type: 'datetime' })
+  @UpdateDateColumn({ name: 'gmt_modified', type: 'datetime' })
   updatedAt!: Date;
-
-  /** 绑定角色。 */
-  @OneToMany(() => RolePermissionEntity, (relation) => relation.permission)
-  roles!: RolePermissionEntity[];
 }

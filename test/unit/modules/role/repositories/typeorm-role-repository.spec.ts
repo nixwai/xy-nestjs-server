@@ -46,6 +46,11 @@ describe('TypeOrmRoleRepository', () => {
       },
     };
     const rolePermissions = {
+      find: vi
+        .fn()
+        .mockResolvedValue([
+          { roleId: 'role-1', permissionId: 'permission-1' },
+        ]),
       findOne: vi.fn().mockResolvedValue(null),
       save: vi.fn().mockResolvedValue(undefined),
       create: vi.fn().mockImplementation((item) => item),

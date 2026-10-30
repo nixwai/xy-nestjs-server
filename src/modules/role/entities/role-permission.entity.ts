@@ -1,23 +1,25 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   Index,
-  JoinColumn,
-  ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import { RoleEntity } from './role.entity.js';
-import { PermissionEntity } from '../../permission/entities/permission.entity.js';
 
 /** 角色与权限的关联。 */
-@Entity({ name: 'role_permissions' })
-@Index('uk_role_permissions_role_permission', ['roleId', 'permissionId'], {
+@Entity({ name: 'role_permission' })
+@Index('uk_role_permission_role_id_permission_id', ['roleId', 'permissionId'], {
   unique: true,
 })
-@Index('idx_role_permissions_permission_id', ['permissionId'])
+@Index('idx_role_permission_permission_id', ['permissionId'])
 export class RolePermissionEntity {
   /** 关联主键。 */
-  @PrimaryGeneratedColumn({ type: 'bigint', unsigned: true })
+  @PrimaryGeneratedColumn({
+    type: 'bigint',
+    unsigned: true,
+    primaryKeyConstraintName: 'pk_role_permission_id',
+  })
   id!: string;
 
   /** 角色主键。 */
@@ -28,17 +30,11 @@ export class RolePermissionEntity {
   @Column({ name: 'permission_id', type: 'bigint', unsigned: true })
   permissionId!: string;
 
-  /** 角色。 */
-  @ManyToOne(() => RoleEntity, (role) => role.permissions, {
-    createForeignKeyConstraints: false,
-  })
-  @JoinColumn({ name: 'role_id' })
-  role!: RoleEntity;
+  /** 关联创建时间。 */
+  @CreateDateColumn({ name: 'gmt_create', type: 'datetime' })
+  createdAt!: Date;
 
-  /** 权限。 */
-  @ManyToOne(() => PermissionEntity, (permission) => permission.roles, {
-    createForeignKeyConstraints: false,
-  })
-  @JoinColumn({ name: 'permission_id' })
-  permission!: PermissionEntity;
+  /** 关联更新时间。 */
+  @UpdateDateColumn({ name: 'gmt_modified', type: 'datetime' })
+  updatedAt!: Date;
 }

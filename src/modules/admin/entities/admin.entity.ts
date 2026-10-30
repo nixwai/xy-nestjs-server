@@ -4,19 +4,21 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { AdminSessionEntity } from './admin-session.entity.js';
-import { AdminRoleEntity } from './admin-role.entity.js';
 
 /** 管理员账户数据。 */
-@Entity({ name: 'admins' })
-@Index('uk_admins_username', ['username'], { unique: true })
+@Entity({ name: 'admin' })
+@Index('uk_admin_username', ['username'], { unique: true })
+@Index('idx_admin_deleted_at', ['deletedAt'])
 export class AdminEntity {
   /** 管理员主键。 */
-  @PrimaryGeneratedColumn({ type: 'bigint', unsigned: true })
+  @PrimaryGeneratedColumn({
+    type: 'bigint',
+    unsigned: true,
+    primaryKeyConstraintName: 'pk_admin_id',
+  })
   id!: string;
 
   /** 登录用户名。 */
@@ -32,30 +34,22 @@ export class AdminEntity {
   passwordSalt!: string;
 
   /** 是否允许登录。 */
-  @Column({ type: 'boolean', default: true })
+  @Column({ type: 'tinyint', unsigned: true, default: 1 })
   isActive!: boolean;
 
   /** 是否拥有系统全部权限。 */
-  @Column({ type: 'boolean', default: false })
+  @Column({ type: 'tinyint', unsigned: true, default: 0 })
   isSuperAdmin!: boolean;
 
   /** 软删除时间。 */
-  @DeleteDateColumn({ type: 'datetime', nullable: true })
+  @DeleteDateColumn({ name: 'deleted_at', type: 'datetime', nullable: true })
   deletedAt!: Date | null;
 
   /** 创建时间。 */
-  @CreateDateColumn({ type: 'datetime' })
+  @CreateDateColumn({ name: 'gmt_create', type: 'datetime' })
   createdAt!: Date;
 
   /** 更新时间。 */
-  @UpdateDateColumn({ type: 'datetime' })
+  @UpdateDateColumn({ name: 'gmt_modified', type: 'datetime' })
   updatedAt!: Date;
-
-  /** 管理员的刷新会话。 */
-  @OneToMany(() => AdminSessionEntity, (session) => session.admin)
-  sessions!: AdminSessionEntity[];
-
-  /** 管理员绑定的角色。 */
-  @OneToMany(() => AdminRoleEntity, (relation) => relation.admin)
-  roles!: AdminRoleEntity[];
 }

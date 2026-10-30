@@ -19,22 +19,17 @@ export class TypeOrmRoleRepository implements RoleRepository {
     private readonly roles: Repository<RoleEntity>,
     @InjectRepository(RolePermissionEntity)
     private readonly rolePermissions: Repository<RolePermissionEntity>,
+    @InjectRepository(AdminRoleEntity)
     private readonly adminRoles: Repository<AdminRoleEntity>,
   ) {}
 
   async list(): Promise<RoleRecord[]> {
-    const items = await this.roles.find({
-      relations: { permissions: true },
-    });
-    return items.map((item) => this.toRecord(item));
+    return this.toRecords(await this.roles.find());
   }
 
   async findById(id: string): Promise<RoleRecord | null> {
-    const item = await this.roles.findOne({
-      where: { id },
-      relations: { permissions: true },
-    });
-    return item ? this.toRecord(item) : null;
+    const item = await this.roles.findOne({ where: { id } });
+    return item ? (await this.toRecords([item]))[0] : null;
   }
 
   async findByIds(ids: string[]): Promise<RoleRecord[]> {
@@ -43,11 +38,10 @@ export class TypeOrmRoleRepository implements RoleRepository {
     }
     const items = await this.roles
       .createQueryBuilder('role')
-      .leftJoinAndSelect('role.permissions', 'rolePermission')
       .where('role.id IN (:...ids)', { ids })
       .getMany();
     const records = new Map(
-      items.map((item) => [String(item.id), this.toRecord(item)]),
+      (await this.toRecords(items)).map((item) => [item.id, item]),
     );
     return ids.flatMap((id) => {
       const item = records.get(id);
@@ -56,11 +50,8 @@ export class TypeOrmRoleRepository implements RoleRepository {
   }
 
   async findByCode(code: string): Promise<RoleRecord | null> {
-    const item = await this.roles.findOne({
-      where: { code },
-      relations: { permissions: true },
-    });
-    return item ? this.toRecord(item) : null;
+    const item = await this.roles.findOne({ where: { code } });
+    return item ? (await this.toRecords([item]))[0] : null;
   }
 
   async create(input: {
@@ -135,16 +126,34 @@ export class TypeOrmRoleRepository implements RoleRepository {
   }
 
   private async findEntityOrThrow(id: string): Promise<RoleEntity> {
-    const item = await this.roles.findOne({
-      where: { id },
-    });
+    const item = await this.roles.findOne({ where: { id } });
     if (!item) {
       throw new DomainNotFoundError('角色');
     }
     return item;
   }
 
-  private toRecord(item: RoleEntity): RoleRecord {
+  private async toRecords(items: RoleEntity[]): Promise<RoleRecord[]> {
+    if (items.length === 0) {
+      return [];
+    }
+    const relations = await this.rolePermissions.find({
+      where: items.map(({ id }) => ({ roleId: id })),
+    });
+    const permissionIds = new Map<string, string[]>();
+    for (const relation of relations) {
+      const current = permissionIds.get(String(relation.roleId)) ?? [];
+      permissionIds.set(String(relation.roleId), [
+        ...current,
+        String(relation.permissionId),
+      ]);
+    }
+    return items.map((item) =>
+      this.toRecord(item, permissionIds.get(String(item.id)) ?? []),
+    );
+  }
+
+  private toRecord(item: RoleEntity, permissionIds: string[] = []): RoleRecord {
     return {
       id: String(item.id),
       code: item.code,
@@ -152,9 +161,7 @@ export class TypeOrmRoleRepository implements RoleRepository {
       description: item.description,
       isActive: item.isActive,
       deletedAt: item.deletedAt,
-      permissionIds:
-        item.permissions?.map((relation) => String(relation.permissionId)) ??
-        [],
+      permissionIds: [...permissionIds],
     };
   }
 
