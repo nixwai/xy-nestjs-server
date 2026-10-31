@@ -15,12 +15,8 @@ export function createDatabaseOptions(
     username: config.getOrThrow<string>('database.username'),
     password: config.get<string>('database.password', ''),
     database: config.getOrThrow<string>('database.database'),
-    entities: [
-      `${process.cwd()}/dist/**/*.entity.js`,
-      `${process.cwd()}/src/**/*.entity.ts`,
-    ],
+    autoLoadEntities: true,
     migrations: [`${process.cwd()}/dist/database/migrations/*.js`],
-    manualInitialization: true,
     synchronize: false,
     charset: 'utf8mb4',
     timezone: 'Z',

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { createDatabaseOptions } from '../../../../src/shared/database/database.module.js';
 
 describe('createDatabaseOptions', () => {
-  it('defers database initialization until the HTTP server is listening', () => {
+  it('lets Nest initialize the database before module initialization', () => {
     const config = {
       getOrThrow: (key: string) =>
         ({
@@ -16,7 +16,7 @@ describe('createDatabaseOptions', () => {
     } as unknown as ConfigService;
 
     expect(createDatabaseOptions(config)).toMatchObject({
-      manualInitialization: true,
+      autoLoadEntities: true,
       synchronize: false,
     });
   });

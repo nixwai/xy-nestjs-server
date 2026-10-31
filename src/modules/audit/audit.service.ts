@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common';
-import { Inject } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { AuditLogEntity } from './entities/audit-log.entity.js';
 
@@ -7,7 +6,11 @@ import { AuditLogEntity } from './entities/audit-log.entity.js';
 @Injectable()
 export class AuditService {
   private readonly memory: AuditLogEntity[] = [];
-  constructor(@Inject(DataSource) private readonly dataSource?: DataSource) {}
+
+  constructor(
+    @Optional() @Inject(DataSource) private readonly dataSource?: DataSource,
+  ) {}
+
   /** 写入不包含敏感字段的审计记录。 */
   async record(input: {
     actorAdminId: string | null;
@@ -32,9 +35,11 @@ export class AuditService {
     }
     const record = Object.assign(new AuditLogEntity(), payload, {
       createdAt: new Date(),
+      updatedAt: new Date(),
     });
     this.memory.push(record);
   }
+
   /** 查询审计记录。 */
   async list(): Promise<AuditLogEntity[]> {
     if (this.dataSource?.isInitialized) {
