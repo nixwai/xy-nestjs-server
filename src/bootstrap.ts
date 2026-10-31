@@ -1,10 +1,11 @@
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SwaggerModule } from '@nestjs/swagger';
 import { INestApplication, Logger } from '@nestjs/common';
 import helmet from 'helmet';
 import { AppModule } from './app.module.js';
 import { createStrictValidationPipe } from './common/pipes/index.js';
+import { createSwaggerConfig } from './common/swagger/index.js';
 import type {
   AppConfig,
   CorsConfig,
@@ -48,13 +49,10 @@ export async function createApplication(): Promise<INestApplication> {
   app.useGlobalPipes(createStrictValidationPipe());
 
   if (swaggerConfig.enabled) {
-    const documentConfig = new DocumentBuilder()
-      .setTitle('Scenic Guide Booking API')
-      .setDescription('景区导游预约平台 REST API')
-      .setVersion('1.0.0')
-      .addBearerAuth()
-      .build();
-    const document = SwaggerModule.createDocument(app, documentConfig);
+    const document = SwaggerModule.createDocument(
+      app,
+      createSwaggerConfig(appConfig.globalPrefix),
+    );
     SwaggerModule.setup(
       `${appConfig.globalPrefix}/${swaggerConfig.path}`,
       app,

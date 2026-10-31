@@ -4,7 +4,12 @@ import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
 /** Refresh Token 请求。 */
 export class RefreshTokenDto {
   /** 当前会话的 Refresh Token。 */
-  @ApiProperty({ type: String, minLength: 32, maxLength: 256 })
+  @ApiProperty({
+    type: String,
+    minLength: 32,
+    maxLength: 256,
+    description: '登录或刷新接口返回的 refreshToken。',
+  })
   @IsString()
   @IsNotEmpty()
   @MinLength(32)

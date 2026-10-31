@@ -1,1 +1,3 @@
 export * from './permission.dto.js';
+export * from './permission-list-response.dto.js';
+export * from './permission-response.dto.js';
