@@ -83,6 +83,22 @@ export const REGISTERED_PERMISSIONS: RegisteredPermission[] = [
     isActive: true,
   },
   {
+    code: createPermissionCode(PermissionResource.MENU, HttpMethod.GET),
+    resource: PermissionResource.MENU,
+    method: HttpMethod.GET,
+    name: '查看菜单',
+    description: '查看后台菜单',
+    isActive: true,
+  },
+  {
+    code: createPermissionCode(PermissionResource.MENU, HttpMethod.POST),
+    resource: PermissionResource.MENU,
+    method: HttpMethod.POST,
+    name: '管理菜单',
+    description: '创建、修改和删除后台菜单',
+    isActive: true,
+  },
+  {
     code: createPermissionCode(PermissionResource.AUDIT, HttpMethod.GET),
     resource: PermissionResource.AUDIT,
     method: HttpMethod.GET,

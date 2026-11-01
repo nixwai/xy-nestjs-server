@@ -149,6 +149,17 @@ export class AdminService {
     return this.toPublic(item, await this.repository.listRoleIds(item.id));
   }
 
+  /** 重置管理员密码。 */
+  async resetAdminPassword(actorId: string, id: string, passwordValue: string, currentPassword: string): Promise<AdminPublicRecord> {
+    const target = await this.repository.findById(id);
+    if (!target) throw new NotFoundException('管理员不存在');
+    if (!(await this.verifyPassword(actorId, currentPassword))) throw new ForbiddenException('当前登录密码验证失败');
+    const password = await hashPassword(passwordValue);
+    const item = await this.repository.update(id, { passwordHash: password.hash, passwordSalt: password.salt });
+    await this.auditService.record({ actorAdminId: actorId, action: 'admin.reset-password', resourceType: 'admin', targetId: id });
+    return this.toPublic(item, await this.repository.listRoleIds(item.id));
+  }
+
   /** 删除管理员。 */
   async softDeleteAdmin(
     actorId: string,

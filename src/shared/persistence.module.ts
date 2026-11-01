@@ -26,6 +26,10 @@ import { TypeOrmRoleRepository } from '../modules/role/repositories/typeorm-role
 import { PERMISSION_REPOSITORY } from '../modules/permission/repositories/permission-repository.port.js';
 import { InMemoryPermissionRepository } from '../modules/permission/repositories/in-memory-permission.repository.js';
 import { TypeOrmPermissionRepository } from '../modules/permission/repositories/typeorm-permission.repository.js';
+import { MenuEntity } from '../modules/menu/entities/menu.entity.js';
+import { MENU_REPOSITORY } from '../modules/menu/repositories/menu-repository.port.js';
+import { InMemoryMenuRepository } from '../modules/menu/repositories/in-memory-menu.repository.js';
+import { TypeOrmMenuRepository } from '../modules/menu/repositories/typeorm-menu.repository.js';
 
 const databaseEnabled = shouldLoadDatabaseModule();
 const databaseEntities = [
@@ -36,6 +40,7 @@ const databaseEntities = [
   PermissionEntity,
   RolePermissionAssignmentEntity,
   RoleEntity,
+  MenuEntity,
 ];
 
 /** 统一装配数据库和内存持久化实现。 */
@@ -76,6 +81,10 @@ const databaseEntities = [
         ? TypeOrmPermissionRepository
         : InMemoryPermissionRepository,
     },
+    {
+      provide: MENU_REPOSITORY,
+      useClass: databaseEnabled ? TypeOrmMenuRepository : InMemoryMenuRepository,
+    },
   ],
   exports: [
     ADMIN_REPOSITORY,
@@ -83,6 +92,7 @@ const databaseEntities = [
     AUTH_SESSION_REPOSITORY,
     ROLE_REPOSITORY,
     PERMISSION_REPOSITORY,
+    MENU_REPOSITORY,
   ],
 })
 export class PersistenceModule {}

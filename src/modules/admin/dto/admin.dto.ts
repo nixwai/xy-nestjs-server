@@ -159,6 +159,39 @@ export class UpdateAdminDto {
   currentPassword?: string;
 }
 
+
+/** 重置管理员密码请求。 */
+export class ResetAdminPasswordDto {
+  @ApiProperty({ type: String, example: '2', description: '待重置管理员 ID。' })
+  @IsString()
+  @IsNotEmpty()
+  id!: string;
+
+  @ApiProperty({
+    type: String,
+    minLength: 8,
+    maxLength: 72,
+    example: 'NewAdmin1234',
+    description: '新密码，至少包含字母和数字。',
+  })
+  @IsString()
+  @MinLength(8)
+  @MaxLength(72)
+  @Matches(/^(?=.*[A-Za-z])(?=.*\d).+$/)
+  password!: string;
+
+  @ApiProperty({
+    type: String,
+    minLength: 8,
+    maxLength: 72,
+    example: 'Current1234',
+    description: '当前登录管理员密码。',
+  })
+  @IsString()
+  @MinLength(8)
+  @MaxLength(72)
+  currentPassword!: string;
+}
 /** 删除管理员请求。 */
 export class SoftDeleteAdminDto {
   @ApiProperty({ type: String, example: '1', description: '待删除管理员 ID。' })

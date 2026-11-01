@@ -13,12 +13,15 @@ describe('AdminController', () => {
     softDeleteAdmin: vi.fn().mockResolvedValue(null),
     bindRole: vi.fn().mockResolvedValue(null),
     unbindRole: vi.fn().mockResolvedValue(null),
+    resetAdminPassword: vi.fn().mockResolvedValue({ id: '1' }),
   };
-  const controller = new AdminController(service as never);
+  const authorizationQuery = { getAuthorization: vi.fn().mockResolvedValue({ permissions: [], menus: [] }) };
+  const controller = new AdminController(service as never, authorizationQuery as never);
 
   it('应代理管理员查询和写操作', async () => {
     await controller.me(admin);
     await controller.list(body);
+    await controller.resetPassword(admin, body);
     await controller.create(admin, body);
     await controller.update(admin, body);
     await controller.softDelete(admin, body);
@@ -27,6 +30,7 @@ describe('AdminController', () => {
 
     expect(service.getMe).toHaveBeenCalledWith('admin-1');
     expect(service.listAdmins).toHaveBeenCalled();
+    expect(service.resetAdminPassword).toHaveBeenCalled();
     expect(service.createAdmin).toHaveBeenCalledWith('admin-1', body);
     expect(service.updateAdmin).toHaveBeenCalledWith('admin-1', body);
     expect(service.softDeleteAdmin).toHaveBeenCalled();

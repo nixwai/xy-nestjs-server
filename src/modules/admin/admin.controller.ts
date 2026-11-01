@@ -24,6 +24,8 @@ import { PermissionResource } from '../authorization/enums/index.js';
 import {
   AdminListResponseDto,
   AdminResponseDto,
+  AdminMeResponseDto,
+  ResetAdminPasswordDto,
   AdminRoleBindingDto,
   CreateAdminDto,
   ListQueryDto,
@@ -31,6 +33,7 @@ import {
   UpdateAdminDto,
 } from './dto/index.js';
 import { AdminService } from './admin.service.js';
+import { AdminAuthorizationQueryService } from './authorization-query.service.js';
 
 /** 提供管理员账户、状态和角色绑定管理接口。 */
 @ApiTags('管理员管理')
@@ -38,7 +41,10 @@ import { AdminService } from './admin.service.js';
 @ApiCommonResponses()
 @Controller()
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly authorizationQueryService: AdminAuthorizationQueryService,
+  ) {}
 
   /** 查询当前登录管理员的公开信息。 */
   @Get('admin/me')
@@ -46,10 +52,12 @@ export class AdminController {
     summary: '查询当前管理员',
     description: '返回当前 accessToken 对应管理员的公开信息和角色 ID。',
   })
-  @ApiOkResponseData(AdminResponseDto, { description: '当前管理员信息。' })
+  @ApiOkResponseData(AdminMeResponseDto, { description: '当前管理员信息和授权信息。' })
   @RequirePermission(PermissionResource.ADMIN_SELF)
   async me(@CurrentAdmin() admin: AdminJwtPayload) {
-    return this.adminService.getMe(admin.sub);
+    const profile = await this.adminService.getMe(admin.sub);
+    const authorization = await this.authorizationQueryService.getAuthorization(profile);
+    return { ...profile, ...authorization };
   }
 
   /** 查询管理员列表。 */
@@ -110,6 +118,29 @@ export class AdminController {
     @Body() body: UpdateAdminDto,
   ) {
     return this.adminService.updateAdmin(admin.sub, body);
+  }
+
+  /** 重置管理员密码。 */
+  @Post('admin/reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: '重置管理员密码',
+    description: '重置指定管理员密码，需要当前登录管理员密码。',
+  })
+  @ApiBody({ type: ResetAdminPasswordDto, description: '管理员密码重置参数。' })
+  @ApiOkResponseData(AdminResponseDto, { description: '密码重置后的管理员信息。' })
+  @RequirePermission(PermissionResource.ADMIN)
+  @SuperAdminOnly()
+  async resetPassword(
+    @CurrentAdmin() admin: AdminJwtPayload,
+    @Body() body: ResetAdminPasswordDto,
+  ) {
+    return this.adminService.resetAdminPassword(
+      admin.sub,
+      body.id,
+      body.password,
+      body.currentPassword,
+    );
   }
 
   /** 软删除管理员账户。 */

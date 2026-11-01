@@ -12,6 +12,8 @@ export enum PermissionResource {
   PERMISSION = 'permission',
   /** 角色权限绑定资源。 */
   ROLE_PERMISSION = 'role.permission',
+  /** 菜单管理资源。 */
+  MENU = 'menu',
   /** 管理审计资源。 */
   AUDIT = 'audit',
 }
