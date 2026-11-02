@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
@@ -21,6 +22,7 @@ export class ListQueryDto {
     description: '页码，从 1 开始。',
   })
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   page = 1;
@@ -33,6 +35,7 @@ export class ListQueryDto {
     description: '每页条数，范围 1-100。',
   })
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   @Max(100)
