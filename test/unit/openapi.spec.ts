@@ -3,7 +3,7 @@ import { createTestModule } from '../e2e/create-test-module.js';
 import { createSwaggerConfig } from '../../src/common/swagger/swagger.config.js';
 
 describe('OpenAPI 文档', () => {
-  it('应完整描述接口说明、请求体、统一响应和版本请求头', async () => {
+  it('应完整描述接口说明、请求体和统一响应', async () => {
     const moduleRef = await createTestModule().compile();
     const app = moduleRef.createNestApplication();
     await app.init();
@@ -45,12 +45,6 @@ describe('OpenAPI 文档', () => {
           operation.requestBody,
           `${method.toUpperCase()} ${path}`,
         ).toBeDefined();
-      }
-      if (!path.startsWith('/health')) {
-        expect(
-          operation.parameters?.some(({ name }) => name === 'Accept'),
-          `${method.toUpperCase()} ${path}`,
-        ).toBe(true);
       }
     }
 

@@ -5,7 +5,6 @@ import {
   ApiOkResponseData,
 } from '../../common/decorators/index.js';
 import { Public } from '../authorization/decorators/index.js';
-import { SkipApiVersion } from '../../common/decorators/index.js';
 import { HealthResponseDto, ReadinessResponseDto } from './dto/index.js';
 import { HealthService } from './health.service.js';
 
@@ -19,7 +18,6 @@ export class HealthController {
 
   /** 返回应用进程存活状态。 */
   @Get()
-  @SkipApiVersion()
   @ApiOperation({
     summary: '存活检查',
     description: '用于容器和负载均衡器确认应用进程仍在运行。',
@@ -31,7 +29,6 @@ export class HealthController {
 
   /** 检查应用及其数据库依赖是否就绪。 */
   @Get('ready')
-  @SkipApiVersion()
   @ApiOperation({
     summary: '就绪检查',
     description: '用于确认应用依赖是否可用；数据库未启用时视为就绪。',

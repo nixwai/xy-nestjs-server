@@ -32,5 +32,3 @@ wechat:
 throttler:
   ttl: 60000
   limit: 100
-api:
-  versionHeader: application/vnd.scenic.v1+json

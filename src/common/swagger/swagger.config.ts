@@ -9,11 +9,10 @@ export function createSwaggerConfig(globalPrefix = 'api') {
         '面向微信小程序和管理后台的 REST API。',
         '',
         '调用说明：',
-        '1. 业务接口必须携带 Accept: application/vnd.scenic.v1+json。',
-        '2. 需要登录的接口使用 Bearer Token，在 Authorize 中填入 accessToken。',
-        '3. HTTP 200 只表示请求已被服务处理，业务结果通过响应体 code 判断。',
-        '4. 成功响应格式为 { code: 0, message: "success", data }。',
-        '5. 业务错误响应格式为 { code, message, data: null }。',
+        '1. 需要登录的接口使用 Bearer Token，在 Authorize 中填入 accessToken。',
+        '2. HTTP 200 只表示请求已被服务处理，业务结果通过响应体 code 判断。',
+        '3. 成功响应格式为 { code: 0, message: "success", data }。',
+        '4. 业务错误响应格式为 { code, message, data: null }。',
       ].join('\n'),
     )
     .setVersion('1.0.0')

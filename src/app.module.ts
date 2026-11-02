@@ -9,7 +9,7 @@ import { RbacGuard } from './modules/authorization/guards/rbac.guard.js';
 import { ConfigModule } from '@nestjs/config';
 import { validateEnvironment } from './config/config.validation.js';
 import configuration from './config/configuration.js';
-import { ApiVersionGuard, RateLimitGuard } from './common/guards/index.js';
+import { RateLimitGuard } from './common/guards/index.js';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor.js';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter.js';
 import { SharedModule } from './shared/database/shared.module.js';
@@ -61,7 +61,6 @@ import { TaskModule } from './modules/task/task.module.js';
     TaskModule,
   ],
   providers: [
-    { provide: APP_GUARD, useClass: ApiVersionGuard },
     { provide: APP_GUARD, useClass: RateLimitGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RbacGuard },

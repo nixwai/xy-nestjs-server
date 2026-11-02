@@ -4,7 +4,6 @@ import {
   ApiCommonResponses,
   ApiOkResponseData,
   ApiOkResponseEmpty,
-  ApiVersionHeader,
 } from '../../common/decorators/index.js';
 import { Public } from '../authorization/decorators/index.js';
 import { AuthService } from './auth.service.js';
@@ -16,7 +15,6 @@ import {
 
 /** 提供管理员认证、令牌刷新和会话注销接口。 */
 @ApiTags('认证')
-@ApiVersionHeader()
 @ApiCommonResponses()
 @Controller('auth')
 @Public()

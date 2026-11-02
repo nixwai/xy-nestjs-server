@@ -12,7 +12,6 @@ import {
   ApiCommonResponses,
   ApiOkResponseData,
   ApiOkResponseEmpty,
-  ApiVersionHeader,
 } from '../../common/decorators/index.js';
 import { CurrentAdmin } from '../auth/decorators/index.js';
 import type { AdminJwtPayload } from '../auth/tokens/jwt-token.service.js';
@@ -37,7 +36,6 @@ import { AdminAuthorizationQueryService } from './authorization-query.service.js
 
 /** 提供管理员账户、状态和角色绑定管理接口。 */
 @ApiTags('管理员管理')
-@ApiVersionHeader()
 @ApiCommonResponses()
 @Controller()
 export class AdminController {

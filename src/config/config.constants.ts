@@ -23,7 +23,4 @@ export const CONFIG_KEYS = {
 
   /** 限流配置键。 */
   throttler: 'throttler',
-
-  /** API 版本配置键。 */
-  api: 'api',
 } as const;

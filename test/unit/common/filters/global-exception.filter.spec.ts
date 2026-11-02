@@ -84,22 +84,6 @@ describe('GlobalExceptionFilter', () => {
     });
   });
 
-  it('应优先使用异常响应体中的显式业务码', () => {
-    const { host, response } = createHost();
-    const exception = new HttpException(
-      { code: HttpCode.UNSUPPORTED_VERSION, message: '版本不受支持' },
-      HttpStatus.UNSUPPORTED_MEDIA_TYPE,
-    );
-
-    new GlobalExceptionFilter().catch(exception, host);
-
-    expect(response.json).toHaveBeenCalledWith({
-      code: HttpCode.UNSUPPORTED_VERSION,
-      message: '版本不受支持',
-      data: null,
-    });
-  });
-
   it('应将领域异常转换为对应的业务错误', () => {
     const filter = new GlobalExceptionFilter();
     const { host, response } = createHost();

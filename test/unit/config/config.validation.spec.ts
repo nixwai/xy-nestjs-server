@@ -93,7 +93,6 @@ describe('config validation', () => {
       },
       wechat: { enabled: false, appId: '', appSecret: '' },
       throttler: { ttl: 60000, limit: 100 },
-      api: { versionHeader: 'application/vnd.scenic.v1+json' },
     };
     expect(
       createApplicationConfigSchema().validate(config).error,

@@ -11,7 +11,6 @@ import {
   ApiCommonResponses,
   ApiOkResponseData,
   ApiOkResponseEmpty,
-  ApiVersionHeader,
 } from '../../common/decorators/index.js';
 import { CurrentAdmin } from '../auth/decorators/index.js';
 import type { AdminJwtPayload } from '../auth/tokens/jwt-token.service.js';
@@ -32,7 +31,6 @@ import { RoleService } from './role.service.js';
 
 /** 提供角色和角色权限关系管理接口。 */
 @ApiTags('角色管理')
-@ApiVersionHeader()
 @ApiCommonResponses()
 @Controller('role')
 @SuperAdminOnly()

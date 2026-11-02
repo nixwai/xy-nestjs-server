@@ -10,7 +10,6 @@ import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   ApiCommonResponses,
   ApiOkResponseData,
-  ApiVersionHeader,
 } from '../../common/decorators/index.js';
 import { CurrentAdmin } from '../auth/decorators/index.js';
 import type { AdminJwtPayload } from '../auth/tokens/jwt-token.service.js';
@@ -28,7 +27,6 @@ import { PermissionService } from './permission.service.js';
 
 /** 提供权限目录查询和启停管理接口。 */
 @ApiTags('权限管理')
-@ApiVersionHeader()
 @ApiCommonResponses()
 @Controller('permission')
 @SuperAdminOnly()

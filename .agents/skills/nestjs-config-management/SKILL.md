@@ -26,7 +26,7 @@ description: 管理本项目 NestJS 配置、环境变量、Joi 校验和 TypeOR
 
 ## 配置分组
 
-当前分组为 `app`、`cors`、`database`、`jwt`、`swagger`、`storage`、`wechat`、`throttler` 和 `api`。分别承载应用、CORS、MySQL、JWT、Swagger、COS、微信、限流及 API 版本头配置。
+当前分组为 `app`、`cors`、`database`、`jwt`、`swagger`、`storage`、`wechat` 和 `throttler`。分别承载应用、CORS、MySQL、JWT、Swagger、COS、微信和限流配置。
 
 ## 数据库
 

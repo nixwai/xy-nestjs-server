@@ -38,7 +38,6 @@ description: 维护本项目 NestJS 的统一成功响应、异常过滤、业�
 |---|---:|---|
 | `SUCCESS` | `0` | 成功 |
 | `BAD_REQUEST` | `40001` | 请求参数无效 |
-| `UNSUPPORTED_VERSION` | `40002` | 缺少受支持的 API 版本信息 |
 | `UNAUTHORIZED` | `40100` | 未通过身份认证 |
 | `FORBIDDEN` | `40300` | 无权执行请求 |
 | `NOT_FOUND` | `40400` | 资源不存在 |
@@ -65,13 +64,3 @@ new ValidationPipe({
 - `forbidNonWhitelisted: true`：包含未声明字段时拒绝请求。
 - `transform: true`：按 DTO 类型执行转换。
 - 外部输入必须通过 DTO 和 `class-validator` 校验。
-
-## API 版本头
-
-业务接口必须携带：
-
-```http
-Accept: application/vnd.scenic.v1+json
-```
-
-`ApiVersionGuard` 对健康检查路径、Swagger 文档路径和使用 `@SkipApiVersion()` 的处理器豁免校验。新增豁免必须有明确的基础设施理由，不得为业务接口随意绕过版本校验。

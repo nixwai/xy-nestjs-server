@@ -80,7 +80,7 @@ test/{unit,e2e}
 ## 模块注册
 
 - 新模块必须在 `src/app.module.ts` 中注册。
-- 全局 Provider 使用 `APP_GUARD`、`APP_INTERCEPTOR` 或 `APP_FILTER` 注册；当前全局能力包括 API 版本守卫、进程内限流守卫、成功响应拦截器和异常过滤器。
+- 全局 Provider 使用 `APP_GUARD`、`APP_INTERCEPTOR` 或 `APP_FILTER` 注册；当前全局能力包括进程内限流守卫、成功响应拦截器和异常过滤器。
 - 需要数据库的模块使用 TypeORM 模块集成方式，并遵守数据库开关和 Migration 约束。
 
 ## API 形态
@@ -93,9 +93,7 @@ test/{unit,e2e}
 - 资源路由使用小写单数名词。
 - 创建、更新、删除和批量删除采用明确动作路径，例如 `/resource/create`、`/resource/update`、`/resource/soft-delete`、`/resource/batch-soft-delete`。
 - 更新请求包含资源定位字段；删除请求使用专用 DTO。
-- 所有业务接口遵守统一 API 响应和 `Accept` 版本头规则。
-
-当前健康检查接口是基础设施例外，使用 `/health` 和 `/health/ready`，并通过 `@SkipApiVersion()` 豁免业务版本头校验。
+- 所有业务接口遵守统一 API 响应规则。
 
 ## 模块化与依赖边界
 

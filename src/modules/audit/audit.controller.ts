@@ -3,7 +3,6 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   ApiCommonResponses,
   ApiOkResponseData,
-  ApiVersionHeader,
 } from '../../common/decorators/index.js';
 import { CurrentAdmin } from '../auth/decorators/index.js';
 import type { AdminJwtPayload } from '../auth/tokens/jwt-token.service.js';
@@ -17,7 +16,6 @@ import { AuditService } from './audit.service.js';
 
 /** 提供管理员变更审计查询接口。 */
 @ApiTags('审计')
-@ApiVersionHeader()
 @ApiCommonResponses()
 @Controller('audit')
 @SuperAdminOnly()

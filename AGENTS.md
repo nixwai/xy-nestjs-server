@@ -26,7 +26,7 @@
 - 领域代码位于 `src/modules`，横切能力位于 `src/common`，配置位于 `src/config`，迁移位于 `src/database`，全局基础设施位于 `src/shared`。
 - `config/config.yaml` 是仓库内唯一 YAML 配置模板。
 - 单元测试位于 `test/unit`，E2E 测试位于 `test/e2e`，测试初始化位于 `test/setup.ts`。
-- 业务接口必须携带 `Accept: application/vnd.scenic.v1+json`；健康检查和 Swagger 按现有代码豁免版本头。
+- 业务接口统一使用统一响应格式；健康检查和 Swagger 按现有代码提供基础设施接口。
 - 生产密钥、数据库密码、COS 密钥、微信 AppSecret 和 JWT 密钥禁止写入仓库。
 
 ## 领域边界

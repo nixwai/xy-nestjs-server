@@ -180,7 +180,7 @@ MySQL
 ```
 
 - `src/modules` 负责领域边界，领域模块通过公开服务或接口协作；
-- `src/common` 负责统一响应、异常、API 版本校验、限流、参数校验和横切工具；
+- `src/common` 负责统一响应、异常、限流、参数校验和横切工具；
 - `src/config` 负责环境文件、运行时变量、YAML 配置和 Joi 校验；
 - `src/shared/database` 负责数据库基础设施；
 - 数据访问通过 Repository Port 隔离，业务逻辑不直接依赖具体存储实现；
@@ -200,7 +200,6 @@ GET /api/health/ready
 
 - `/api/health`：返回进程存活状态和当前运行环境；
 - `/api/health/ready`：检查应用及数据库依赖是否就绪；
-- 健康检查接口不要求 API 版本头。
 
 ### 认证
 
@@ -240,14 +239,6 @@ POST /api/permission/disable
 
 ```text
 GET /api/audit/list
-```
-
-### API 版本头
-
-除健康检查和 Swagger 文档外，业务接口必须携带：
-
-```http
-Accept: application/vnd.scenic.v1+json
 ```
 
 所有请求还会经过全局参数校验、进程内客户端 IP 限流、JWT 认证和 RBAC 授权流程；公开接口按现有控制器声明豁免认证或授权。

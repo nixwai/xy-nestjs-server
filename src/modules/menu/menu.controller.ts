@@ -11,7 +11,6 @@ import {
   ApiCommonResponses,
   ApiOkResponseData,
   ApiOkResponseEmpty,
-  ApiVersionHeader,
 } from '../../common/decorators/index.js';
 import { CurrentAdmin } from '../auth/decorators/index.js';
 import type { AdminJwtPayload } from '../auth/tokens/jwt-token.service.js';
@@ -28,7 +27,6 @@ import {
 } from './dto/index.js';
 import { MenuService } from './menu.service.js';
 @ApiTags('菜单管理')
-@ApiVersionHeader()
 @ApiCommonResponses()
 @Controller('menu')
 @SuperAdminOnly()
@@ -62,6 +60,7 @@ export class MenuController {
       isActive: true,
     });
   }
+
   @Post('update')
   @ApiOperation({ summary: '更新菜单' })
   @HttpCode(HttpStatus.OK)
@@ -82,6 +81,7 @@ export class MenuController {
       isActive: body.isActive ?? true,
     });
   }
+
   @Post('soft-delete')
   @ApiOperation({ summary: '删除菜单' })
   @HttpCode(HttpStatus.OK)
@@ -107,6 +107,7 @@ export class MenuController {
   ) {
     return this.service.setActive(admin.sub, body.id, true);
   }
+
   @Post('disable')
   @ApiOperation({ summary: '停用菜单' })
   @HttpCode(HttpStatus.OK)

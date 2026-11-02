@@ -1,10 +1,5 @@
 import { applyDecorators, type Type } from '@nestjs/common';
-import {
-  ApiExtraModels,
-  ApiHeader,
-  ApiResponse,
-  getSchemaPath,
-} from '@nestjs/swagger';
+import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import { ApiErrorResponseDto } from '../dto/api-error-response.dto.js';
 
 interface ApiResponseDataOptions {
@@ -39,19 +34,6 @@ function createBusinessResponseSchema(data: Record<string, unknown>) {
     ],
   };
 }
-
-/** 为业务接口声明统一的 Accept 版本请求头。 */
-export const ApiVersionHeader = () =>
-  ApiHeader({
-    name: 'Accept',
-    required: true,
-    description: '业务 API 版本。',
-    schema: {
-      type: 'string',
-      enum: ['application/vnd.scenic.v1+json'],
-      default: 'application/vnd.scenic.v1+json',
-    },
-  });
 
 /** 为接口声明服务端错误响应。 */
 export const ApiCommonResponses = () =>

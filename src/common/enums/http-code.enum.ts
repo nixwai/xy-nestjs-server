@@ -26,7 +26,4 @@ export enum HttpCode {
 
   /** 服务端发生未预期错误。 */
   INTERNAL_SERVER_ERROR = 50000,
-
-  /** 请求缺少受支持的 API 版本信息。 */
-  UNSUPPORTED_VERSION = 40002,
 }

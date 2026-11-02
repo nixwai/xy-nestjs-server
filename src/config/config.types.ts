@@ -103,12 +103,6 @@ export interface ThrottlerConfig {
   limit: number;
 }
 
-/** API 版本配置。 */
-export interface ApiConfig {
-  /** 业务 API 要求的 Accept 请求头值。 */
-  versionHeader: string;
-}
-
 /** 应用总配置。 */
 export interface ApplicationConfig {
   /** 应用运行配置。 */
@@ -134,7 +128,4 @@ export interface ApplicationConfig {
 
   /** 请求限流配置。 */
   throttler: ThrottlerConfig;
-
-  /** API 版本配置。 */
-  api: ApiConfig;
 }

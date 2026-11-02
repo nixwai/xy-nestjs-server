@@ -173,11 +173,6 @@ export function createApplicationConfigSchema(): Joi.ObjectSchema {
       ttl: Joi.number().integer().positive().required(),
       limit: Joi.number().integer().positive().required(),
     }).required(),
-    api: Joi.object({
-      versionHeader: Joi.string()
-        .valid('application/vnd.scenic.v1+json')
-        .required(),
-    }).required(),
   })
     .custom((value, helpers) => {
       if (
