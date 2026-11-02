@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   ApiCommonResponses,
@@ -80,7 +72,6 @@ export class AdminController {
 
   /** 创建管理员账户。 */
   @Post('admin/create')
-  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '创建管理员',
     description: '创建管理员账户。创建超级管理员时必须提供当前登录管理员密码。',
@@ -100,7 +91,6 @@ export class AdminController {
 
   /** 更新管理员账户。 */
   @Post('admin/update')
-  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '更新管理员',
     description:
@@ -124,7 +114,6 @@ export class AdminController {
 
   /** 重置管理员密码。 */
   @Post('admin/reset-password')
-  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '重置管理员密码',
     description: '重置指定管理员密码，需要当前登录管理员密码。',
@@ -152,7 +141,6 @@ export class AdminController {
 
   /** 软删除管理员账户。 */
   @Post('admin/soft-delete')
-  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '软删除管理员',
     description:
@@ -175,7 +163,6 @@ export class AdminController {
 
   /** 为管理员绑定角色。 */
   @Post('admin/role-bind')
-  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '绑定管理员角色',
     description: '为指定管理员增加一个角色绑定。重复绑定会返回业务冲突错误。',
@@ -196,7 +183,6 @@ export class AdminController {
 
   /** 解除管理员角色绑定。 */
   @Post('admin/role-unbind')
-  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '解绑管理员角色',
     description: '解除指定管理员和角色之间的绑定关系。',

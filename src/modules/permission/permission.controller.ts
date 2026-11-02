@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   ApiCommonResponses,
@@ -51,7 +44,6 @@ export class PermissionController {
 
   /** 启用权限。 */
   @Post('enable')
-  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '启用权限',
     description: '将指定权限设置为启用状态，变更会写入审计记录。',
@@ -70,7 +62,6 @@ export class PermissionController {
 
   /** 停用权限。 */
   @Post('disable')
-  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '停用权限',
     description: '将指定权限设置为停用状态，变更会写入审计记录。',

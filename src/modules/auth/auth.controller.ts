@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   ApiCommonResponses,
@@ -23,7 +23,6 @@ export class AuthController {
 
   /** 使用用户名和密码登录并创建管理员会话。 */
   @Post('admin/login')
-  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '管理员登录',
     description: '校验管理员用户名和密码，返回访问令牌和刷新令牌。',
@@ -40,7 +39,6 @@ export class AuthController {
 
   /** 使用 Refresh Token 轮换管理员会话令牌。 */
   @Post('refresh')
-  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '刷新访问令牌',
     description: '使用当前 refreshToken 获取新的 accessToken 和 refreshToken。',
@@ -60,7 +58,6 @@ export class AuthController {
 
   /** 撤销管理员的 Refresh Token 会话。 */
   @Post('logout')
-  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '注销管理员会话',
     description: '撤销指定 refreshToken 对应的会话，重复注销不会报错。',

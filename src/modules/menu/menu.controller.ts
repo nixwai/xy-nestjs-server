@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   ApiCommonResponses,
@@ -46,7 +39,6 @@ export class MenuController {
   }
   @Post('create')
   @ApiOperation({ summary: '创建菜单' })
-  @HttpCode(HttpStatus.OK)
   @ApiBody({ type: MenuCreateRequestDto })
   @ApiOkResponseData(MenuResponseDto)
   @RequirePermission(PermissionResource.MENU)
@@ -67,7 +59,6 @@ export class MenuController {
 
   @Post('update')
   @ApiOperation({ summary: '更新菜单' })
-  @HttpCode(HttpStatus.OK)
   @ApiBody({ type: MenuUpdateRequestDto })
   @ApiOkResponseData(MenuResponseDto)
   @RequirePermission(PermissionResource.MENU)
@@ -88,7 +79,6 @@ export class MenuController {
 
   @Post('soft-delete')
   @ApiOperation({ summary: '删除菜单' })
-  @HttpCode(HttpStatus.OK)
   @ApiBody({ type: MenuStatusRequestDto })
   @ApiOkResponseEmpty()
   @RequirePermission(PermissionResource.MENU)
@@ -101,7 +91,6 @@ export class MenuController {
   }
   @Post('enable')
   @ApiOperation({ summary: '启用菜单' })
-  @HttpCode(HttpStatus.OK)
   @ApiBody({ type: MenuStatusRequestDto })
   @ApiOkResponseData(MenuResponseDto)
   @RequirePermission(PermissionResource.MENU)
@@ -114,7 +103,6 @@ export class MenuController {
 
   @Post('disable')
   @ApiOperation({ summary: '停用菜单' })
-  @HttpCode(HttpStatus.OK)
   @ApiBody({ type: MenuStatusRequestDto })
   @ApiOkResponseData(MenuResponseDto)
   @RequirePermission(PermissionResource.MENU)
