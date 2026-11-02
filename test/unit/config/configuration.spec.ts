@@ -1,3 +1,4 @@
+import { TEST_RSA_PRIVATE_KEY } from '../../fixtures/rsa-key.js';
 import { describe, expect, it } from 'vitest';
 import { applyEnvironmentOverrides, buildApplicationConfig } from '../../../src/config/configuration.js';
 import { loadBaseConfig } from '../../../src/common/utils/config.util.js';
@@ -10,6 +11,7 @@ describe('application configuration', () => {
       CORS_ORIGINS: 'http://localhost:5173,https://admin.example.com',
       DB_ENABLED: 'true',
       JWT_SECRET: 'test-only-secret-with-at-least-32-chars',
+      AUTH_RSA_PRIVATE_KEY: TEST_RSA_PRIVATE_KEY,
       SWAGGER_ENABLED: 'false'
     });
 
@@ -28,7 +30,8 @@ describe('application configuration', () => {
       NODE_ENV: 'test',
       PORT: '9000',
       APP_PORT: '3100',
-      JWT_SECRET: 'test-only-secret-with-at-least-32-chars'
+      JWT_SECRET: 'test-only-secret-with-at-least-32-chars',
+      AUTH_RSA_PRIVATE_KEY: TEST_RSA_PRIVATE_KEY
     });
 
     expect(config).toMatchObject({ app: { port: 9000 } });

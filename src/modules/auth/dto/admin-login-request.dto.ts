@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { createValidationMessages } from '../../../common/constants/index.js';
-import { IsNotEmpty, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import { IsBase64, IsNotEmpty, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
 const usernameValidation = createValidationMessages('用户名');
 const passwordValidation = createValidationMessages('密码');
@@ -16,19 +16,15 @@ export class AdminLoginRequestDto {
   @Matches(/^[A-Za-z0-9._-]+$/, { message: '用户名格式不正确' })
   username!: string;
 
-  /** 管理员密码。 */
+  /** Base64 编码的 RSA-OAEP-SHA256 管理员密码密文。 */
   @ApiProperty({
     type: String,
-    minLength: 8,
-    maxLength: 72,
-    example: 'Admin1234'
+    maxLength: 512,
+    example: 'Base64-RSA-OAEP-SHA256-ciphertext'
   })
   @IsString({ message: passwordValidation.isString })
   @IsNotEmpty({ message: passwordValidation.isNotEmpty })
-  @MinLength(8, { message: passwordValidation.minLength(8) })
-  @MaxLength(72, { message: passwordValidation.maxLength(72) })
-  @Matches(/^(?=.*[A-Za-z])(?=.*\d).+$/, {
-    message: '密码必须同时包含字母和数字'
-  })
+  @MaxLength(512, { message: passwordValidation.maxLength(512) })
+  @IsBase64({}, { message: '密码密文必须是 Base64 字符串' })
   password!: string;
 }

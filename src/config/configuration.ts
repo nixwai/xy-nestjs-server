@@ -80,6 +80,12 @@ export function applyEnvironmentOverrides(baseConfig: ConfigRecord, environment:
         baseConfigValue(baseConfig, ['jwt', 'refreshTokenExpiresIn'], '7d')
       )
     },
+    auth: {
+      rsaPrivateKey: readString(
+        environment.AUTH_RSA_PRIVATE_KEY,
+        baseConfigValue(baseConfig, ['auth', 'rsaPrivateKey'], '')
+      )
+    },
     swagger: {
       enabled: readBoolean(environment.SWAGGER_ENABLED, baseConfigValue(baseConfig, ['swagger', 'enabled'], true))
     },

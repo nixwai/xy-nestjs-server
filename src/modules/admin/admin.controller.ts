@@ -23,6 +23,7 @@ import {
 } from './dto/index.js';
 import { AdminService } from './admin.service.js';
 import { AdminAuthorizationQueryService } from './authorization-query.service.js';
+import { PasswordTransportService } from '../../common/security/index.js';
 
 /** 提供管理员账户、状态和角色绑定管理接口。 */
 @ApiTags('管理员管理')
@@ -31,7 +32,8 @@ import { AdminAuthorizationQueryService } from './authorization-query.service.js
 export class AdminController {
   constructor(
     @Inject(AdminService) private readonly adminService: AdminService,
-    @Inject(AdminAuthorizationQueryService) private readonly authorizationQueryService: AdminAuthorizationQueryService
+    @Inject(AdminAuthorizationQueryService) private readonly authorizationQueryService: AdminAuthorizationQueryService,
+    @Inject(PasswordTransportService) private readonly passwordTransportService: PasswordTransportService
   ) {}
 
   /** 查询当前登录管理员的公开信息。 */
@@ -79,7 +81,12 @@ export class AdminController {
   @RequirePermission(PermissionResource.ADMIN)
   @SuperAdminOnly()
   async create(@CurrentAdmin() admin: AdminJwtPayload, @Body() body: AdminCreateRequestDto) {
-    return this.adminService.createAdmin(admin.sub, body);
+    return this.adminService.createAdmin(admin.sub, {
+      username: body.username,
+      password: this.passwordTransportService.decryptPassword(body.password),
+      isSuperAdmin: body.isSuperAdmin,
+      currentPassword: this.passwordTransportService.decryptOptionalPassword(body.currentPassword, '当前密码')
+    });
   }
 
   /** 更新管理员账户。 */
@@ -98,7 +105,14 @@ export class AdminController {
   @RequirePermission(PermissionResource.ADMIN)
   @SuperAdminOnly()
   async update(@CurrentAdmin() admin: AdminJwtPayload, @Body() body: AdminUpdateRequestDto) {
-    return this.adminService.updateAdmin(admin.sub, body);
+    return this.adminService.updateAdmin(admin.sub, {
+      id: body.id,
+      username: body.username,
+      password: this.passwordTransportService.decryptOptionalPassword(body.password),
+      isActive: body.isActive,
+      isSuperAdmin: body.isSuperAdmin,
+      currentPassword: this.passwordTransportService.decryptOptionalPassword(body.currentPassword, '当前密码')
+    });
   }
 
   /** 重置管理员密码。 */
@@ -117,7 +131,12 @@ export class AdminController {
   @RequirePermission(PermissionResource.ADMIN)
   @SuperAdminOnly()
   async resetPassword(@CurrentAdmin() admin: AdminJwtPayload, @Body() body: AdminResetPasswordRequestDto) {
-    return this.adminService.resetAdminPassword(admin.sub, body.id, body.password, body.currentPassword);
+    return this.adminService.resetAdminPassword(
+      admin.sub,
+      body.id,
+      this.passwordTransportService.decryptPassword(body.password),
+      this.passwordTransportService.decryptPassword(body.currentPassword, '当前密码')
+    );
   }
 
   /** 软删除管理员账户。 */
@@ -131,7 +150,11 @@ export class AdminController {
   @RequirePermission(PermissionResource.ADMIN)
   @SuperAdminOnly()
   async softDelete(@CurrentAdmin() admin: AdminJwtPayload, @Body() body: AdminSoftDeleteRequestDto) {
-    return this.adminService.softDeleteAdmin(admin.sub, body.id, body.currentPassword ?? '');
+    return this.adminService.softDeleteAdmin(
+      admin.sub,
+      body.id,
+      this.passwordTransportService.decryptOptionalPassword(body.currentPassword, '当前密码') ?? ''
+    );
   }
 
   /** 为管理员绑定角色。 */

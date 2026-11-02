@@ -1,3 +1,4 @@
+import { TEST_RSA_PRIVATE_KEY } from '../../fixtures/rsa-key.js';
 import { describe, expect, it } from 'vitest';
 import {
   createApplicationConfigSchema,
@@ -6,6 +7,23 @@ import {
 } from '../../../src/config/config.validation.js';
 
 describe('config validation', () => {
+  it('rejects a missing RSA private key', () => {
+    const { error } = createConfigValidationSchema().validate({
+      NODE_ENV: 'test',
+      JWT_SECRET: 'test-only-secret-with-at-least-32-chars'
+    });
+    expect(error).toBeDefined();
+  });
+
+  it('rejects an invalid RSA private key', () => {
+    const { error } = createConfigValidationSchema().validate({
+      NODE_ENV: 'test',
+      JWT_SECRET: 'test-only-secret-with-at-least-32-chars',
+      AUTH_RSA_PRIVATE_KEY: 'not-a-private-key'
+    });
+    expect(error).toBeDefined();
+  });
+
   it('rejects a missing JWT secret', () => {
     const { error } = createConfigValidationSchema().validate({
       NODE_ENV: 'development'
@@ -16,7 +34,8 @@ describe('config validation', () => {
   it('rejects an invalid environment', () => {
     const { error } = createConfigValidationSchema().validate({
       NODE_ENV: 'invalid',
-      JWT_SECRET: 'test-only-secret-with-at-least-32-chars'
+      JWT_SECRET: 'test-only-secret-with-at-least-32-chars',
+      AUTH_RSA_PRIVATE_KEY: TEST_RSA_PRIVATE_KEY
     });
     expect(error).toBeDefined();
   });
@@ -26,7 +45,8 @@ describe('config validation', () => {
       validateEnvironment({
         NODE_ENV: 'test',
         DB_ENABLED: 'false',
-        JWT_SECRET: 'test-only-secret-with-at-least-32-chars'
+        JWT_SECRET: 'test-only-secret-with-at-least-32-chars',
+        AUTH_RSA_PRIVATE_KEY: TEST_RSA_PRIVATE_KEY
       })
     ).toMatchObject({ NODE_ENV: 'test', DB_ENABLED: false });
   });
@@ -36,7 +56,8 @@ describe('config validation', () => {
       validateEnvironment({
         NODE_ENV: 'development',
         DB_ENABLED: 'false',
-        JWT_SECRET: 'test-only-secret-with-at-least-32-chars'
+        JWT_SECRET: 'test-only-secret-with-at-least-32-chars',
+        AUTH_RSA_PRIVATE_KEY: TEST_RSA_PRIVATE_KEY
       })
     ).toThrow('开发和生产环境必须显式启用数据库');
   });
@@ -46,7 +67,8 @@ describe('config validation', () => {
       validateEnvironment({
         NODE_ENV: 'production',
         DB_ENABLED: 'true',
-        JWT_SECRET: 'test-only-secret-with-at-least-32-chars'
+        JWT_SECRET: 'test-only-secret-with-at-least-32-chars',
+        AUTH_RSA_PRIVATE_KEY: TEST_RSA_PRIVATE_KEY
       })
     ).toThrow('生产环境缺少数据库配置');
   });
@@ -60,7 +82,8 @@ describe('config validation', () => {
       DB_USERNAME: 'app',
       DB_PASSWORD: 'strong-password',
       DB_DATABASE: 'scenic_booking',
-      JWT_SECRET: 'test-only-secret-with-at-least-32-chars'
+      JWT_SECRET: 'test-only-secret-with-at-least-32-chars',
+      AUTH_RSA_PRIVATE_KEY: TEST_RSA_PRIVATE_KEY
     });
     expect(error).toBeDefined();
   });
@@ -83,6 +106,7 @@ describe('config validation', () => {
         accessTokenExpiresIn: '15m',
         refreshTokenExpiresIn: '7d'
       },
+      auth: { rsaPrivateKey: TEST_RSA_PRIVATE_KEY },
       swagger: { enabled: true, path: 'docs' },
       storage: {
         enabled: true,

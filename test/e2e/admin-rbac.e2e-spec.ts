@@ -6,10 +6,12 @@ import { ADMIN_REPOSITORY } from '../../src/modules/admin/repositories/admin-rep
 import type { AdminRepository } from '../../src/modules/admin/repositories/admin-repository.port.js';
 import { hashPassword } from '../../src/modules/auth/utils/password.util.js';
 import { createStrictValidationPipe } from '../../src/common/pipes/index.js';
+import { encryptPassword } from './password-transport.js';
 
 describe('RBAC management API (e2e)', () => {
   let app: INestApplication;
   let repository: AdminRepository;
+  let publicKey: string;
   beforeEach(async () => {
     const moduleRef = await createTestModule().compile();
     app = moduleRef.createNestApplication();
@@ -17,6 +19,8 @@ describe('RBAC management API (e2e)', () => {
     app.useGlobalPipes(createStrictValidationPipe());
     await app.init();
     repository = app.get<AdminRepository>(ADMIN_REPOSITORY);
+    const keyResponse = await request(app.getHttpServer()).get('/api/auth/admin/public-key').expect(200);
+    publicKey = keyResponse.body.data.publicKey as string;
     const root = await hashPassword('Root1234');
     await repository.create({
       username: 'root',
@@ -37,7 +41,7 @@ describe('RBAC management API (e2e)', () => {
   async function login(username: string, password: string): Promise<string> {
     const response = await request(app.getHttpServer())
       .post('/api/auth/admin/login')
-      .send({ username, password })
+      .send({ username, password: encryptPassword(publicKey, password) })
       .expect(200);
     return response.body.data.accessToken as string;
   }
@@ -68,7 +72,7 @@ describe('RBAC management API (e2e)', () => {
     const allowed = await request(app.getHttpServer())
       .post('/api/admin/update')
       .set('Authorization', `Bearer ${token}`)
-      .send({ id: '1', username: 'root-renamed', currentPassword: 'Root1234' })
+      .send({ id: '1', username: 'root-renamed', currentPassword: encryptPassword(publicKey, 'Root1234') })
       .expect(200);
     expect(allowed.body.code).toBe(0);
   });
@@ -146,8 +150,8 @@ describe('RBAC management API (e2e)', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({
         id: '2',
-        password: 'NewOperator1234',
-        currentPassword: 'Root1234'
+        password: encryptPassword(publicKey, 'NewOperator1234'),
+        currentPassword: encryptPassword(publicKey, 'Root1234')
       })
       .expect(200);
     expect(reset.body.code).toBe(0);

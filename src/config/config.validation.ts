@@ -1,3 +1,4 @@
+import { createPrivateKey } from 'node:crypto';
 import Joi from 'joi';
 
 /**
@@ -20,6 +21,15 @@ export function createConfigValidationSchema(): Joi.ObjectSchema {
     JWT_SECRET: Joi.string().min(32).required(),
     JWT_ACCESS_TOKEN_EXPIRES_IN: Joi.string().min(1),
     JWT_REFRESH_TOKEN_EXPIRES_IN: Joi.string().min(1),
+    AUTH_RSA_PRIVATE_KEY: Joi.string()
+      .min(1)
+      .required()
+      .custom((value, helpers) => {
+        if (!isValidRsaPrivateKey(value)) {
+          return helpers.error('any.invalid');
+        }
+        return value;
+      }),
     SWAGGER_ENABLED: Joi.boolean().truthy('true').falsy('false'),
     STORAGE_ENABLED: Joi.boolean().truthy('true').falsy('false'),
     COS_REGION: Joi.string().allow(''),
@@ -111,6 +121,9 @@ export function createApplicationConfigSchema(): Joi.ObjectSchema {
       accessTokenExpiresIn: Joi.string().min(1).required(),
       refreshTokenExpiresIn: Joi.string().min(1).required()
     }).required(),
+    auth: Joi.object({
+      rsaPrivateKey: Joi.string().min(1).required()
+    }).required(),
     swagger: Joi.object({
       enabled: Joi.boolean().required(),
       path: Joi.string().min(1).required()
@@ -186,4 +199,22 @@ function isWeakProductionSecret(value: unknown): boolean {
     return true;
   }
   return /replace-with|change-me|test-only|example|default-secret/i.test(value);
+}
+
+/** 校验 Base64 编码的 PKCS#8 RSA 私钥。 */
+function isValidRsaPrivateKey(value: unknown): boolean {
+  if (typeof value !== 'string' || !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value)) {
+    return false;
+  }
+
+  try {
+    const privateKey = createPrivateKey({
+      key: Buffer.from(value, 'base64'),
+      format: 'der',
+      type: 'pkcs8'
+    });
+    return privateKey.asymmetricKeyType === 'rsa' && privateKey.asymmetricKeyDetails?.modulusLength === 2048;
+  } catch {
+    return false;
+  }
 }

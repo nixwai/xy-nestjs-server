@@ -5,10 +5,12 @@ import { createTestModule } from './create-test-module.js';
 import { ADMIN_REPOSITORY } from '../../src/modules/admin/repositories/admin-repository.port.js';
 import type { AdminRepository } from '../../src/modules/admin/repositories/admin-repository.port.js';
 import { hashPassword } from '../../src/modules/auth/utils/password.util.js';
+import { encryptPassword } from './password-transport.js';
 
 describe('Admin authentication API (e2e)', () => {
   let app: INestApplication;
   let repository: AdminRepository;
+  let publicKey: string;
 
   beforeEach(async () => {
     const moduleRef = await createTestModule().compile();
@@ -16,6 +18,8 @@ describe('Admin authentication API (e2e)', () => {
     app.setGlobalPrefix('api');
     await app.init();
     repository = app.get<AdminRepository>(ADMIN_REPOSITORY);
+    const keyResponse = await request(app.getHttpServer()).get('/api/auth/admin/public-key').expect(200);
+    publicKey = keyResponse.body.data.publicKey as string;
     const { hash, salt } = await hashPassword('Admin1234');
     await repository.create({
       username: 'admin',
@@ -28,10 +32,20 @@ describe('Admin authentication API (e2e)', () => {
     await app.close();
   });
 
+  it('rejects plaintext passwords at the HTTP boundary', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/api/auth/admin/login')
+      .send({ username: 'admin', password: 'Admin1234' })
+      .expect(200);
+    expect(response.body.code).toBe(40001);
+    expect(response.body.data).toBeNull();
+    expect(response.body.message).toBe('密码解密失败');
+  });
+
   it('logs in, rotates a refresh token, and logs out', async () => {
     const login = await request(app.getHttpServer())
       .post('/api/auth/admin/login')
-      .send({ username: 'admin', password: 'Admin1234' })
+      .send({ username: 'admin', password: encryptPassword(publicKey, 'Admin1234') })
       .expect(200);
     expect(login.body).toMatchObject({
       code: 0,

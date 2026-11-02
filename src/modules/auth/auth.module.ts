@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { AdminModule } from '../admin/admin.module.js';
+import { SecurityModule } from '../../common/security/index.js';
 import { AdminService } from '../admin/admin.service.js';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
@@ -12,7 +13,7 @@ import { AUTH_SESSION_REPOSITORY } from './repositories/auth-session-repository.
 
 /** 提供管理员认证、令牌会话和身份校验能力。 */
 @Module({
-  imports: [AdminModule],
+  imports: [AdminModule, SecurityModule],
   controllers: [AuthController],
   providers: [
     Reflector,

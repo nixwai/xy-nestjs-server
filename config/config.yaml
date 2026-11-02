@@ -16,6 +16,8 @@ jwt:
   secret: ''
   accessTokenExpiresIn: 15m
   refreshTokenExpiresIn: 7d
+auth:
+  rsaPrivateKey: ''
 swagger:
   enabled: true
   path: docs

@@ -1,5 +1,6 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { hashPassword, verifyPassword } from '../auth/utils/password.util.js';
+import { validatePassword } from '../../common/security/index.js';
 import type {
   AdminCreateInput,
   AdminRepository,
@@ -61,6 +62,7 @@ export class AdminService {
     }
     if (body.isSuperAdmin && !(await this.verifyPassword(actorId, body.currentPassword as string)))
       throw new ForbiddenException('当前密码错误');
+    validatePassword(body.password);
     const password = await hashPassword(body.password);
     const role = body.isSuperAdmin ? null : await this.roleService.findByCode('operator');
     const item = await this.transactionRunner.run(async repository => {
@@ -107,6 +109,7 @@ export class AdminService {
       isSuperAdmin: body.isSuperAdmin
     };
     if (body.password) {
+      validatePassword(body.password);
       const password = await hashPassword(body.password);
       input.passwordHash = password.hash;
       input.passwordSalt = password.salt;
@@ -135,6 +138,7 @@ export class AdminService {
     const target = await this.repository.findById(id);
     if (!target) throw new NotFoundException('管理员不存在');
     if (!(await this.verifyPassword(actorId, currentPassword))) throw new ForbiddenException('当前密码错误');
+    validatePassword(passwordValue);
     const password = await hashPassword(passwordValue);
     const item = await this.repository.update(id, {
       passwordHash: password.hash,

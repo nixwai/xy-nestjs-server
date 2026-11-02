@@ -55,6 +55,12 @@ export interface JwtConfig {
   refreshTokenExpiresIn: string;
 }
 
+/** 管理员认证配置。 */
+export interface AuthConfig {
+  /** Base64 编码的 PKCS#8 RSA 私钥 DER。 */
+  rsaPrivateKey: string;
+}
+
 /** Swagger 配置。 */
 export interface SwaggerConfig {
   /** 是否启用 Swagger 文档。 */

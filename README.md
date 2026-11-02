@@ -60,6 +60,7 @@ cp .env.example .env.development.local
 
 - `DB_PASSWORD`：本地 MySQL 密码；
 - `JWT_SECRET`：不少于 32 个字符的随机密钥；
+- `AUTH_RSA_PRIVATE_KEY`：Base64 编码的 PKCS#8 RSA-2048 私钥 DER；
 - `CORS_ORIGINS`：允许访问 API 的前端来源。
 
 启用腾讯云 COS 或微信能力时，还需要填写对应的完整配置。真实密码、密钥、连接信息和 AppSecret 禁止提交到仓库。
@@ -319,6 +320,7 @@ production:
 | `JWT_SECRET` | JWT 签名密钥，至少 32 个字符 |
 | `JWT_ACCESS_TOKEN_EXPIRES_IN` | Access Token 有效期，默认 `15m` |
 | `JWT_REFRESH_TOKEN_EXPIRES_IN` | Refresh Token 有效期，默认 `7d` |
+| `AUTH_RSA_PRIVATE_KEY` | Base64 编码的 PKCS#8 RSA-2048 私钥 DER，用于解密管理员密码密文 |
 | `SWAGGER_ENABLED` | 是否启用 Swagger UI |
 | `STORAGE_ENABLED` | 是否启用腾讯云 COS |
 | `COS_REGION` / `COS_BUCKET` | COS 地域和存储桶 |
@@ -333,7 +335,9 @@ production:
 - `synchronize` 永远为 `false`；
 - 测试环境强制关闭真实数据库连接；
 - 启用 COS 或微信能力时必须提供对应的完整凭据；
-- 生产环境拒绝占位、示例或测试 JWT 密钥。
+- 生产环境拒绝占位、示例或测试 JWT 密钥；
+- 管理员密码 HTTP 字段必须使用 RSA-OAEP-SHA256 + Base64 密文；
+- `AUTH_RSA_PRIVATE_KEY` 缺失或格式错误时应用启动失败。
 
 ## API 文档
 
@@ -462,6 +466,7 @@ DB_USERNAME
 DB_PASSWORD
 DB_DATABASE
 JWT_SECRET
+AUTH_RSA_PRIVATE_KEY
 ```
 
 启用 COS 或微信能力时，还必须提供对应的完整凭据。

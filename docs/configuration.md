@@ -43,6 +43,7 @@ production:
 ## 校验规则
 
 - JWT 密钥至少 32 位。
+- `AUTH_RSA_PRIVATE_KEY` 必须是 Base64 编码的 PKCS#8 RSA-2048 私钥 DER。
 - 开发和生产环境必须显式启用数据库。
 - 测试环境强制关闭数据库，外部 `DB_ENABLED=true` 也不会建立真实连接。
 - 数据库启用时必须提供完整连接参数，且 `synchronize` 永远为 `false`。
@@ -57,6 +58,7 @@ production:
 ```text
 DB_*
 JWT_SECRET
+AUTH_RSA_PRIVATE_KEY
 COS_*
 WECHAT_*
 ```

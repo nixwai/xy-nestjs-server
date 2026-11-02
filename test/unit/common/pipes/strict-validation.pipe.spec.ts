@@ -14,11 +14,7 @@ describe('createStrictValidationPipe', () => {
       pipe.transform({ username: 'a', password: '1' }, { type: 'body', metatype: AdminLoginRequestDto, data: 'body' })
     ).rejects.toMatchObject({
       response: {
-        message: expect.arrayContaining([
-          '用户名长度不能少于3个字符',
-          '密码长度不能少于8个字符',
-          '密码必须同时包含字母和数字'
-        ])
+        message: expect.arrayContaining(['用户名长度不能少于3个字符', '密码密文必须是 Base64 字符串'])
       }
     });
   });
@@ -28,7 +24,7 @@ describe('createStrictValidationPipe', () => {
 
     await expect(
       pipe.transform(
-        { username: 'admin', password: 'Admin1234', unexpected: true },
+        { username: 'admin', password: 'AQ==', unexpected: true },
         { type: 'body', metatype: AdminLoginRequestDto, data: 'body' }
       )
     ).rejects.toMatchObject({

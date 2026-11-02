@@ -1,7 +1,7 @@
 import { createValidationMessages } from '../../../common/constants/index.js';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PageQueryDto } from '../../../common/dto/index.js';
-import { IsBoolean, IsNotEmpty, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import { IsBase64, IsBoolean, IsNotEmpty, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
 const usernameValidation = createValidationMessages('用户名');
 const passwordValidation = createValidationMessages('密码');
@@ -33,17 +33,14 @@ export class AdminCreateRequestDto {
 
   @ApiProperty({
     type: String,
-    minLength: 8,
-    maxLength: 72,
-    example: 'Admin1234',
-    description: '管理员登录密码，至少包含字母和数字。'
+    maxLength: 512,
+    example: 'Base64-RSA-OAEP-SHA256-ciphertext',
+    description: 'Base64 编码的 RSA-OAEP-SHA256 管理员密码密文。'
   })
   @IsString({ message: passwordValidation.isString })
-  @MinLength(8, { message: passwordValidation.minLength(8) })
-  @MaxLength(72, { message: passwordValidation.maxLength(72) })
-  @Matches(/^(?=.*[A-Za-z])(?=.*\d).+$/, {
-    message: '密码必须同时包含字母和数字'
-  })
+  @IsNotEmpty({ message: passwordValidation.isNotEmpty })
+  @MaxLength(512, { message: passwordValidation.maxLength(512) })
+  @IsBase64({}, { message: '密码密文必须是 Base64 字符串' })
   password!: string;
 
   @ApiPropertyOptional({
@@ -58,15 +55,14 @@ export class AdminCreateRequestDto {
 
   @ApiPropertyOptional({
     type: String,
-    minLength: 8,
-    maxLength: 72,
-    example: 'Current1234',
-    description: '创建超级管理员时必填的当前登录管理员密码。'
+    maxLength: 512,
+    example: 'Base64-RSA-OAEP-SHA256-ciphertext',
+    description: '创建超级管理员时必填的 Base64 RSA-OAEP-SHA256 当前密码密文。'
   })
   @IsOptional()
   @IsString({ message: currentPasswordValidation.isString })
-  @MinLength(8, { message: currentPasswordValidation.minLength(8) })
-  @MaxLength(72, { message: currentPasswordValidation.maxLength(72) })
+  @MaxLength(512, { message: currentPasswordValidation.maxLength(512) })
+  @IsBase64({}, { message: '当前密码密文必须是 Base64 字符串' })
   currentPassword?: string;
 }
 
@@ -93,18 +89,14 @@ export class AdminUpdateRequestDto {
 
   @ApiPropertyOptional({
     type: String,
-    minLength: 8,
-    maxLength: 72,
-    example: 'NewAdmin1234',
-    description: '新的登录密码，至少包含字母和数字。'
+    maxLength: 512,
+    example: 'Base64-RSA-OAEP-SHA256-ciphertext',
+    description: '新的 Base64 RSA-OAEP-SHA256 登录密码密文。'
   })
   @IsOptional()
   @IsString({ message: passwordValidation.isString })
-  @MinLength(8, { message: passwordValidation.minLength(8) })
-  @MaxLength(72, { message: passwordValidation.maxLength(72) })
-  @Matches(/^(?=.*[A-Za-z])(?=.*\d).+$/, {
-    message: '密码必须同时包含字母和数字'
-  })
+  @MaxLength(512, { message: passwordValidation.maxLength(512) })
+  @IsBase64({}, { message: '密码密文必须是 Base64 字符串' })
   password?: string;
 
   @ApiPropertyOptional({
@@ -127,15 +119,14 @@ export class AdminUpdateRequestDto {
 
   @ApiPropertyOptional({
     type: String,
-    minLength: 8,
-    maxLength: 72,
-    example: 'Current1234',
-    description: '修改密码或超级管理员状态时必填的当前登录管理员密码。'
+    maxLength: 512,
+    example: 'Base64-RSA-OAEP-SHA256-ciphertext',
+    description: '修改密码或超级管理员状态时必填的 Base64 RSA-OAEP-SHA256 当前密码密文。'
   })
   @IsOptional()
   @IsString({ message: currentPasswordValidation.isString })
-  @MinLength(8, { message: currentPasswordValidation.minLength(8) })
-  @MaxLength(72, { message: currentPasswordValidation.maxLength(72) })
+  @MaxLength(512, { message: currentPasswordValidation.maxLength(512) })
+  @IsBase64({}, { message: '当前密码密文必须是 Base64 字符串' })
   currentPassword?: string;
 }
 
@@ -148,31 +139,29 @@ export class AdminResetPasswordRequestDto {
 
   @ApiProperty({
     type: String,
-    minLength: 8,
-    maxLength: 72,
-    example: 'NewAdmin1234',
-    description: '新密码，至少包含字母和数字。'
+    maxLength: 512,
+    example: 'Base64-RSA-OAEP-SHA256-ciphertext',
+    description: '新的 Base64 RSA-OAEP-SHA256 密码密文。'
   })
   @IsString({ message: passwordValidation.isString })
-  @MinLength(8, { message: passwordValidation.minLength(8) })
-  @MaxLength(72, { message: passwordValidation.maxLength(72) })
-  @Matches(/^(?=.*[A-Za-z])(?=.*\d).+$/, {
-    message: '密码必须同时包含字母和数字'
-  })
+  @IsNotEmpty({ message: passwordValidation.isNotEmpty })
+  @MaxLength(512, { message: passwordValidation.maxLength(512) })
+  @IsBase64({}, { message: '密码密文必须是 Base64 字符串' })
   password!: string;
 
   @ApiProperty({
     type: String,
-    minLength: 8,
-    maxLength: 72,
-    example: 'Current1234',
-    description: '当前登录管理员密码。'
+    maxLength: 512,
+    example: 'Base64-RSA-OAEP-SHA256-ciphertext',
+    description: 'Base64 RSA-OAEP-SHA256 当前登录管理员密码密文。'
   })
   @IsString({ message: currentPasswordValidation.isString })
-  @MinLength(8, { message: currentPasswordValidation.minLength(8) })
-  @MaxLength(72, { message: currentPasswordValidation.maxLength(72) })
+  @IsNotEmpty({ message: currentPasswordValidation.isNotEmpty })
+  @MaxLength(512, { message: currentPasswordValidation.maxLength(512) })
+  @IsBase64({}, { message: '当前密码密文必须是 Base64 字符串' })
   currentPassword!: string;
 }
+
 /** 删除管理员请求。 */
 export class AdminSoftDeleteRequestDto {
   @ApiProperty({ type: String, example: '1', description: '待删除管理员 ID。' })
@@ -182,15 +171,14 @@ export class AdminSoftDeleteRequestDto {
 
   @ApiPropertyOptional({
     type: String,
-    minLength: 8,
-    maxLength: 72,
-    example: 'Current1234',
-    description: '当前登录管理员密码。'
+    maxLength: 512,
+    example: 'Base64-RSA-OAEP-SHA256-ciphertext',
+    description: 'Base64 RSA-OAEP-SHA256 当前登录管理员密码密文。'
   })
   @IsOptional()
   @IsString({ message: currentPasswordValidation.isString })
-  @MinLength(8, { message: currentPasswordValidation.minLength(8) })
-  @MaxLength(72, { message: currentPasswordValidation.maxLength(72) })
+  @MaxLength(512, { message: currentPasswordValidation.maxLength(512) })
+  @IsBase64({}, { message: '当前密码密文必须是 Base64 字符串' })
   currentPassword?: string;
 }
 

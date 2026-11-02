@@ -1,8 +1,8 @@
-import { writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { loadEnvironment } from '../src/config/environment.js';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule } from '@nestjs/swagger';
-import { createTestModule } from '../test/e2e/create-test-module.js';
+import { writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { createSwaggerConfig } from '../src/common/swagger/swagger.config.js';
 import type { AppConfig } from '../src/config/config.types.js';
 
@@ -10,7 +10,9 @@ import type { AppConfig } from '../src/config/config.types.js';
 process.env.NODE_ENV = 'test';
 process.env.DB_ENABLED = 'false';
 process.env.JWT_SECRET = 'test-only-secret-with-at-least-32-chars';
+loadEnvironment({ environment: 'test' });
 
+const { createTestModule } = await import('../test/e2e/create-test-module.js');
 const moduleRef = await createTestModule().compile();
 const app = moduleRef.createNestApplication();
 await app.init();

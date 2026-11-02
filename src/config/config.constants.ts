@@ -12,6 +12,9 @@ export const CONFIG_KEYS = {
   /** JWT 配置键。 */
   jwt: 'jwt',
 
+  /** 管理员认证配置键。 */
+  auth: 'auth',
+
   /** Swagger 配置键。 */
   swagger: 'swagger',
 
