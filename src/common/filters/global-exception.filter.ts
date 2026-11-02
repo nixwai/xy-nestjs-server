@@ -25,6 +25,40 @@ const HTTP_STATUS_TO_BUSINESS_CODE: Readonly<Record<number, HttpCode>> =
     [HttpStatus.TOO_MANY_REQUESTS]: HttpCode.TOO_MANY_REQUESTS,
   });
 
+const HTTP_STATUS_TO_DEFAULT_MESSAGE: Readonly<Record<number, string>> =
+  Object.freeze({
+    [HttpStatus.BAD_REQUEST]: '请求参数错误',
+    [HttpStatus.UNAUTHORIZED]: '请先登录',
+    [HttpStatus.FORBIDDEN]: '无权访问',
+    [HttpStatus.NOT_FOUND]: '请求的资源不存在',
+    [HttpStatus.CONFLICT]: '请求与当前资源冲突',
+    [HttpStatus.UNPROCESSABLE_ENTITY]: '请求参数校验失败',
+    [HttpStatus.TOO_MANY_REQUESTS]: '请求过于频繁，请稍后重试',
+    [HttpStatus.UNSUPPORTED_MEDIA_TYPE]: '请求格式不受支持',
+  });
+
+const DUPLICATE_KEY_LABELS: Readonly<Record<string, string>> = Object.freeze({
+  username: '用户名',
+  tokenHash: '令牌',
+  adminRole: '管理员角色关系',
+  roleCode: '角色编码',
+  permissionCode: '权限编码',
+  rolePermission: '角色权限关系',
+  uniqueKey: '唯一字段',
+});
+
+const DEFAULT_ENGLISH_MESSAGES: Readonly<Record<string, string>> =
+  Object.freeze({
+    'bad request': '请求参数错误',
+    unauthorized: '请先登录',
+    forbidden: '无权访问',
+    'not found': '请求的资源不存在',
+    conflict: '请求与当前资源冲突',
+    'unprocessable entity': '请求参数校验失败',
+    'too many requests': '请求过于频繁，请稍后重试',
+    'unsupported media type': '请求格式不受支持',
+  });
+
 /** 将异常转换为项目统一的 API 错误响应。 */
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter<unknown> {
@@ -46,7 +80,7 @@ export class GlobalExceptionFilter implements ExceptionFilter<unknown> {
     if (duplicateKey) {
       this.sendError(response, HttpStatus.OK, {
         code: HttpCode.CONFLICT,
-        message: `${duplicateKey}已存在`,
+        message: `${DUPLICATE_KEY_LABELS[duplicateKey] ?? '字段'}已存在`,
         data: null,
       });
       return;
@@ -70,7 +104,7 @@ export class GlobalExceptionFilter implements ExceptionFilter<unknown> {
     const body = this.getExceptionBody(exception);
     const payload: ApiErrorResponse = {
       code: this.getBusinessCode(body, status),
-      message: this.getClientMessage(body),
+      message: this.getClientMessage(body, status),
       data: null,
     };
 
@@ -105,32 +139,49 @@ export class GlobalExceptionFilter implements ExceptionFilter<unknown> {
     return undefined;
   }
 
-  /** 从异常响应体中提取客户端可见消息。 */
-  private getClientMessage(body: unknown): string {
+  /** 从异常响应体中提取并安全转换客户端可见消息。 */
+  private getClientMessage(body: unknown, status: number): string {
+    const fallback = HTTP_STATUS_TO_DEFAULT_MESSAGE[status] ?? '请求处理失败';
+    const messages = this.extractMessages(body);
+    if (messages.length === 0) {
+      return fallback;
+    }
+    return messages
+      .map((message) => this.translateClientMessage(message, status))
+      .join('; ');
+  }
+
+  /** 提取异常响应中的一条或多条消息。 */
+  private extractMessages(body: unknown): string[] {
     if (typeof body === 'string' && body.trim()) {
-      return body;
+      return [body.trim()];
     }
-
     if (!this.isErrorResponseBody(body)) {
-      return '请求处理失败';
+      return [];
     }
-
-    const message = body.message;
-    if (typeof message === 'string' && message.trim()) {
-      return message;
+    if (typeof body.message === 'string' && body.message.trim()) {
+      return [body.message.trim()];
     }
-
-    if (Array.isArray(message)) {
-      const messages = message.filter(
+    if (Array.isArray(body.message)) {
+      return body.message.filter(
         (item): item is string =>
           typeof item === 'string' && item.trim().length > 0,
       );
-      if (messages.length > 0) {
-        return messages.join('; ');
-      }
     }
+    return [];
+  }
 
-    return '请求处理失败';
+  /** 将框架默认英文消息转换为中文，未知英文消息使用安全兜底。 */
+  private translateClientMessage(message: string, status: number): string {
+    const normalized = message.trim().toLowerCase();
+    const knownMessage = DEFAULT_ENGLISH_MESSAGES[normalized];
+    if (knownMessage) {
+      return knownMessage;
+    }
+    if (/[\u4e00-\u9fff]/.test(message)) {
+      return message;
+    }
+    return HTTP_STATUS_TO_DEFAULT_MESSAGE[status] ?? '请求处理失败';
   }
 
   /** 从异常响应体中提取显式业务码，未提供时按 HTTP 状态码映射。 */

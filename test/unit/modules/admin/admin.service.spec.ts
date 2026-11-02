@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import { AdminService } from '../../../../src/modules/admin/admin.service.js';
 import type {
@@ -171,7 +167,7 @@ describe('AdminService', () => {
         currentPassword: 'Wrong1234',
         isSuperAdmin: true,
       }),
-    ).rejects.toBeInstanceOf(ForbiddenException);
+    ).rejects.toThrow('当前密码错误');
   });
 
   it('更新管理员时应支持修改密码并记录审计', async () => {

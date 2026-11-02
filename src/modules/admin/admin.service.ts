@@ -72,7 +72,7 @@ export class AdminService {
       body.isSuperAdmin &&
       !(await this.verifyPassword(actorId, body.currentPassword as string))
     )
-      throw new ForbiddenException('当前登录密码验证失败');
+      throw new ForbiddenException('当前密码错误');
     const password = await hashPassword(body.password);
     const role = body.isSuperAdmin
       ? null
@@ -117,7 +117,7 @@ export class AdminService {
       (!body.currentPassword ||
         !(await this.verifyPassword(actorId, body.currentPassword)))
     )
-      throw new ForbiddenException('当前登录密码验证失败');
+      throw new ForbiddenException('当前密码错误');
     if (
       target.isSuperAdmin &&
       target.isActive &&
@@ -153,7 +153,7 @@ export class AdminService {
   async resetAdminPassword(actorId: string, id: string, passwordValue: string, currentPassword: string): Promise<AdminPublicRecord> {
     const target = await this.repository.findById(id);
     if (!target) throw new NotFoundException('管理员不存在');
-    if (!(await this.verifyPassword(actorId, currentPassword))) throw new ForbiddenException('当前登录密码验证失败');
+    if (!(await this.verifyPassword(actorId, currentPassword))) throw new ForbiddenException('当前密码错误');
     const password = await hashPassword(passwordValue);
     const item = await this.repository.update(id, { passwordHash: password.hash, passwordSalt: password.salt });
     await this.auditService.record({ actorAdminId: actorId, action: 'admin.reset-password', resourceType: 'admin', targetId: id });
@@ -171,7 +171,7 @@ export class AdminService {
       throw new NotFoundException('管理员不存在');
     }
     if (!(await this.verifyPassword(actorId, currentPassword))) {
-      throw new ForbiddenException('当前登录密码验证失败');
+      throw new ForbiddenException('当前密码错误');
     }
     if (
       target.isSuperAdmin &&

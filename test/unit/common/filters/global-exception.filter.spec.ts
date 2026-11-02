@@ -133,7 +133,37 @@ describe('GlobalExceptionFilter', () => {
     expect(response.status).toHaveBeenCalledWith(HttpStatus.OK);
     expect(response.json).toHaveBeenCalledWith({
       code: HttpCode.CONFLICT,
-      message: 'username已存在',
+      message: '用户名已存在',
+      data: null,
+    });
+  });
+
+  it('应将框架默认英文异常转换为中文', () => {
+    const { host, response } = createHost();
+
+    new GlobalExceptionFilter().catch(
+      new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED),
+      host,
+    );
+
+    expect(response.json).toHaveBeenCalledWith({
+      code: HttpCode.UNAUTHORIZED,
+      message: '请先登录',
+      data: null,
+    });
+  });
+
+  it('应隐藏未知英文客户端异常消息', () => {
+    const { host, response } = createHost();
+
+    new GlobalExceptionFilter().catch(
+      new HttpException('database failure', HttpStatus.BAD_REQUEST),
+      host,
+    );
+
+    expect(response.json).toHaveBeenCalledWith({
+      code: HttpCode.BAD_REQUEST,
+      message: '请求参数错误',
       data: null,
     });
   });
