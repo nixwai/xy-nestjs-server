@@ -18,7 +18,9 @@ export class TypeOrmPermissionRepository implements PermissionRepository {
   ) {}
 
   async list(): Promise<PermissionRecord[]> {
-    return (await this.permissions.find()).map((item) => this.toRecord(item));
+    return (
+      await this.permissions.find({ order: { code: 'ASC', id: 'ASC' } })
+    ).map((item) => this.toRecord(item));
   }
 
   async findById(id: string): Promise<PermissionRecord | null> {

@@ -5,6 +5,7 @@ import { createTestModule } from './create-test-module.js';
 import { ADMIN_REPOSITORY } from '../../src/modules/admin/repositories/admin-repository.port.js';
 import type { AdminRepository } from '../../src/modules/admin/repositories/admin-repository.port.js';
 import { hashPassword } from '../../src/modules/auth/utils/password.util.js';
+import { createStrictValidationPipe } from '../../src/common/pipes/index.js';
 
 describe('RBAC management API (e2e)', () => {
   let app: INestApplication;
@@ -13,6 +14,7 @@ describe('RBAC management API (e2e)', () => {
     const moduleRef = await createTestModule().compile();
     app = moduleRef.createNestApplication();
     app.setGlobalPrefix('api');
+    app.useGlobalPipes(createStrictValidationPipe());
     await app.init();
     repository = app.get<AdminRepository>(ADMIN_REPOSITORY);
     const root = await hashPassword('Root1234');
@@ -41,10 +43,22 @@ describe('RBAC management API (e2e)', () => {
   }
   it('allows super administrators to access RBAC management and protects account changes with password verification', async () => {
     const token = await login('root', 'Root1234');
-    await request(app.getHttpServer())
-      .get('/api/admin/list')
+    const firstAdminPage = await request(app.getHttpServer())
+      .get('/api/admin/list?page=1&pageSize=1')
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
+    expect(firstAdminPage.body.data.items).toHaveLength(1);
+    expect(firstAdminPage.body.data.total).toBe(2);
+    expect(firstAdminPage.body.data.page).toBe(1);
+    expect(firstAdminPage.body.data.pageSize).toBe(1);
+    expect(firstAdminPage.body.data.hasNextPage).toBe(true);
+
+    const secondAdminPage = await request(app.getHttpServer())
+      .get('/api/admin/list?page=2&pageSize=1')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+    expect(secondAdminPage.body.data.items).toHaveLength(1);
+    expect(secondAdminPage.body.data.hasPreviousPage).toBe(true);
     const denied = await request(app.getHttpServer())
       .post('/api/admin/update')
       .set('Authorization', `Bearer ${token}`)
@@ -58,6 +72,39 @@ describe('RBAC management API (e2e)', () => {
       .expect(200);
     expect(allowed.body.code).toBe(0);
   });
+  it('supports role page pagination and audit cursor pagination', async () => {
+    const token = await login('root', 'Root1234');
+    await request(app.getHttpServer())
+      .post('/api/role/create')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ code: 'operator', name: '运营人员' })
+      .expect(200);
+
+    const roles = await request(app.getHttpServer())
+      .get('/api/role/list?page=1&pageSize=1')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+    expect(roles.body.data.items).toHaveLength(1);
+    expect(roles.body.data.total).toBe(1);
+    expect(roles.body.data.totalPages).toBe(1);
+
+    const firstAuditPage = await request(app.getHttpServer())
+      .get('/api/audit/list?limit=1')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+    expect(firstAuditPage.body.data.items).toHaveLength(1);
+    expect(firstAuditPage.body.data).not.toHaveProperty('total');
+    if (firstAuditPage.body.data.hasMore) {
+      const secondAuditPage = await request(app.getHttpServer())
+        .get(
+          `/api/audit/list?limit=1&cursor=${encodeURIComponent(firstAuditPage.body.data.nextCursor)}`,
+        )
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+      expect(secondAuditPage.body.data.items).toHaveLength(1);
+    }
+  });
+
   it('supports menu management and returns menus from persistence', async () => {
     const token = await login('root', 'Root1234');
     const created = await request(app.getHttpServer())

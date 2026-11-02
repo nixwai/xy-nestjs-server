@@ -2,18 +2,36 @@ import {
   DomainConflictError,
   DomainNotFoundError,
 } from '../../../common/errors/index.js';
+import { PageQueryDto } from '../../../common/dto/index.js';
+import type { PageResult } from '../../../common/types/index.js';
 import type { RoleRecord } from '../types/role.types.js';
 import type { RoleRepository } from './role-repository.port.js';
 
 /** 在单元测试中保存角色及其权限关系。 */
 export class InMemoryRoleRepository implements RoleRepository {
   private readonly roles = new Map<string, RoleRecord>();
+  private readonly createdAt = new Map<string, number>();
   private nextId = 1;
 
-  async list(): Promise<RoleRecord[]> {
-    return [...this.roles.values()]
+  async list(
+    query: PageQueryDto = new PageQueryDto(),
+  ): Promise<PageResult<RoleRecord>> {
+    const items = [...this.roles.values()]
       .filter((item) => item.deletedAt === null)
-      .map((item) => this.copy(item));
+      .sort((left, right) => Number(BigInt(right.id) - BigInt(left.id)));
+    const total = items.length;
+    const totalPages = total === 0 ? 0 : Math.ceil(total / query.pageSize);
+    return {
+      items: items
+        .slice(query.skip, query.skip + query.pageSize)
+        .map((item) => this.copy(item)),
+      total,
+      page: query.page,
+      pageSize: query.pageSize,
+      totalPages,
+      hasNextPage: query.page < totalPages,
+      hasPreviousPage: query.page > 1 && total > 0,
+    };
   }
 
   async findById(id: string): Promise<RoleRecord | null> {
@@ -51,6 +69,7 @@ export class InMemoryRoleRepository implements RoleRepository {
       permissionIds: [],
     };
     this.roles.set(item.id, item);
+    this.createdAt.set(item.id, Date.now());
     return this.copy(item);
   }
 

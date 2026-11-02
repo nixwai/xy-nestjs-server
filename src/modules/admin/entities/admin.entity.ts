@@ -12,6 +12,7 @@ import {
 @Entity({ name: 'admin' })
 @Index('uk_admin_username', ['username'], { unique: true })
 @Index('idx_admin_deleted_at', ['deletedAt'])
+@Index('idx_admin_page', ['deletedAt', 'createdAt', 'id'])
 export class AdminEntity {
   /** 管理员主键。 */
   @PrimaryGeneratedColumn({

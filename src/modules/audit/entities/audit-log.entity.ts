@@ -10,6 +10,7 @@ import {
 /** RBAC 和管理员变更审计记录。 */
 @Entity({ name: 'audit_log' })
 @Index('idx_audit_log_created_at', ['createdAt'])
+@Index('idx_audit_log_cursor', ['createdAt', 'id'])
 @Index('idx_audit_log_resource_type_target_id', ['resourceType', 'targetId'])
 @Index('idx_audit_log_actor_admin_id', ['actorAdminId'])
 export class AuditLogEntity {

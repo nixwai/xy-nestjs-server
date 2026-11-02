@@ -21,6 +21,7 @@ import {
 import { PermissionResource } from '../authorization/enums/index.js';
 import {
   MenuCreateRequestDto,
+  MenuListResponseDto,
   MenuResponseDto,
   MenuStatusRequestDto,
   MenuUpdateRequestDto,
@@ -33,8 +34,11 @@ import { MenuService } from './menu.service.js';
 export class MenuController {
   constructor(private readonly service: MenuService) {}
   @Get('list')
-  @ApiOperation({ summary: '查询菜单列表' })
-  @ApiOkResponseData(MenuResponseDto)
+  @ApiOperation({
+    summary: '查询完整菜单列表',
+    description: '返回用于菜单树和授权计算的全部未软删除菜单，不执行分页。',
+  })
+  @ApiOkResponseData(MenuListResponseDto)
   @RequirePermission(PermissionResource.MENU)
   async list() {
     const items = await this.service.list();

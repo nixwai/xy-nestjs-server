@@ -3,6 +3,8 @@ import { ROLE_REPOSITORY } from './repositories/role-repository.port.js';
 import type { RoleRepository } from './repositories/role-repository.port.js';
 import { PermissionService } from '../permission/permission.service.js';
 import { AuditService } from '../audit/audit.service.js';
+import { PageQueryDto } from '../../common/dto/index.js';
+import type { PageResult } from '../../common/types/index.js';
 import type { RoleRecord } from './types/role.types.js';
 
 /** 角色及角色授权关系应用服务。 */
@@ -15,8 +17,10 @@ export class RoleService {
   ) {}
 
   /** 查询角色。 */
-  listRoles(): Promise<RoleRecord[]> {
-    return this.repository.list();
+  listRoles(
+    query: PageQueryDto = new PageQueryDto(),
+  ): Promise<PageResult<RoleRecord>> {
+    return this.repository.list(query);
   }
 
   /** 查询角色。 */

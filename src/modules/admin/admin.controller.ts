@@ -10,6 +10,7 @@ import {
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   ApiCommonResponses,
+  ApiPageQuery,
   ApiOkResponseData,
   ApiOkResponseEmpty,
 } from '../../common/decorators/index.js';
@@ -63,18 +64,18 @@ export class AdminController {
 
   /** 查询管理员列表。 */
   @Get('admin/list')
+  @ApiPageQuery()
   @ApiOperation({
     summary: '查询管理员列表',
-    description: '返回全部未软删除的管理员列表。当前实现不执行分页。',
+    description: '返回未软删除的管理员分页列表，按创建时间和 ID 倒序排列。',
   })
   @ApiOkResponseData(AdminListResponseDto, {
-    description: '管理员列表和总数。',
+    description: '管理员分页列表和分页元数据。',
   })
   @RequirePermission(PermissionResource.ADMIN)
   @SuperAdminOnly()
-  async list(@Query() _query: AdminListQueryDto) {
-    const items = await this.adminService.listAdmins();
-    return { items, total: items.length };
+  async list(@Query() query: AdminListQueryDto = new AdminListQueryDto()) {
+    return this.adminService.listAdmins(query);
   }
 
   /** 创建管理员账户。 */

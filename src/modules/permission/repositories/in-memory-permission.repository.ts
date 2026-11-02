@@ -11,7 +11,13 @@ export class InMemoryPermissionRepository implements PermissionRepository {
   private nextId = 1;
 
   async list(): Promise<PermissionRecord[]> {
-    return [...this.permissions.values()].map((item) => ({ ...item }));
+    return [...this.permissions.values()]
+      .sort(
+        (left, right) =>
+          left.code.localeCompare(right.code) ||
+          Number(left.id) - Number(right.id),
+      )
+      .map((item) => ({ ...item }));
   }
 
   async findById(id: string): Promise<PermissionRecord | null> {

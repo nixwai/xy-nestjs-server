@@ -12,6 +12,7 @@ import {
 @Entity({ name: 'role' })
 @Index('uk_role_code', ['code'], { unique: true })
 @Index('idx_role_deleted_at', ['deletedAt'])
+@Index('idx_role_page', ['deletedAt', 'createdAt', 'id'])
 export class RoleEntity {
   /** 角色主键。 */
   @PrimaryGeneratedColumn({

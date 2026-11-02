@@ -41,7 +41,15 @@ function createService(
   const repository: Partial<AdminRepository> = {
     findById: vi.fn().mockResolvedValue(admin()),
     findByUsername: vi.fn().mockResolvedValue(null),
-    list: vi.fn().mockResolvedValue([admin()]),
+    list: vi.fn().mockResolvedValue({
+      items: [admin()],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    }),
     listRoleIds: vi.fn().mockResolvedValue([]),
     listRoleIdsByAdminIds: vi.fn().mockResolvedValue(new Map([['1', []]])),
     countActiveSuperAdmins: vi.fn().mockResolvedValue(2),
@@ -81,7 +89,15 @@ describe('AdminService', () => {
   it('应返回管理员列表并映射角色 ID', async () => {
     const { service } = createService({
       repository: {
-        list: vi.fn().mockResolvedValue([admin(), admin({ id: '2' })]),
+        list: vi.fn().mockResolvedValue({
+          items: [admin(), admin({ id: '2' })],
+          total: 2,
+          page: 1,
+          pageSize: 20,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        }),
         listRoleIdsByAdminIds: vi.fn().mockResolvedValue(
           new Map([
             ['1', ['role-1']],
@@ -91,10 +107,18 @@ describe('AdminService', () => {
       },
     });
 
-    await expect(service.listAdmins()).resolves.toEqual([
-      expect.objectContaining({ id: '1', roleIds: ['role-1'] }),
-      expect.objectContaining({ id: '2', roleIds: [] }),
-    ]);
+    await expect(service.listAdmins()).resolves.toMatchObject({
+      items: [
+        expect.objectContaining({ id: '1', roleIds: ['role-1'] }),
+        expect.objectContaining({ id: '2', roleIds: [] }),
+      ],
+      total: 2,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    });
   });
 
   it('查询不存在的管理员时应抛出 NotFoundException', async () => {

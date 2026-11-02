@@ -19,7 +19,12 @@ import {
 import type { AdminRecord, AdminPublicRecord } from './types/admin.types.js';
 import { RoleService } from '../role/role.service.js';
 import { AuditService } from '../audit/audit.service.js';
-import { AdminCreateRequestDto, AdminUpdateRequestDto } from './dto/index.js';
+import {
+  AdminCreateRequestDto,
+  AdminListQueryDto,
+  AdminUpdateRequestDto,
+} from './dto/index.js';
+import type { PageResult } from '../../common/types/index.js';
 
 /** 管理员账户应用服务。 */
 @Injectable()
@@ -43,12 +48,19 @@ export class AdminService {
   }
 
   /** 查询管理员列表。 */
-  async listAdmins(): Promise<AdminPublicRecord[]> {
-    const items = await this.repository.list();
+  async listAdmins(
+    query: AdminListQueryDto = new AdminListQueryDto(),
+  ): Promise<PageResult<AdminPublicRecord>> {
+    const result = await this.repository.list(query);
     const roleIds = await this.repository.listRoleIdsByAdminIds(
-      items.map((item) => item.id),
+      result.items.map((item) => item.id),
     );
-    return items.map((item) => this.toPublic(item, roleIds.get(item.id) ?? []));
+    return {
+      ...result,
+      items: result.items.map((item) =>
+        this.toPublic(item, roleIds.get(item.id) ?? []),
+      ),
+    };
   }
 
   /** 查询当前管理员。 */

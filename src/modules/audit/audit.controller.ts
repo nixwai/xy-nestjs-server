@@ -1,5 +1,5 @@
-import { Controller, Get } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Query } from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
   ApiCommonResponses,
   ApiOkResponseData,
@@ -11,7 +11,7 @@ import {
   SuperAdminOnly,
 } from '../authorization/decorators/index.js';
 import { PermissionResource } from '../authorization/enums/index.js';
-import { AuditLogListResponseDto } from './dto/index.js';
+import { AuditLogListQueryDto, AuditLogListResponseDto } from './dto/index.js';
 import { AuditService } from './audit.service.js';
 
 /** 提供管理员变更审计查询接口。 */
@@ -24,16 +24,31 @@ export class AuditController {
 
   /** 查询管理员、角色和权限变更审计记录。 */
   @Get('list')
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    example: 20,
+    description: '每页条数，范围 1-100。',
+  })
+  @ApiQuery({
+    name: 'cursor',
+    required: false,
+    type: String,
+    description: '上一页返回的不透明游标。',
+  })
   @ApiOperation({
     summary: '查询审计记录',
-    description: '按创建时间倒序返回管理员、角色和权限相关的变更记录。',
+    description: '按创建时间和 ID 倒序返回审计记录，使用游标分页，不计算总数。',
   })
   @ApiOkResponseData(AuditLogListResponseDto, {
-    description: '审计记录列表和总数。',
+    description: '审计记录游标分页结果，不返回总数。',
   })
   @RequirePermission(PermissionResource.AUDIT)
-  async list(@CurrentAdmin() _admin: AdminJwtPayload) {
-    const items = await this.auditService.list();
-    return { items, total: items.length };
+  async list(
+    @CurrentAdmin() _admin: AdminJwtPayload,
+    @Query() query: AuditLogListQueryDto = new AuditLogListQueryDto(),
+  ) {
+    return this.auditService.list(query);
   }
 }

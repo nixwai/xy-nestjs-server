@@ -6,7 +6,7 @@ const body = {} as never;
 
 describe('RoleController', () => {
   const service = {
-    listRoles: vi.fn().mockResolvedValue([{ id: '1' }]),
+    listRoles: vi.fn().mockResolvedValue({ items: [{ id: '1' }], total: 1 }),
     createRole: vi.fn().mockResolvedValue({ id: '1' }),
     updateRole: vi.fn().mockResolvedValue({ id: '1' }),
     softDeleteRole: vi.fn().mockResolvedValue(undefined),

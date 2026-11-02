@@ -37,7 +37,8 @@ export class PermissionController {
   @Get('list')
   @ApiOperation({
     summary: '查询权限目录',
-    description: '返回代码注册的权限资源、HTTP 方法、名称和启用状态。',
+    description:
+      '返回完整的代码注册权限目录，不执行分页。结果按权限编码稳定排序。',
   })
   @ApiOkResponseData(PermissionListResponseDto, {
     description: '权限列表和总数。',

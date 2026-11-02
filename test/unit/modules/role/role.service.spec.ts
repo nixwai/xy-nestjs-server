@@ -43,7 +43,15 @@ function createService(
   auditService: Partial<AuditService>;
 } {
   const repository: Partial<RoleRepository> = {
-    list: vi.fn().mockResolvedValue([role]),
+    list: vi.fn().mockResolvedValue({
+      items: [role],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    }),
     findById: vi.fn().mockResolvedValue(role),
     findByIds: vi.fn().mockResolvedValue([role]),
     findByCode: vi.fn().mockResolvedValue(role),
@@ -130,7 +138,10 @@ describe('RoleService', () => {
   it('应透传角色查询结果', async () => {
     const { service } = createService();
 
-    await expect(service.listRoles()).resolves.toEqual([role]);
+    await expect(service.listRoles()).resolves.toMatchObject({
+      items: [role],
+      total: 1,
+    });
     await expect(service.findById('role-1')).resolves.toEqual(role);
     await expect(service.findByIds(['role-1'])).resolves.toEqual([role]);
     await expect(service.findByCode('operator')).resolves.toEqual(role);

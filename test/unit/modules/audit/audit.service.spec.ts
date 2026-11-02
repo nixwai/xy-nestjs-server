@@ -1,8 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
 import { AuditService } from '../../../../src/modules/audit/audit.service.js';
+import { AuditLogListQueryDto } from '../../../../src/modules/audit/dto/index.js';
+
+function query(overrides: Partial<AuditLogListQueryDto> = {}) {
+  return Object.assign(new AuditLogListQueryDto(), overrides);
+}
 
 describe('AuditService', () => {
-  it('无数据库连接时应写入内存并按倒序返回', async () => {
+  it('无数据库连接时应按稳定顺序返回游标分页结果', async () => {
     const service = new AuditService();
 
     await service.record({
@@ -18,22 +23,54 @@ describe('AuditService', () => {
       succeeded: false,
     });
 
-    const records = await service.list();
-    expect(records).toHaveLength(2);
-    expect(records[0]).toMatchObject({
+    const first = await service.list(query({ limit: 1 }));
+    expect(first.items).toHaveLength(1);
+    expect(first.items[0]).toMatchObject({
       action: 'admin.soft-delete',
       succeeded: false,
     });
-    expect(records[1]).toMatchObject({ action: 'admin.create', targetId: '1' });
+    expect(first.hasMore).toBe(true);
+    expect(first.nextCursor).toBeTruthy();
+
+    const second = await service.list(
+      query({ limit: 1, cursor: first.nextCursor! }),
+    );
+    expect(second.items).toHaveLength(1);
+    expect(second.items[0]).toMatchObject({
+      action: 'admin.create',
+      targetId: '1',
+    });
+    expect(second.hasMore).toBe(false);
+    expect(second.nextCursor).toBeNull();
   });
 
-  it('数据库已初始化时应使用数据库仓储', async () => {
+  it('非法游标应拒绝查询', async () => {
+    const service = new AuditService();
+    await expect(
+      service.list(query({ cursor: 'invalid' })),
+    ).rejects.toMatchObject({
+      message: '游标格式不正确',
+    });
+  });
+
+  it('数据库已初始化时应使用 QueryBuilder 游标查询', async () => {
     const save = vi.fn().mockResolvedValue(undefined);
-    const find = vi.fn().mockResolvedValue([{ action: 'db.record' }]);
     const create = vi.fn((payload) => payload);
+    const getMany = vi.fn().mockResolvedValue([]);
+    const builder = {
+      orderBy: vi.fn().mockReturnThis(),
+      addOrderBy: vi.fn().mockReturnThis(),
+      take: vi.fn().mockReturnThis(),
+      where: vi.fn().mockReturnThis(),
+      getMany,
+    };
     const dataSource = {
       isInitialized: true,
-      getRepository: vi.fn().mockReturnValue({ save, find, create }),
+      getRepository: vi.fn().mockReturnValue({
+        save,
+        create,
+        createQueryBuilder: vi.fn().mockReturnValue(builder),
+      }),
     } as never;
     const service = new AuditService(dataSource);
 
@@ -42,8 +79,39 @@ describe('AuditService', () => {
       action: 'db.record',
       resourceType: 'admin',
     });
-    await expect(service.list()).resolves.toEqual([{ action: 'db.record' }]);
+    await expect(service.list(query({ limit: 10 }))).resolves.toEqual({
+      items: [],
+      nextCursor: null,
+      hasMore: false,
+    });
     expect(save).toHaveBeenCalled();
-    expect(find).toHaveBeenCalledWith({ order: { createdAt: 'DESC' } });
+    expect(builder.take).toHaveBeenCalledWith(11);
+    expect(getMany).toHaveBeenCalled();
+  });
+
+  it('数据库游标查询应添加边界条件', async () => {
+    const cursor = Buffer.from(
+      JSON.stringify({ createdAt: '2026-01-01T00:00:00.000Z', id: '10' }),
+    ).toString('base64url');
+    const builder = {
+      orderBy: vi.fn().mockReturnThis(),
+      addOrderBy: vi.fn().mockReturnThis(),
+      take: vi.fn().mockReturnThis(),
+      where: vi.fn().mockReturnThis(),
+      getMany: vi.fn().mockResolvedValue([]),
+    };
+    const dataSource = {
+      isInitialized: true,
+      getRepository: vi.fn().mockReturnValue({
+        createQueryBuilder: vi.fn().mockReturnValue(builder),
+      }),
+    } as never;
+    const service = new AuditService(dataSource);
+
+    await service.list(query({ limit: 5, cursor }));
+    expect(builder.where).toHaveBeenCalledWith(
+      '(audit.createdAt < :createdAt OR (audit.createdAt = :createdAt AND audit.id < :id))',
+      expect.objectContaining({ id: '10' }),
+    );
   });
 });

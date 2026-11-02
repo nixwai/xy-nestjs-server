@@ -22,6 +22,7 @@ describe('TypeOrmAdminRepository', () => {
     const adminRepository = {
       findOne: vi.fn().mockResolvedValue(entity),
       find: vi.fn().mockResolvedValue([entity]),
+      findAndCount: vi.fn().mockResolvedValue([[entity], 1]),
       save: vi.fn().mockImplementation(async (item) => item),
       create: vi.fn().mockImplementation((item) => item),
       merge: vi
@@ -62,7 +63,10 @@ describe('TypeOrmAdminRepository', () => {
       username: 'admin',
     });
     await expect(repository.findById('1')).resolves.toMatchObject({ id: '1' });
-    await expect(repository.list()).resolves.toHaveLength(1);
+    await expect(repository.list()).resolves.toMatchObject({
+      items: [expect.objectContaining({ id: '1' })],
+      total: 1,
+    });
     await expect(
       repository.create({
         username: 'new',
@@ -76,6 +80,56 @@ describe('TypeOrmAdminRepository', () => {
     await repository.softDelete('1');
 
     expect(adminRepository.softRemove).toHaveBeenCalled();
+  });
+
+  it('应将分页参数传递给数据库并计算分页元数据', async () => {
+    const { repository, adminRepository } = createRepository();
+    adminRepository.findAndCount.mockResolvedValue([
+      [createEntity(), createEntity({ id: '2' })],
+      3,
+    ]);
+
+    const result = await repository.list({
+      page: 2,
+      pageSize: 2,
+      skip: 2,
+    } as never);
+    expect(result).toMatchObject({
+      page: 2,
+      pageSize: 2,
+      total: 3,
+      totalPages: 2,
+      hasPreviousPage: true,
+      hasNextPage: false,
+    });
+    expect(adminRepository.findAndCount).toHaveBeenCalledWith({
+      order: { createdAt: 'DESC', id: 'DESC' },
+      skip: 2,
+      take: 2,
+    });
+  });
+
+  it('总数为零时应返回零页', async () => {
+    const { repository, adminRepository } = createRepository();
+    adminRepository.findAndCount.mockResolvedValue([[], 0]);
+
+    await expect(
+      repository.list({ page: 1, pageSize: 20, skip: 0 } as never),
+    ).resolves.toMatchObject({
+      items: [],
+      total: 0,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    });
+  });
+
+  it('找不到管理员时应返回空值', async () => {
+    const { repository, adminRepository } = createRepository();
+    adminRepository.findOne.mockResolvedValue(null);
+
+    await expect(repository.findByUsername('missing')).resolves.toBeNull();
+    await expect(repository.findById('missing')).resolves.toBeNull();
   });
 
   it('应处理超级管理员统计、角色关系和空查询', async () => {

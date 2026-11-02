@@ -8,6 +8,8 @@ import {
 import { RolePermissionAssignmentEntity } from '../entities/role-permission-assignment.entity.js';
 import { AdminRoleAssignmentEntity } from '../../admin/entities/admin-role-assignment.entity.js';
 import { RoleEntity } from '../entities/role.entity.js';
+import { PageQueryDto } from '../../../common/dto/index.js';
+import type { PageResult } from '../../../common/types/index.js';
 import type { RoleRecord } from '../types/role.types.js';
 import type { RoleRepository } from './role-repository.port.js';
 
@@ -23,8 +25,25 @@ export class TypeOrmRoleRepository implements RoleRepository {
     private readonly adminRoles: Repository<AdminRoleAssignmentEntity>,
   ) {}
 
-  async list(): Promise<RoleRecord[]> {
-    return this.toRecords(await this.roles.find());
+  async list(
+    query: PageQueryDto = new PageQueryDto(),
+  ): Promise<PageResult<RoleRecord>> {
+    const [items, total] = await this.roles.findAndCount({
+      order: { createdAt: 'DESC', id: 'DESC' },
+      skip: query.skip,
+      take: query.pageSize,
+    });
+    const pageItems = await this.toRecords(items);
+    const totalPages = total === 0 ? 0 : Math.ceil(total / query.pageSize);
+    return {
+      items: pageItems,
+      total,
+      page: query.page,
+      pageSize: query.pageSize,
+      totalPages,
+      hasNextPage: query.page < totalPages,
+      hasPreviousPage: query.page > 1 && total > 0,
+    };
   }
 
   async findById(id: string): Promise<RoleRecord | null> {

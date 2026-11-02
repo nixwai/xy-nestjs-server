@@ -1,3 +1,5 @@
+import type { PageQueryDto } from '../../../common/dto/index.js';
+import type { PageResult } from '../../../common/types/index.js';
 import type { AdminRecord } from '../types/admin.types.js';
 
 /** 管理员创建输入。 */
@@ -23,7 +25,7 @@ export const ADMIN_REPOSITORY = Symbol('ADMIN_REPOSITORY');
 export interface AdminRepository {
   findByUsername(username: string): Promise<AdminRecord | null>;
   findById(id: string): Promise<AdminRecord | null>;
-  list(): Promise<AdminRecord[]>;
+  list(query: PageQueryDto): Promise<PageResult<AdminRecord>>;
   create(input: AdminCreateInput): Promise<AdminRecord>;
   update(id: string, input: AdminUpdateInput): Promise<AdminRecord>;
   softDelete(id: string): Promise<void>;

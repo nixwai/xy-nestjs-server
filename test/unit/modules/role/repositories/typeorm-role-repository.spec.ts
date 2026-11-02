@@ -19,6 +19,7 @@ describe('TypeOrmRoleRepository', () => {
     const roleEntity = entity();
     const roles = {
       find: vi.fn().mockResolvedValue([roleEntity]),
+      findAndCount: vi.fn().mockResolvedValue([[roleEntity], 1]),
       findOne: vi.fn().mockResolvedValue(roleEntity),
       save: vi.fn().mockImplementation(async (item) => item),
       create: vi.fn().mockImplementation((item) => item),
@@ -70,7 +71,10 @@ describe('TypeOrmRoleRepository', () => {
   it('应读取、创建、更新和软删除角色', async () => {
     const { repository, roles } = createRepository();
 
-    await expect(repository.list()).resolves.toHaveLength(1);
+    await expect(repository.list()).resolves.toMatchObject({
+      items: [expect.objectContaining({ id: 'role-1' })],
+      total: 1,
+    });
     await expect(repository.findById('role-1')).resolves.toMatchObject({
       id: 'role-1',
     });
@@ -88,6 +92,53 @@ describe('TypeOrmRoleRepository', () => {
     await repository.softDelete('role-1');
 
     expect(roles.softRemove).toHaveBeenCalled();
+  });
+
+  it('应将分页参数传递给数据库并只组装当前页关系', async () => {
+    const { repository, roles } = createRepository();
+    roles.findAndCount.mockResolvedValue([[entity()], 3]);
+
+    const result = await repository.list({
+      page: 2,
+      pageSize: 1,
+      skip: 1,
+    } as never);
+    expect(result).toMatchObject({
+      page: 2,
+      pageSize: 1,
+      total: 3,
+      totalPages: 3,
+      hasPreviousPage: true,
+      hasNextPage: true,
+    });
+    expect(roles.findAndCount).toHaveBeenCalledWith({
+      order: { createdAt: 'DESC', id: 'DESC' },
+      skip: 1,
+      take: 1,
+    });
+  });
+
+  it('总数为零时应返回零页', async () => {
+    const { repository, roles } = createRepository();
+    roles.findAndCount.mockResolvedValue([[], 0]);
+
+    await expect(
+      repository.list({ page: 1, pageSize: 20, skip: 0 } as never),
+    ).resolves.toMatchObject({
+      items: [],
+      total: 0,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    });
+  });
+
+  it('找不到角色时应返回空值', async () => {
+    const { repository, roles } = createRepository();
+    roles.findOne.mockResolvedValue(null);
+
+    await expect(repository.findById('missing')).resolves.toBeNull();
+    await expect(repository.findByCode('missing')).resolves.toBeNull();
   });
 
   it('应绑定、解绑权限并处理重复关系', async () => {

@@ -5,10 +5,12 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   ApiCommonResponses,
+  ApiPageQuery,
   ApiOkResponseData,
   ApiOkResponseEmpty,
 } from '../../common/decorators/index.js';
@@ -27,6 +29,7 @@ import {
   RoleSoftDeleteRequestDto,
   RoleUpdateRequestDto,
 } from './dto/index.js';
+import { PageQueryDto } from '../../common/dto/index.js';
 import { RoleService } from './role.service.js';
 
 /** 提供角色和角色权限关系管理接口。 */
@@ -39,15 +42,18 @@ export class RoleController {
 
   /** 查询未软删除的角色列表。 */
   @Get('list')
+  @ApiPageQuery()
   @ApiOperation({
     summary: '查询角色列表',
-    description: '返回系统中未软删除的角色及其权限 ID 列表。',
+    description:
+      '返回未软删除的角色分页列表及其权限 ID，按创建时间和 ID 倒序排列。',
   })
-  @ApiOkResponseData(RoleListResponseDto, { description: '角色列表和总数。' })
+  @ApiOkResponseData(RoleListResponseDto, {
+    description: '角色分页列表和分页元数据。',
+  })
   @RequirePermission(PermissionResource.ROLE)
-  async list() {
-    const items = await this.roleService.listRoles();
-    return { items, total: items.length };
+  async list(@Query() query: PageQueryDto = new PageQueryDto()) {
+    return this.roleService.listRoles(query);
   }
 
   /** 创建角色。 */

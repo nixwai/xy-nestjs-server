@@ -1,15 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { PageResponseDto } from '../../../common/dto/index.js';
 import { RoleResponseDto } from './role-response.dto.js';
 
-/** 角色列表响应数据。 */
-export class RoleListResponseDto {
-  @ApiProperty({ type: () => [RoleResponseDto], description: '角色列表。' })
-  items!: RoleResponseDto[];
-
+/** 角色分页列表响应数据。 */
+export class RoleListResponseDto extends PageResponseDto<RoleResponseDto> {
   @ApiProperty({
-    type: Number,
-    description: '符合条件的角色总数。',
-    example: 1,
+    type: () => [RoleResponseDto],
+    description: '当前页角色列表。',
   })
-  total!: number;
+  declare items: RoleResponseDto[];
 }

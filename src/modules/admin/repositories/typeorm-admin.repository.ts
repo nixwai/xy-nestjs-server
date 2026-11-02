@@ -14,6 +14,8 @@ import type {
   AdminRepository,
   AdminUpdateInput,
 } from './admin-repository.port.js';
+import { PageQueryDto } from '../../../common/dto/index.js';
+import type { PageResult } from '../../../common/types/index.js';
 import type { AdminRecord } from '../types/admin.types.js';
 
 /** 使用 TypeORM 保存管理员账户和角色关系。 */
@@ -42,9 +44,24 @@ export class TypeOrmAdminRepository implements AdminRepository {
     return item ? this.toRecord(item) : null;
   }
 
-  async list(): Promise<AdminRecord[]> {
-    const items = await this.admins.find();
-    return items.map((item) => this.toRecord(item));
+  async list(
+    query: PageQueryDto = new PageQueryDto(),
+  ): Promise<PageResult<AdminRecord>> {
+    const [items, total] = await this.admins.findAndCount({
+      order: { createdAt: 'DESC', id: 'DESC' },
+      skip: query.skip,
+      take: query.pageSize,
+    });
+    const totalPages = total === 0 ? 0 : Math.ceil(total / query.pageSize);
+    return {
+      items: items.map((item) => this.toRecord(item)),
+      total,
+      page: query.page,
+      pageSize: query.pageSize,
+      totalPages,
+      hasNextPage: query.page < totalPages,
+      hasPreviousPage: query.page > 1 && total > 0,
+    };
   }
 
   async create(input: AdminCreateInput): Promise<AdminRecord> {
