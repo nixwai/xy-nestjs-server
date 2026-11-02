@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { TypeOrmRoleRepository } from '../../../../../src/modules/role/repositories/typeorm-role.repository.js';
+import { TypeOrmRoleRepository } from '#/modules/role/repositories/typeorm-role.repository.js';
 
 function entity(overrides: Record<string, unknown> = {}) {
   return {

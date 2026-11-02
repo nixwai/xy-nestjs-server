@@ -2,7 +2,7 @@ import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { getEnvironmentFilePaths, resolveEnvironmentVariables } from '../../../src/config/environment.js';
+import { getEnvironmentFilePaths, resolveEnvironmentVariables } from '#/config/environment.js';
 
 describe('environment loader', () => {
   it('loads development files from high to low precedence while preserving runtime values', () => {

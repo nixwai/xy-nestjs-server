@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Inject, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ApiCommonResponses, ApiOkResponseData, ApiOkResponseEmpty } from '../../common/decorators/index.js';
+import { ApiCommonResponses, ApiOkResponseData, ApiOkResponseEmpty } from '#/common/decorators/index.js';
 import { Public } from '../authorization/decorators/index.js';
 import { AuthService } from './auth.service.js';
-import { PasswordTransportService } from '../../common/security/index.js';
+import { PasswordTransportService } from '#/common/security/index.js';
 import {
   AdminLoginRequestDto,
   AdminPublicKeyResponseDto,

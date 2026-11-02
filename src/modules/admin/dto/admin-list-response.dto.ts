@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { PageResponseDto } from '../../../common/dto/index.js';
+import { PageResponseDto } from '#/common/dto/index.js';
 import { AdminResponseDto } from './admin-response.dto.js';
 
 /** 管理员分页列表响应数据。 */

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { HttpMethod, PermissionResource } from '../../authorization/enums/index.js';
+import { HttpMethod, PermissionResource } from '#/modules/authorization/enums/index.js';
 
 /** 权限目录公开信息。 */
 export class PermissionResponseDto {

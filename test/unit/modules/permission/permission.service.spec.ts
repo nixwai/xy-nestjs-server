@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { PermissionService } from '../../../../src/modules/permission/permission.service.js';
-import type { PermissionRepository } from '../../../../src/modules/permission/repositories/permission-repository.port.js';
-import type { AuditService } from '../../../../src/modules/audit/audit.service.js';
-import { REGISTERED_PERMISSIONS } from '../../../../src/modules/permission/constants/registered-permissions.constant.js';
-import { PermissionResource, HttpMethod } from '../../../../src/modules/authorization/enums/index.js';
+import { PermissionService } from '#/modules/permission/permission.service.js';
+import type { PermissionRepository } from '#/modules/permission/repositories/permission-repository.port.js';
+import type { AuditService } from '#/modules/audit/audit.service.js';
+import { REGISTERED_PERMISSIONS } from '#/modules/permission/constants/registered-permissions.constant.js';
+import { PermissionResource, HttpMethod } from '#/modules/authorization/enums/index.js';
 
 const permission = {
   id: 'permission-1',

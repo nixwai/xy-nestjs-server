@@ -1,6 +1,6 @@
 import type { ConfigService } from '@nestjs/config';
 import { describe, expect, it } from 'vitest';
-import { HealthService } from '../../../../src/modules/health/health.service.js';
+import { HealthService } from '#/modules/health/health.service.js';
 
 describe('HealthService', () => {
   it('reports liveness and readiness when database is disabled', async () => {

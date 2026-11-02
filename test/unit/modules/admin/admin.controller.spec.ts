@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AdminController } from '../../../../src/modules/admin/admin.controller.js';
+import { AdminController } from '#/modules/admin/admin.controller.js';
 
 const admin = { sub: 'admin-1' } as never;
 const body = {

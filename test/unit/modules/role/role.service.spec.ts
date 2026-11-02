@@ -1,12 +1,12 @@
 import { NotFoundException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
-import type { PermissionService } from '../../../../src/modules/permission/permission.service.js';
-import { RoleService } from '../../../../src/modules/role/role.service.js';
-import type { PermissionRecord } from '../../../../src/modules/authorization/types/permission.types.js';
-import type { RoleRecord } from '../../../../src/modules/role/types/role.types.js';
-import type { RoleRepository } from '../../../../src/modules/role/repositories/role-repository.port.js';
-import type { AuditService } from '../../../../src/modules/audit/audit.service.js';
-import { HttpMethod, PermissionResource } from '../../../../src/modules/authorization/enums/index.js';
+import type { PermissionService } from '#/modules/permission/permission.service.js';
+import { RoleService } from '#/modules/role/role.service.js';
+import type { PermissionRecord } from '#/modules/authorization/types/permission.types.js';
+import type { RoleRecord } from '#/modules/role/types/role.types.js';
+import type { RoleRepository } from '#/modules/role/repositories/role-repository.port.js';
+import type { AuditService } from '#/modules/audit/audit.service.js';
+import { HttpMethod, PermissionResource } from '#/modules/authorization/enums/index.js';
 
 const role: RoleRecord = {
   id: 'role-1',

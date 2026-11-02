@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { AdminModule } from '../admin/admin.module.js';
-import { SecurityModule } from '../../common/security/index.js';
+import { SecurityModule } from '#/common/security/index.js';
 import { AdminService } from '../admin/admin.service.js';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';

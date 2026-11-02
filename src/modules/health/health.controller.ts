@@ -1,6 +1,6 @@
 import { Controller, Get, Inject } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ApiCommonResponses, ApiOkResponseData } from '../../common/decorators/index.js';
+import { ApiCommonResponses, ApiOkResponseData } from '#/common/decorators/index.js';
 import { Public } from '../authorization/decorators/index.js';
 import { HealthResponseDto, ReadinessResponseDto } from './dto/index.js';
 import { HealthService } from './health.service.js';

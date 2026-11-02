@@ -1,6 +1,6 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { hashPassword, verifyPassword } from '../auth/utils/password.util.js';
-import { validatePassword } from '../../common/security/index.js';
+import { validatePassword } from '#/common/security/index.js';
 import type {
   AdminCreateInput,
   AdminRepository,
@@ -13,7 +13,7 @@ import { RoleService } from '../role/role.service.js';
 import { AuditService } from '../audit/audit.service.js';
 import type { AdminCreateRequestDto, AdminUpdateRequestDto } from './dto/index.js';
 import { AdminListQueryDto } from './dto/index.js';
-import type { PageResult } from '../../common/types/index.js';
+import type { PageResult } from '#/common/types/index.js';
 
 /** 管理员账户应用服务。 */
 @Injectable()

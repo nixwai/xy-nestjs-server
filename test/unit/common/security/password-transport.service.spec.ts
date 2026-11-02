@@ -2,7 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { constants, createPublicKey, publicEncrypt } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import { TEST_RSA_PRIVATE_KEY } from '../../../fixtures/rsa-key.js';
-import { PasswordTransportService } from '../../../../src/common/security/password-transport.service.js';
+import { PasswordTransportService } from '#/common/security/password-transport.service.js';
 
 function createService(): PasswordTransportService {
   return new PasswordTransportService(new ConfigService({ auth: { rsaPrivateKey: TEST_RSA_PRIVATE_KEY } }));

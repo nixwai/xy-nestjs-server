@@ -1,6 +1,6 @@
 import { of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { TransformInterceptor } from '../../../../src/common/interceptors/transform.interceptor.js';
+import { TransformInterceptor } from '#/common/interceptors/transform.interceptor.js';
 
 describe('TransformInterceptor', () => {
   it('sets HTTP success responses to 200 and wraps handler data', async () => {

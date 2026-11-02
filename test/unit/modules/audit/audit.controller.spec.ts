@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AuditController } from '../../../../src/modules/audit/audit.controller.js';
-import { AuditLogListQueryDto } from '../../../../src/modules/audit/dto/index.js';
+import { AuditController } from '#/modules/audit/audit.controller.js';
+import { AuditLogListQueryDto } from '#/modules/audit/dto/index.js';
 
 const admin = { sub: 'admin-1' } as never;
 

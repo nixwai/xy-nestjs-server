@@ -1,17 +1,14 @@
 import { Test, type TestingModuleBuilder } from '@nestjs/testing';
-import { AppModule } from '../../src/app.module.js';
-import {
-  ADMIN_REPOSITORY,
-  ADMIN_TRANSACTION_RUNNER
-} from '../../src/modules/admin/repositories/admin-repository.port.js';
-import { InMemoryAdminRepository } from '../../src/modules/admin/repositories/in-memory-admin.repository.js';
-import { InMemoryAdminTransactionRunner } from '../../src/modules/admin/repositories/in-memory-admin-transaction-runner.js';
-import { AUTH_SESSION_REPOSITORY } from '../../src/modules/auth/repositories/auth-session-repository.port.js';
-import { InMemoryAuthSessionRepository } from '../../src/modules/auth/repositories/in-memory-auth-session.repository.js';
-import { ROLE_REPOSITORY } from '../../src/modules/role/repositories/role-repository.port.js';
-import { InMemoryRoleRepository } from '../../src/modules/role/repositories/in-memory-role.repository.js';
-import { PERMISSION_REPOSITORY } from '../../src/modules/permission/repositories/permission-repository.port.js';
-import { InMemoryPermissionRepository } from '../../src/modules/permission/repositories/in-memory-permission.repository.js';
+import { AppModule } from '#/app.module.js';
+import { ADMIN_REPOSITORY, ADMIN_TRANSACTION_RUNNER } from '#/modules/admin/repositories/admin-repository.port.js';
+import { InMemoryAdminRepository } from '#/modules/admin/repositories/in-memory-admin.repository.js';
+import { InMemoryAdminTransactionRunner } from '#/modules/admin/repositories/in-memory-admin-transaction-runner.js';
+import { AUTH_SESSION_REPOSITORY } from '#/modules/auth/repositories/auth-session-repository.port.js';
+import { InMemoryAuthSessionRepository } from '#/modules/auth/repositories/in-memory-auth-session.repository.js';
+import { ROLE_REPOSITORY } from '#/modules/role/repositories/role-repository.port.js';
+import { InMemoryRoleRepository } from '#/modules/role/repositories/in-memory-role.repository.js';
+import { PERMISSION_REPOSITORY } from '#/modules/permission/repositories/permission-repository.port.js';
+import { InMemoryPermissionRepository } from '#/modules/permission/repositories/in-memory-permission.repository.js';
 
 /** 创建不依赖数据库的端到端测试模块。 */
 export function createTestModule(): TestingModuleBuilder {

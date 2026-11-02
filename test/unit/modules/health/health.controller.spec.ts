@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { HealthController } from '../../../../src/modules/health/health.controller.js';
+import { HealthController } from '#/modules/health/health.controller.js';
 
 describe('HealthController', () => {
   it('应返回存活和就绪状态', async () => {

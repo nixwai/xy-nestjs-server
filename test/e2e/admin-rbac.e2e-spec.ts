@@ -2,10 +2,10 @@ import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createTestModule } from './create-test-module.js';
-import { ADMIN_REPOSITORY } from '../../src/modules/admin/repositories/admin-repository.port.js';
-import type { AdminRepository } from '../../src/modules/admin/repositories/admin-repository.port.js';
-import { hashPassword } from '../../src/modules/auth/utils/password.util.js';
-import { createStrictValidationPipe } from '../../src/common/pipes/index.js';
+import { ADMIN_REPOSITORY } from '#/modules/admin/repositories/admin-repository.port.js';
+import type { AdminRepository } from '#/modules/admin/repositories/admin-repository.port.js';
+import { hashPassword } from '#/modules/auth/utils/password.util.js';
+import { createStrictValidationPipe } from '#/common/pipes/index.js';
 import { encryptPassword } from './password-transport.js';
 
 describe('RBAC management API (e2e)', () => {

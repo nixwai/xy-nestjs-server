@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { createValidationMessages } from '../../../common/constants/index.js';
+import { createValidationMessages } from '#/common/constants/index.js';
 import { IsBoolean, IsInt, IsNotEmpty, IsOptional, IsString, MaxLength, Min } from 'class-validator';
 
 const parentIdValidation = createValidationMessages('父级菜单 ID');

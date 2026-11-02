@@ -1,11 +1,6 @@
 import { Body, Controller, Get, Inject, Post, Query } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
-import {
-  ApiCommonResponses,
-  ApiPageQuery,
-  ApiOkResponseData,
-  ApiOkResponseEmpty
-} from '../../common/decorators/index.js';
+import { ApiCommonResponses, ApiPageQuery, ApiOkResponseData, ApiOkResponseEmpty } from '#/common/decorators/index.js';
 import { CurrentAdmin } from '../auth/decorators/index.js';
 import type { AdminJwtPayload } from '../auth/tokens/jwt-token.service.js';
 import { RequirePermission, SuperAdminOnly } from '../authorization/decorators/index.js';
@@ -23,7 +18,7 @@ import {
 } from './dto/index.js';
 import { AdminService } from './admin.service.js';
 import { AdminAuthorizationQueryService } from './authorization-query.service.js';
-import { PasswordTransportService } from '../../common/security/index.js';
+import { PasswordTransportService } from '#/common/security/index.js';
 
 /** 提供管理员账户、状态和角色绑定管理接口。 */
 @ApiTags('管理员管理')

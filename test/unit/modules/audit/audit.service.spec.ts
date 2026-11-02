@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AuditService } from '../../../../src/modules/audit/audit.service.js';
-import { AuditLogListQueryDto } from '../../../../src/modules/audit/dto/index.js';
+import { AuditService } from '#/modules/audit/audit.service.js';
+import { AuditLogListQueryDto } from '#/modules/audit/dto/index.js';
 
 function query(overrides: Partial<AuditLogListQueryDto> = {}) {
   return Object.assign(new AuditLogListQueryDto(), overrides);

@@ -2,9 +2,9 @@ import type { ArgumentsHost } from '@nestjs/common';
 import { BadRequestException, HttpException, HttpStatus, InternalServerErrorException, Logger } from '@nestjs/common';
 import { QueryFailedError } from 'typeorm';
 import { describe, expect, it, vi } from 'vitest';
-import { HttpCode } from '../../../../src/common/enums/index.js';
-import { DomainConflictError, DomainNotFoundError } from '../../../../src/common/errors/index.js';
-import { GlobalExceptionFilter } from '../../../../src/common/filters/global-exception.filter.js';
+import { HttpCode } from '#/common/enums/index.js';
+import { DomainConflictError, DomainNotFoundError } from '#/common/errors/index.js';
+import { GlobalExceptionFilter } from '#/common/filters/global-exception.filter.js';
 
 interface ResponseMock {
   status: ReturnType<typeof vi.fn>;

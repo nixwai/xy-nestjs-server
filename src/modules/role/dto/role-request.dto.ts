@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { createValidationMessages } from '../../../common/constants/index.js';
+import { createValidationMessages } from '#/common/constants/index.js';
 import { IsBoolean, IsNotEmpty, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
 
 const codeValidation = createValidationMessages('角色编码');

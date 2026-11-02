@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull } from 'typeorm';
 import type { Repository } from 'typeorm';
-import { DomainConflictError, DomainNotFoundError } from '../../../common/errors/index.js';
+import { DomainConflictError, DomainNotFoundError } from '#/common/errors/index.js';
 import { AdminEntity } from '../entities/admin.entity.js';
 import { AdminRoleAssignmentEntity } from '../entities/admin-role-assignment.entity.js';
 import { AdminSessionEntity } from '../entities/admin-session.entity.js';
 import type { AdminCreateInput, AdminRepository, AdminUpdateInput } from './admin-repository.port.js';
-import { PageQueryDto } from '../../../common/dto/index.js';
-import type { PageResult } from '../../../common/types/index.js';
+import { PageQueryDto } from '#/common/dto/index.js';
+import type { PageResult } from '#/common/types/index.js';
 import type { AdminRecord } from '../types/admin.types.js';
 
 /** 使用 TypeORM 保存管理员账户和角色关系。 */

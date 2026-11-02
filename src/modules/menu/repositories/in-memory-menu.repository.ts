@@ -1,4 +1,4 @@
-import { DomainNotFoundError } from '../../../common/errors/index.js';
+import { DomainNotFoundError } from '#/common/errors/index.js';
 import type { MenuRecord } from '../types/menu.types.js';
 import type { MenuRepository } from './menu-repository.port.js';
 

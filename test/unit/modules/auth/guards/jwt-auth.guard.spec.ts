@@ -2,15 +2,15 @@ import type { ExecutionContext } from '@nestjs/common';
 import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { describe, expect, it } from 'vitest';
-import { AdminService } from '../../../../../src/modules/admin/admin.service.js';
-import { InMemoryAdminRepository } from '../../../../../src/modules/admin/repositories/in-memory-admin.repository.js';
-import { InMemoryAdminTransactionRunner } from '../../../../../src/modules/admin/repositories/in-memory-admin-transaction-runner.js';
-import { AuditService } from '../../../../../src/modules/audit/audit.service.js';
-import { AuthService } from '../../../../../src/modules/auth/auth.service.js';
-import { InMemoryAuthSessionRepository } from '../../../../../src/modules/auth/repositories/in-memory-auth-session.repository.js';
-import { JwtAuthGuard } from '../../../../../src/modules/auth/guards/jwt-auth.guard.js';
-import { JwtTokenService } from '../../../../../src/modules/auth/tokens/jwt-token.service.js';
-import type { RoleService } from '../../../../../src/modules/role/role.service.js';
+import { AdminService } from '#/modules/admin/admin.service.js';
+import { InMemoryAdminRepository } from '#/modules/admin/repositories/in-memory-admin.repository.js';
+import { InMemoryAdminTransactionRunner } from '#/modules/admin/repositories/in-memory-admin-transaction-runner.js';
+import { AuditService } from '#/modules/audit/audit.service.js';
+import { AuthService } from '#/modules/auth/auth.service.js';
+import { InMemoryAuthSessionRepository } from '#/modules/auth/repositories/in-memory-auth-session.repository.js';
+import { JwtAuthGuard } from '#/modules/auth/guards/jwt-auth.guard.js';
+import { JwtTokenService } from '#/modules/auth/tokens/jwt-token.service.js';
+import type { RoleService } from '#/modules/role/role.service.js';
 
 function contextFor(authorization?: string): ExecutionContext {
   const request = { header: () => authorization };

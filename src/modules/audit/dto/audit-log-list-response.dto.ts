@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { CursorPageResponseDto } from '../../../common/dto/index.js';
+import { CursorPageResponseDto } from '#/common/dto/index.js';
 import { AuditLogResponseDto } from './audit-log-response.dto.js';
 
 /** 审计日志游标分页响应数据。 */

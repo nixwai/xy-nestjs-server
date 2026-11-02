@@ -1,6 +1,6 @@
 import type { ConfigService } from '@nestjs/config';
 import { describe, expect, it, vi } from 'vitest';
-import { RateLimitGuard } from '../../../../src/common/guards/rate-limit.guard.js';
+import { RateLimitGuard } from '#/common/guards/rate-limit.guard.js';
 
 /** 创建携带客户端 IP 的限流守卫测试上下文桩。 */
 function contextFor(ip: string) {

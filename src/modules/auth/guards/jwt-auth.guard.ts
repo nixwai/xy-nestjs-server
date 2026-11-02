@@ -4,7 +4,7 @@ import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import { AuthService } from '../auth.service.js';
 import { JwtTokenService, type AdminJwtPayload } from '../tokens/jwt-token.service.js';
-import { PUBLIC_ROUTE_KEY } from '../../authorization/decorators/index.js';
+import { PUBLIC_ROUTE_KEY } from '#/modules/authorization/decorators/index.js';
 
 /** 校验访问令牌并将当前管理员身份写入请求。 */
 @Injectable()

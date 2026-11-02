@@ -1,6 +1,6 @@
 import { QueryFailedError } from 'typeorm';
 import { describe, expect, it } from 'vitest';
-import { getMysqlDuplicateKey } from '../../../../src/common/utils/typeorm-error.util.js';
+import { getMysqlDuplicateKey } from '#/common/utils/typeorm-error.util.js';
 
 interface MysqlErrorOptions {
   code?: string;

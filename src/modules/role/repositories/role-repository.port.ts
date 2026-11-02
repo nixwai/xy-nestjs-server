@@ -1,5 +1,5 @@
-import type { PageQueryDto } from '../../../common/dto/index.js';
-import type { PageResult } from '../../../common/types/index.js';
+import type { PageQueryDto } from '#/common/dto/index.js';
+import type { PageResult } from '#/common/types/index.js';
 import type { RoleRecord } from '../types/role.types.js';
 
 /** 角色仓储注入令牌。 */

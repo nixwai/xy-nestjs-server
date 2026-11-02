@@ -1,7 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException } from '@nestjs/common';
 import { describe, expect, it } from 'vitest';
-import { JwtTokenService } from '../../../../../src/modules/auth/tokens/jwt-token.service.js';
+import { JwtTokenService } from '#/modules/auth/tokens/jwt-token.service.js';
 
 const service = new JwtTokenService(
   new ConfigService({

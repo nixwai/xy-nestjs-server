@@ -1,6 +1,6 @@
-import { DomainConflictError, DomainNotFoundError } from '../../../common/errors/index.js';
-import { PageQueryDto } from '../../../common/dto/index.js';
-import type { PageResult } from '../../../common/types/index.js';
+import { DomainConflictError, DomainNotFoundError } from '#/common/errors/index.js';
+import { PageQueryDto } from '#/common/dto/index.js';
+import type { PageResult } from '#/common/types/index.js';
 import type { RoleRecord } from '../types/role.types.js';
 import type { RoleRepository } from './role-repository.port.js';
 

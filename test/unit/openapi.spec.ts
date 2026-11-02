@@ -1,6 +1,6 @@
 import { SwaggerModule } from '@nestjs/swagger';
 import { createTestModule } from '../e2e/create-test-module.js';
-import { createSwaggerConfig } from '../../src/common/swagger/swagger.config.js';
+import { createSwaggerConfig } from '#/common/swagger/swagger.config.js';
 
 describe('OpenAPI 文档', () => {
   it('应完整描述接口说明、请求体和统一响应', async () => {

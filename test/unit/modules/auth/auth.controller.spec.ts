@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AuthController } from '../../../../src/modules/auth/auth.controller.js';
+import { AuthController } from '#/modules/auth/auth.controller.js';
 
 describe('AuthController', () => {
   it('应代理认证接口', async () => {

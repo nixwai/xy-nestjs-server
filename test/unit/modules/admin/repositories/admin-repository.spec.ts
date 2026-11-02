@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { DomainConflictError } from '../../../../../src/common/errors/index.js';
-import { InMemoryAdminRepository } from '../../../../../src/modules/admin/repositories/in-memory-admin.repository.js';
+import { DomainConflictError } from '#/common/errors/index.js';
+import { InMemoryAdminRepository } from '#/modules/admin/repositories/in-memory-admin.repository.js';
 
 function adminInput(username: string) {
   return { username, passwordHash: 'hash', passwordSalt: 'salt' };

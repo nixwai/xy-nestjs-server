@@ -1,9 +1,9 @@
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { describe, expect, it } from 'vitest';
-import { CursorPageQueryDto, PageQueryDto } from '../../../../src/common/dto/index.js';
-import { decodeCursor, encodeCursor } from '../../../../src/common/utils/index.js';
-import { createPageResult } from '../../../../src/common/utils/pagination.util.js';
+import { CursorPageQueryDto, PageQueryDto } from '#/common/dto/index.js';
+import { decodeCursor, encodeCursor } from '#/common/utils/index.js';
+import { createPageResult } from '#/common/utils/pagination.util.js';
 
 describe('pagination utilities', () => {
   it('应使用默认分页参数并计算 skip', () => {

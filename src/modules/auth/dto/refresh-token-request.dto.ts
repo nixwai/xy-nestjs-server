@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { createValidationMessages } from '../../../common/constants/index.js';
+import { createValidationMessages } from '#/common/constants/index.js';
 import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
 
 const refreshTokenValidation = createValidationMessages('刷新令牌');

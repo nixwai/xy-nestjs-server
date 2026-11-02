@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { createValidationMessages } from '../../../common/constants/index.js';
+import { createValidationMessages } from '#/common/constants/index.js';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 const idValidation = createValidationMessages('权限 ID');

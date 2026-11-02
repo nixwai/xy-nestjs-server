@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { AdminLoginRequestDto } from '../../../../src/modules/auth/dto/admin-login-request.dto.js';
-import { createStrictValidationPipe } from '../../../../src/common/pipes/strict-validation.pipe.js';
+import { AdminLoginRequestDto } from '#/modules/auth/dto/admin-login-request.dto.js';
+import { createStrictValidationPipe } from '#/common/pipes/strict-validation.pipe.js';
 
 describe('createStrictValidationPipe', () => {
   it('creates a validation pipe for strict request boundaries', () => {

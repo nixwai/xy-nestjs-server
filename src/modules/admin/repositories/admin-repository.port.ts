@@ -1,5 +1,5 @@
-import type { PageQueryDto } from '../../../common/dto/index.js';
-import type { PageResult } from '../../../common/types/index.js';
+import type { PageQueryDto } from '#/common/dto/index.js';
+import type { PageResult } from '#/common/types/index.js';
 import type { AdminRecord } from '../types/admin.types.js';
 
 /** 管理员创建输入。 */

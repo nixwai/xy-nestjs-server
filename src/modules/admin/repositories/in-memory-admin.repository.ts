@@ -1,7 +1,7 @@
-import { DomainConflictError, DomainNotFoundError } from '../../../common/errors/index.js';
+import { DomainConflictError, DomainNotFoundError } from '#/common/errors/index.js';
 import type { AdminCreateInput, AdminRepository, AdminUpdateInput } from './admin-repository.port.js';
-import { PageQueryDto } from '../../../common/dto/index.js';
-import type { PageResult } from '../../../common/types/index.js';
+import { PageQueryDto } from '#/common/dto/index.js';
+import type { PageResult } from '#/common/types/index.js';
 import type { AdminRecord } from '../types/admin.types.js';
 
 /** 在单元测试中保存管理员账户和角色关系。 */

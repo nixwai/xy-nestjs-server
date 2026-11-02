@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import type { HttpMethod, PermissionResource } from '../../authorization/enums/index.js';
+import type { HttpMethod, PermissionResource } from '#/modules/authorization/enums/index.js';
 
 /** 代码注册的权限目录。 */
 @Entity({ name: 'permission' })

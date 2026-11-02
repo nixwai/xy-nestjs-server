@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
-import { AdminSessionEntity } from '../../admin/entities/admin-session.entity.js';
+import { AdminSessionEntity } from '#/modules/admin/entities/admin-session.entity.js';
 import type { AuthSessionRepository } from './auth-session-repository.port.js';
 import type { AdminSessionRecord, SessionRotationResult } from '../types/session.types.js';
 

@@ -1,6 +1,6 @@
-import { createValidationMessages } from '../../../common/constants/index.js';
+import { createValidationMessages } from '#/common/constants/index.js';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { PageQueryDto } from '../../../common/dto/index.js';
+import { PageQueryDto } from '#/common/dto/index.js';
 import { IsBase64, IsBoolean, IsNotEmpty, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
 const usernameValidation = createValidationMessages('用户名');

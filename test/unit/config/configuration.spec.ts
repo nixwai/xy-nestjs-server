@@ -1,7 +1,7 @@
 import { TEST_RSA_PRIVATE_KEY } from '../../fixtures/rsa-key.js';
 import { describe, expect, it } from 'vitest';
-import { applyEnvironmentOverrides, buildApplicationConfig } from '../../../src/config/configuration.js';
-import { loadBaseConfig } from '../../../src/common/utils/config.util.js';
+import { applyEnvironmentOverrides, buildApplicationConfig } from '#/config/configuration.js';
+import { loadBaseConfig } from '#/common/utils/config.util.js';
 
 describe('application configuration', () => {
   it('maps environment variables into grouped configuration', () => {

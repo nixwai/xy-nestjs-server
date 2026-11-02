@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { TypeOrmAdminRepository } from '../../../../../src/modules/admin/repositories/typeorm-admin.repository.js';
+import { TypeOrmAdminRepository } from '#/modules/admin/repositories/typeorm-admin.repository.js';
 
 function createEntity(overrides: Record<string, unknown> = {}) {
   return {

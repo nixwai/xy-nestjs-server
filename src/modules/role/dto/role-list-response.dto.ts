@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { PageResponseDto } from '../../../common/dto/index.js';
+import { PageResponseDto } from '#/common/dto/index.js';
 import { RoleResponseDto } from './role-response.dto.js';
 
 /** 角色分页列表响应数据。 */

@@ -20,14 +20,14 @@
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
     "typecheck": "tsc --noEmit",
     "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\" \"scripts/**/*.ts\"",
-    "openapi:generate": "tsx scripts/generate-openapi.ts",
-    "typeorm": "typeorm-ts-node-esm -d src/data-source.ts",
+    "openapi:generate": "tsx --conditions=development scripts/generate-openapi.ts",
+    "typeorm": "tsx --conditions=development node_modules/typeorm/cli.js -d src/data-source.ts",
     "migration:generate": "pnpm typeorm migration:generate src/database/migrations/Initial",
     "migration:run": "pnpm typeorm migration:run",
     "migration:revert": "pnpm typeorm migration:revert",
     "migration:show": "pnpm typeorm migration:show",
     "start:prod": "node dist/main.js",
-    "admin:init": "tsx scripts/initialize-admin.ts"
+    "admin:init": "tsx --conditions=development scripts/initialize-admin.ts"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",
@@ -68,5 +68,12 @@
     "vite": "^8.0.0",
     "vitest": "^4.1.2"
   },
-  "packageManager": "pnpm@11.20.0"
+  "packageManager": "pnpm@11.20.0",
+  "imports": {
+    "#/*": {
+      "types": "./src/*",
+      "development": "./src/*",
+      "default": "./dist/*"
+    }
+  }
 }

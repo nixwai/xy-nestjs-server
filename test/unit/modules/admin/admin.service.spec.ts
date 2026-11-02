@@ -1,14 +1,11 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
-import { AdminService } from '../../../../src/modules/admin/admin.service.js';
-import type {
-  AdminRepository,
-  AdminTransactionRunner
-} from '../../../../src/modules/admin/repositories/admin-repository.port.js';
-import type { AdminRecord } from '../../../../src/modules/admin/types/admin.types.js';
-import { hashPassword } from '../../../../src/modules/auth/utils/password.util.js';
-import type { RoleService } from '../../../../src/modules/role/role.service.js';
-import type { AuditService } from '../../../../src/modules/audit/audit.service.js';
+import { AdminService } from '#/modules/admin/admin.service.js';
+import type { AdminRepository, AdminTransactionRunner } from '#/modules/admin/repositories/admin-repository.port.js';
+import type { AdminRecord } from '#/modules/admin/types/admin.types.js';
+import { hashPassword } from '#/modules/auth/utils/password.util.js';
+import type { RoleService } from '#/modules/role/role.service.js';
+import type { AuditService } from '#/modules/audit/audit.service.js';
 
 const now = new Date('2026-01-01T00:00:00.000Z');
 

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { PermissionController } from '../../../../src/modules/permission/permission.controller.js';
+import { PermissionController } from '#/modules/permission/permission.controller.js';
 
 const admin = { sub: 'admin-1' } as never;
 const body = {} as never;

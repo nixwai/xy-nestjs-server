@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { createValidationMessages } from '../../../common/constants/index.js';
+import { createValidationMessages } from '#/common/constants/index.js';
 import { IsBase64, IsNotEmpty, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
 const usernameValidation = createValidationMessages('用户名');

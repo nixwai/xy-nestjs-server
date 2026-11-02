@@ -1,8 +1,8 @@
 import { BadRequestException, Inject, Injectable, Optional } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { decodeCursor, encodeCursor } from '../../common/utils/index.js';
-import type { CursorPageResult } from '../../common/types/index.js';
-import { CursorPageQueryDto } from '../../common/dto/index.js';
+import { decodeCursor, encodeCursor } from '#/common/utils/index.js';
+import type { CursorPageResult } from '#/common/types/index.js';
+import { CursorPageQueryDto } from '#/common/dto/index.js';
 import type { AuditLogListQueryDto } from './dto/index.js';
 import { AuditLogEntity } from './entities/audit-log.entity.js';
 

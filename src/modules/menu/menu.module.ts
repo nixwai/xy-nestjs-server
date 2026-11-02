@@ -7,7 +7,7 @@ import { MenuService } from './menu.service.js';
 import { MENU_REPOSITORY } from './repositories/menu-repository.port.js';
 import { InMemoryMenuRepository } from './repositories/in-memory-menu.repository.js';
 import { TypeOrmMenuRepository } from './repositories/typeorm-menu.repository.js';
-import { shouldLoadDatabaseModule } from '../../config/configuration.js';
+import { shouldLoadDatabaseModule } from '#/config/configuration.js';
 
 const databaseEnabled = shouldLoadDatabaseModule();
 @Module({

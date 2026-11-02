@@ -1,11 +1,6 @@
 import { Body, Controller, Get, Inject, Post, Query } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
-import {
-  ApiCommonResponses,
-  ApiPageQuery,
-  ApiOkResponseData,
-  ApiOkResponseEmpty
-} from '../../common/decorators/index.js';
+import { ApiCommonResponses, ApiPageQuery, ApiOkResponseData, ApiOkResponseEmpty } from '#/common/decorators/index.js';
 import { CurrentAdmin } from '../auth/decorators/index.js';
 import type { AdminJwtPayload } from '../auth/tokens/jwt-token.service.js';
 import { RequirePermission, SuperAdminOnly } from '../authorization/decorators/index.js';
@@ -18,7 +13,7 @@ import {
   RoleSoftDeleteRequestDto,
   RoleUpdateRequestDto
 } from './dto/index.js';
-import { PageQueryDto } from '../../common/dto/index.js';
+import { PageQueryDto } from '#/common/dto/index.js';
 import { RoleService } from './role.service.js';
 
 /** 提供角色和角色权限关系管理接口。 */

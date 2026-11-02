@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { DomainNotFoundError } from '../../common/errors/index.js';
+import { DomainNotFoundError } from '#/common/errors/index.js';
 import type { HttpMethod, PermissionResource } from './enums/index.js';
 import { AdminService } from '../admin/admin.service.js';
 import { RoleService } from '../role/role.service.js';

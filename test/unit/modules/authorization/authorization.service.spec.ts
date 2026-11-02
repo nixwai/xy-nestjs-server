@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AuthorizationService } from '../../../../src/modules/authorization/authorization.service.js';
-import type { AdminService } from '../../../../src/modules/admin/admin.service.js';
-import type { RoleService } from '../../../../src/modules/role/role.service.js';
-import type { PermissionService } from '../../../../src/modules/permission/permission.service.js';
-import { HttpMethod, PermissionResource } from '../../../../src/modules/authorization/enums/index.js';
-import { DomainNotFoundError } from '../../../../src/common/errors/index.js';
+import { AuthorizationService } from '#/modules/authorization/authorization.service.js';
+import type { AdminService } from '#/modules/admin/admin.service.js';
+import type { RoleService } from '#/modules/role/role.service.js';
+import type { PermissionService } from '#/modules/permission/permission.service.js';
+import { HttpMethod, PermissionResource } from '#/modules/authorization/enums/index.js';
+import { DomainNotFoundError } from '#/common/errors/index.js';
 
 const admin = {
   id: 'admin-1',

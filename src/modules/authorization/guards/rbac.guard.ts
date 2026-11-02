@@ -2,7 +2,7 @@ import type { CanActivate, ExecutionContext } from '@nestjs/common';
 import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
-import type { AdminJwtPayload } from '../../auth/tokens/jwt-token.service.js';
+import type { AdminJwtPayload } from '#/modules/auth/tokens/jwt-token.service.js';
 import { AuthorizationService } from '../authorization.service.js';
 import {
   PERMISSION_KEY,

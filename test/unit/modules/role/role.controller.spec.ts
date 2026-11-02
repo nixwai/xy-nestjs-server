@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { RoleController } from '../../../../src/modules/role/role.controller.js';
+import { RoleController } from '#/modules/role/role.controller.js';
 
 const admin = { sub: 'admin-1' } as never;
 const body = {} as never;

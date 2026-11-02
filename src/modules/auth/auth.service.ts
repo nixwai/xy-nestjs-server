@@ -2,7 +2,7 @@ import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createHash, randomBytes } from 'node:crypto';
 import { hashPassword, verifyPassword } from './utils/password.util.js';
-import { validatePassword } from '../../common/security/index.js';
+import { validatePassword } from '#/common/security/index.js';
 import { JwtTokenService } from './tokens/jwt-token.service.js';
 import { parseDuration } from './tokens/jwt-token.service.js';
 import type { AdminRecord } from '../admin/types/admin.types.js';

@@ -4,7 +4,7 @@ import {
   createApplicationConfigSchema,
   createConfigValidationSchema,
   validateEnvironment
-} from '../../../src/config/config.validation.js';
+} from '#/config/config.validation.js';
 
 describe('config validation', () => {
   it('rejects a missing RSA private key', () => {

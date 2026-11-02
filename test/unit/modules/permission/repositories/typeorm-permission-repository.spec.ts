@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { TypeOrmPermissionRepository } from '../../../../../src/modules/permission/repositories/typeorm-permission.repository.js';
+import { TypeOrmPermissionRepository } from '#/modules/permission/repositories/typeorm-permission.repository.js';
 
 const permission = {
   id: 'permission-1',

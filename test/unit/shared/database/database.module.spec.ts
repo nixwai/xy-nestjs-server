@@ -1,6 +1,6 @@
 import type { ConfigService } from '@nestjs/config';
 import { describe, expect, it } from 'vitest';
-import { createDatabaseOptions } from '../../../../src/shared/database/database.module.js';
+import { createDatabaseOptions } from '#/shared/database/database.module.js';
 
 describe('createDatabaseOptions', () => {
   it('lets Nest initialize the database before module initialization', () => {

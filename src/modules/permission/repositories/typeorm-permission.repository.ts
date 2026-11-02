@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
-import { DomainNotFoundError } from '../../../common/errors/index.js';
+import { DomainNotFoundError } from '#/common/errors/index.js';
 import { PermissionEntity } from '../entities/permission.entity.js';
-import type { PermissionRecord, RegisteredPermission } from '../../authorization/types/permission.types.js';
+import type { PermissionRecord, RegisteredPermission } from '#/modules/authorization/types/permission.types.js';
 import type { PermissionRepository } from './permission-repository.port.js';
 
 /** 使用 TypeORM 保存权限目录。 */

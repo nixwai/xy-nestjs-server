@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { InMemoryPermissionRepository } from '../../../../../src/modules/permission/repositories/in-memory-permission.repository.js';
-import { InMemoryRoleRepository } from '../../../../../src/modules/role/repositories/in-memory-role.repository.js';
+import { InMemoryPermissionRepository } from '#/modules/permission/repositories/in-memory-permission.repository.js';
+import { InMemoryRoleRepository } from '#/modules/role/repositories/in-memory-role.repository.js';
 
 const permission = {
   code: 'admin:get',

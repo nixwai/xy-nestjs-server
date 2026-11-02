@@ -1,6 +1,6 @@
-import { HttpMethod, PermissionResource } from '../../authorization/enums/index.js';
-import { createPermissionCode } from '../../authorization/utils/permission-code.util.js';
-import type { RegisteredPermission } from '../../authorization/types/permission.types.js';
+import { HttpMethod, PermissionResource } from '#/modules/authorization/enums/index.js';
+import { createPermissionCode } from '#/modules/authorization/utils/permission-code.util.js';
+import type { RegisteredPermission } from '#/modules/authorization/types/permission.types.js';
 
 /** 由代码维护的默认权限目录。 */
 export const REGISTERED_PERMISSIONS: RegisteredPermission[] = [
