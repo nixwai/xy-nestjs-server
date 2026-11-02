@@ -1,10 +1,5 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import type { CanActivate, ExecutionContext } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { Request } from 'express';
 
@@ -30,7 +25,7 @@ export class RateLimitGuard implements CanActivate {
 
   constructor(
     /** 读取限流窗口和请求上限配置。 */
-    private readonly configService: ConfigService,
+    @Inject(ConfigService) private readonly configService: ConfigService
   ) {}
 
   /**
@@ -60,18 +55,11 @@ export class RateLimitGuard implements CanActivate {
       return true;
     }
 
-    throw new HttpException(
-      '请求过于频繁，请稍后重试',
-      HttpStatus.TOO_MANY_REQUESTS,
-    );
+    throw new HttpException('请求过于频繁，请稍后重试', HttpStatus.TOO_MANY_REQUESTS);
   }
 
   /** 创建当前时间窗口的计数记录。 */
-  private createEntry(
-    current: RateLimitEntry | undefined,
-    now: number,
-    ttl: number,
-  ): RateLimitEntry {
+  private createEntry(current: RateLimitEntry | undefined, now: number, ttl: number): RateLimitEntry {
     if (!current || current.expiresAt <= now) {
       return { count: 0, expiresAt: now + ttl };
     }

@@ -7,23 +7,19 @@ interface MysqlDriverError {
   sqlMessage?: string;
 }
 
-const DUPLICATE_INDEX_KEY_MAP: Readonly<Record<string, string>> = Object.freeze(
-  {
-    uk_admin_username: 'username',
-    uk_admin_session_token_hash: 'tokenHash',
-    uk_admin_role_assignment_admin_id_role_id: 'adminRole',
-    uk_role_code: 'roleCode',
-    uk_permission_code: 'permissionCode',
-    uk_role_permission_assignment_role_id_permission_id: 'rolePermission',
-  },
-);
+const DUPLICATE_INDEX_KEY_MAP: Readonly<Record<string, string>> = Object.freeze({
+  uk_admin_username: 'username',
+  uk_admin_session_token_hash: 'tokenHash',
+  uk_admin_role_assignment_admin_id_role_id: 'adminRole',
+  uk_role_code: 'roleCode',
+  uk_permission_code: 'permissionCode',
+  uk_role_permission_assignment_role_id_permission_id: 'rolePermission'
+});
 
 /** 从 MySQL 错误消息中提取唯一索引名称。 */
 function extractIndexName(message: string): string | null {
-  const match = message.match(
-    /\bfor key\s+(?:'([^']+)'|"([^"]+)"|`([^`]+)`|([^\s,;]+))/i,
-  );
-  const rawIndexName = match?.slice(1).find((value) => value !== undefined);
+  const match = message.match(/\bfor key\s+(?:'([^']+)'|"([^"]+)"|`([^`]+)`|([^\s,;]+))/i);
+  const rawIndexName = match?.slice(1).find(value => value !== undefined);
   if (!rawIndexName) {
     return null;
   }
@@ -54,9 +50,7 @@ function getDriverError(error: unknown): MysqlDriverError | null {
   }
 
   const driverError = error.driverError;
-  return typeof driverError === 'object' && driverError !== null
-    ? (driverError as MysqlDriverError)
-    : null;
+  return typeof driverError === 'object' && driverError !== null ? (driverError as MysqlDriverError) : null;
 }
 
 /**
@@ -71,18 +65,13 @@ export function getMysqlDuplicateKey(error: unknown): string | null {
     return null;
   }
 
-  const isDuplicateEntry =
-    driverError.code === 'ER_DUP_ENTRY' || driverError.errno === 1062;
+  const isDuplicateEntry = driverError.code === 'ER_DUP_ENTRY' || driverError.errno === 1062;
   if (!isDuplicateEntry) {
     return null;
   }
 
   const queryError = error as QueryFailedError;
-  const messages = [
-    driverError.sqlMessage,
-    driverError.message,
-    queryError.message,
-  ];
+  const messages = [driverError.sqlMessage, driverError.message, queryError.message];
 
   for (const message of messages) {
     if (typeof message !== 'string') {

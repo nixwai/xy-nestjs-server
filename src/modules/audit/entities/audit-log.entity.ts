@@ -1,11 +1,4 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  Index,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 /** RBAC 和管理员变更审计记录。 */
 @Entity({ name: 'audit_log' })
@@ -18,7 +11,7 @@ export class AuditLogEntity {
   @PrimaryGeneratedColumn({
     type: 'bigint',
     unsigned: true,
-    primaryKeyConstraintName: 'pk_audit_log_id',
+    primaryKeyConstraintName: 'pk_audit_log_id'
   })
   id!: string;
 
@@ -27,7 +20,7 @@ export class AuditLogEntity {
     name: 'actor_admin_id',
     type: 'bigint',
     unsigned: true,
-    nullable: true,
+    nullable: true
   })
   actorAdminId!: string | null;
 

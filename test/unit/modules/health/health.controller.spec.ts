@@ -5,13 +5,13 @@ describe('HealthController', () => {
   it('应返回存活和就绪状态', async () => {
     const service = {
       getHealth: vi.fn().mockReturnValue({ status: 'ok' }),
-      getReadiness: vi.fn().mockResolvedValue({ status: 'ready' }),
+      getReadiness: vi.fn().mockResolvedValue({ status: 'ready' })
     };
     const controller = new HealthController(service as never);
 
     expect(controller.getHealth()).toEqual({ status: 'ok' });
     await expect(controller.getReadiness()).resolves.toEqual({
-      status: 'ready',
+      status: 'ready'
     });
   });
 });

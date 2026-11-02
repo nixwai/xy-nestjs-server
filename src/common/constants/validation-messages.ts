@@ -12,7 +12,7 @@ export function createValidationMessages(label: string) {
     min: (value: number) => `${label}不能小于${value}`,
     max: (value: number) => `${label}不能大于${value}`,
     minLength: (value: number) => `${label}长度不能少于${value}个字符`,
-    maxLength: (value: number) => `${label}长度不能超过${value}个字符`,
+    maxLength: (value: number) => `${label}长度不能超过${value}个字符`
   };
 }
 

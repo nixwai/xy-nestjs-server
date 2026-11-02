@@ -1,11 +1,5 @@
-import {
-  ArgumentsHost,
-  Catch,
-  ExceptionFilter,
-  HttpException,
-  HttpStatus,
-  Logger,
-} from '@nestjs/common';
+import type { ArgumentsHost, ExceptionFilter } from '@nestjs/common';
+import { Catch, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { HttpCode } from '../enums/index.js';
 import { DomainConflictError, DomainNotFoundError } from '../errors/index.js';
@@ -14,28 +8,26 @@ import type { ApiErrorResponse } from '../types/index.js';
 
 type ErrorResponseBody = Record<string, unknown>;
 
-const HTTP_STATUS_TO_BUSINESS_CODE: Readonly<Record<number, HttpCode>> =
-  Object.freeze({
-    [HttpStatus.BAD_REQUEST]: HttpCode.BAD_REQUEST,
-    [HttpStatus.UNAUTHORIZED]: HttpCode.UNAUTHORIZED,
-    [HttpStatus.FORBIDDEN]: HttpCode.FORBIDDEN,
-    [HttpStatus.NOT_FOUND]: HttpCode.NOT_FOUND,
-    [HttpStatus.CONFLICT]: HttpCode.CONFLICT,
-    [HttpStatus.UNPROCESSABLE_ENTITY]: HttpCode.UNPROCESSABLE_ENTITY,
-    [HttpStatus.TOO_MANY_REQUESTS]: HttpCode.TOO_MANY_REQUESTS,
-  });
+const HTTP_STATUS_TO_BUSINESS_CODE: Readonly<Record<number, HttpCode>> = Object.freeze({
+  [HttpStatus.BAD_REQUEST]: HttpCode.BAD_REQUEST,
+  [HttpStatus.UNAUTHORIZED]: HttpCode.UNAUTHORIZED,
+  [HttpStatus.FORBIDDEN]: HttpCode.FORBIDDEN,
+  [HttpStatus.NOT_FOUND]: HttpCode.NOT_FOUND,
+  [HttpStatus.CONFLICT]: HttpCode.CONFLICT,
+  [HttpStatus.UNPROCESSABLE_ENTITY]: HttpCode.UNPROCESSABLE_ENTITY,
+  [HttpStatus.TOO_MANY_REQUESTS]: HttpCode.TOO_MANY_REQUESTS
+});
 
-const HTTP_STATUS_TO_DEFAULT_MESSAGE: Readonly<Record<number, string>> =
-  Object.freeze({
-    [HttpStatus.BAD_REQUEST]: '请求参数错误',
-    [HttpStatus.UNAUTHORIZED]: '请先登录',
-    [HttpStatus.FORBIDDEN]: '无权访问',
-    [HttpStatus.NOT_FOUND]: '请求的资源不存在',
-    [HttpStatus.CONFLICT]: '请求与当前资源冲突',
-    [HttpStatus.UNPROCESSABLE_ENTITY]: '请求参数校验失败',
-    [HttpStatus.TOO_MANY_REQUESTS]: '请求过于频繁，请稍后重试',
-    [HttpStatus.UNSUPPORTED_MEDIA_TYPE]: '请求格式不受支持',
-  });
+const HTTP_STATUS_TO_DEFAULT_MESSAGE: Readonly<Record<number, string>> = Object.freeze({
+  [HttpStatus.BAD_REQUEST]: '请求参数错误',
+  [HttpStatus.UNAUTHORIZED]: '请先登录',
+  [HttpStatus.FORBIDDEN]: '无权访问',
+  [HttpStatus.NOT_FOUND]: '请求的资源不存在',
+  [HttpStatus.CONFLICT]: '请求与当前资源冲突',
+  [HttpStatus.UNPROCESSABLE_ENTITY]: '请求参数校验失败',
+  [HttpStatus.TOO_MANY_REQUESTS]: '请求过于频繁，请稍后重试',
+  [HttpStatus.UNSUPPORTED_MEDIA_TYPE]: '请求格式不受支持'
+});
 
 const DUPLICATE_KEY_LABELS: Readonly<Record<string, string>> = Object.freeze({
   username: '用户名',
@@ -44,20 +36,19 @@ const DUPLICATE_KEY_LABELS: Readonly<Record<string, string>> = Object.freeze({
   roleCode: '角色编码',
   permissionCode: '权限编码',
   rolePermission: '角色权限关系',
-  uniqueKey: '唯一字段',
+  uniqueKey: '唯一字段'
 });
 
-const DEFAULT_ENGLISH_MESSAGES: Readonly<Record<string, string>> =
-  Object.freeze({
-    'bad request': '请求参数错误',
-    unauthorized: '请先登录',
-    forbidden: '无权访问',
-    'not found': '请求的资源不存在',
-    conflict: '请求与当前资源冲突',
-    'unprocessable entity': '请求参数校验失败',
-    'too many requests': '请求过于频繁，请稍后重试',
-    'unsupported media type': '请求格式不受支持',
-  });
+const DEFAULT_ENGLISH_MESSAGES: Readonly<Record<string, string>> = Object.freeze({
+  'bad request': '请求参数错误',
+  unauthorized: '请先登录',
+  forbidden: '无权访问',
+  'not found': '请求的资源不存在',
+  conflict: '请求与当前资源冲突',
+  'unprocessable entity': '请求参数校验失败',
+  'too many requests': '请求过于频繁，请稍后重试',
+  'unsupported media type': '请求格式不受支持'
+});
 
 /** 将异常转换为项目统一的 API 错误响应。 */
 @Catch()
@@ -81,7 +72,7 @@ export class GlobalExceptionFilter implements ExceptionFilter<unknown> {
       this.sendError(response, HttpStatus.OK, {
         code: HttpCode.CONFLICT,
         message: `${DUPLICATE_KEY_LABELS[duplicateKey] ?? '字段'}已存在`,
-        data: null,
+        data: null
       });
       return;
     }
@@ -90,13 +81,11 @@ export class GlobalExceptionFilter implements ExceptionFilter<unknown> {
     const isClientError = status >= HttpStatus.BAD_REQUEST && status < 500;
 
     if (!isClientError) {
-      this.logger.error(
-        `${this.getRequestContext(request)} ${this.getExceptionName(exception)}`,
-      );
+      this.logger.error(`${this.getRequestContext(request)} ${this.getExceptionName(exception)}`);
       this.sendError(response, HttpStatus.INTERNAL_SERVER_ERROR, {
         code: HttpCode.INTERNAL_SERVER_ERROR,
         message: '服务器内部错误',
-        data: null,
+        data: null
       });
       return;
     }
@@ -105,7 +94,7 @@ export class GlobalExceptionFilter implements ExceptionFilter<unknown> {
     const payload: ApiErrorResponse = {
       code: this.getBusinessCode(body, status),
       message: this.getClientMessage(body, status),
-      data: null,
+      data: null
     };
 
     this.sendError(response, HttpStatus.OK, payload);
@@ -130,10 +119,7 @@ export class GlobalExceptionFilter implements ExceptionFilter<unknown> {
     if (exception instanceof HttpException) {
       return exception.getResponse();
     }
-    if (
-      exception instanceof DomainNotFoundError ||
-      exception instanceof DomainConflictError
-    ) {
+    if (exception instanceof DomainNotFoundError || exception instanceof DomainConflictError) {
       return exception.message;
     }
     return undefined;
@@ -146,9 +132,7 @@ export class GlobalExceptionFilter implements ExceptionFilter<unknown> {
     if (messages.length === 0) {
       return fallback;
     }
-    return messages
-      .map((message) => this.translateClientMessage(message, status))
-      .join('; ');
+    return messages.map(message => this.translateClientMessage(message, status)).join('; ');
   }
 
   /** 提取异常响应中的一条或多条消息。 */
@@ -163,10 +147,7 @@ export class GlobalExceptionFilter implements ExceptionFilter<unknown> {
       return [body.message.trim()];
     }
     if (Array.isArray(body.message)) {
-      return body.message.filter(
-        (item): item is string =>
-          typeof item === 'string' && item.trim().length > 0,
-      );
+      return body.message.filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
     }
     return [];
   }
@@ -217,11 +198,7 @@ export class GlobalExceptionFilter implements ExceptionFilter<unknown> {
   }
 
   /** 写入统一错误响应。 */
-  private sendError(
-    response: Response,
-    status: number,
-    payload: ApiErrorResponse,
-  ): void {
+  private sendError(response: Response, status: number, payload: ApiErrorResponse): void {
     response.status(status);
     response.json(payload);
   }

@@ -7,7 +7,7 @@ const body = {} as never;
 describe('PermissionController', () => {
   const service = {
     listPermissions: vi.fn().mockResolvedValue([{ id: '1' }]),
-    setActive: vi.fn().mockResolvedValue({ id: '1' }),
+    setActive: vi.fn().mockResolvedValue({ id: '1' })
   };
   const controller = new PermissionController(service as never);
 
@@ -17,17 +17,7 @@ describe('PermissionController', () => {
     await controller.disable(admin, body);
 
     expect(service.listPermissions).toHaveBeenCalled();
-    expect(service.setActive).toHaveBeenNthCalledWith(
-      1,
-      'admin-1',
-      undefined,
-      true,
-    );
-    expect(service.setActive).toHaveBeenNthCalledWith(
-      2,
-      'admin-1',
-      undefined,
-      false,
-    );
+    expect(service.setActive).toHaveBeenNthCalledWith(1, 'admin-1', undefined, true);
+    expect(service.setActive).toHaveBeenNthCalledWith(2, 'admin-1', undefined, false);
   });
 });

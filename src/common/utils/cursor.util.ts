@@ -9,9 +9,7 @@ export function encodeCursor(payload: CursorPayload): string {
 /** 解码游标载荷，格式不正确时返回 null。 */
 export function decodeCursor(value: string): CursorPayload | null {
   try {
-    const parsed: unknown = JSON.parse(
-      Buffer.from(value, 'base64url').toString('utf8'),
-    );
+    const parsed: unknown = JSON.parse(Buffer.from(value, 'base64url').toString('utf8'));
     if (!isCursorPayload(parsed)) {
       return null;
     }
@@ -22,9 +20,5 @@ export function decodeCursor(value: string): CursorPayload | null {
 }
 
 function isCursorPayload(value: unknown): value is CursorPayload {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    Object.values(value).every((item) => typeof item === 'string')
-  );
+  return typeof value === 'object' && value !== null && Object.values(value).every(item => typeof item === 'string');
 }

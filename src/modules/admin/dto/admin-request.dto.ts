@@ -1,15 +1,7 @@
 import { createValidationMessages } from '../../../common/constants/index.js';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PageQueryDto } from '../../../common/dto/index.js';
-import {
-  IsBoolean,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  Matches,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
 const usernameValidation = createValidationMessages('用户名');
 const passwordValidation = createValidationMessages('密码');
@@ -30,7 +22,7 @@ export class AdminCreateRequestDto {
     minLength: 3,
     maxLength: 64,
     example: 'operator01',
-    description: '管理员登录用户名，只允许字母、数字、点、下划线和连字符。',
+    description: '管理员登录用户名，只允许字母、数字、点、下划线和连字符。'
   })
   @IsString({ message: usernameValidation.isString })
   @IsNotEmpty({ message: usernameValidation.isNotEmpty })
@@ -44,13 +36,13 @@ export class AdminCreateRequestDto {
     minLength: 8,
     maxLength: 72,
     example: 'Admin1234',
-    description: '管理员登录密码，至少包含字母和数字。',
+    description: '管理员登录密码，至少包含字母和数字。'
   })
   @IsString({ message: passwordValidation.isString })
   @MinLength(8, { message: passwordValidation.minLength(8) })
   @MaxLength(72, { message: passwordValidation.maxLength(72) })
   @Matches(/^(?=.*[A-Za-z])(?=.*\d).+$/, {
-    message: '密码必须同时包含字母和数字',
+    message: '密码必须同时包含字母和数字'
   })
   password!: string;
 
@@ -58,7 +50,7 @@ export class AdminCreateRequestDto {
     type: Boolean,
     default: false,
     example: false,
-    description: '是否创建为超级管理员。',
+    description: '是否创建为超级管理员。'
   })
   @IsOptional()
   @IsBoolean({ message: isSuperAdminValidation.isBoolean })
@@ -69,7 +61,7 @@ export class AdminCreateRequestDto {
     minLength: 8,
     maxLength: 72,
     example: 'Current1234',
-    description: '创建超级管理员时必填的当前登录管理员密码。',
+    description: '创建超级管理员时必填的当前登录管理员密码。'
   })
   @IsOptional()
   @IsString({ message: currentPasswordValidation.isString })
@@ -90,7 +82,7 @@ export class AdminUpdateRequestDto {
     minLength: 3,
     maxLength: 64,
     example: 'operator01',
-    description: '新的登录用户名。',
+    description: '新的登录用户名。'
   })
   @IsOptional()
   @IsString({ message: usernameValidation.isString })
@@ -104,21 +96,21 @@ export class AdminUpdateRequestDto {
     minLength: 8,
     maxLength: 72,
     example: 'NewAdmin1234',
-    description: '新的登录密码，至少包含字母和数字。',
+    description: '新的登录密码，至少包含字母和数字。'
   })
   @IsOptional()
   @IsString({ message: passwordValidation.isString })
   @MinLength(8, { message: passwordValidation.minLength(8) })
   @MaxLength(72, { message: passwordValidation.maxLength(72) })
   @Matches(/^(?=.*[A-Za-z])(?=.*\d).+$/, {
-    message: '密码必须同时包含字母和数字',
+    message: '密码必须同时包含字母和数字'
   })
   password?: string;
 
   @ApiPropertyOptional({
     type: Boolean,
     example: true,
-    description: '是否允许该管理员继续登录。',
+    description: '是否允许该管理员继续登录。'
   })
   @IsOptional()
   @IsBoolean({ message: isActiveValidation.isBoolean })
@@ -127,7 +119,7 @@ export class AdminUpdateRequestDto {
   @ApiPropertyOptional({
     type: Boolean,
     example: false,
-    description: '是否设置为超级管理员。',
+    description: '是否设置为超级管理员。'
   })
   @IsOptional()
   @IsBoolean({ message: isSuperAdminValidation.isBoolean })
@@ -138,7 +130,7 @@ export class AdminUpdateRequestDto {
     minLength: 8,
     maxLength: 72,
     example: 'Current1234',
-    description: '修改密码或超级管理员状态时必填的当前登录管理员密码。',
+    description: '修改密码或超级管理员状态时必填的当前登录管理员密码。'
   })
   @IsOptional()
   @IsString({ message: currentPasswordValidation.isString })
@@ -159,13 +151,13 @@ export class AdminResetPasswordRequestDto {
     minLength: 8,
     maxLength: 72,
     example: 'NewAdmin1234',
-    description: '新密码，至少包含字母和数字。',
+    description: '新密码，至少包含字母和数字。'
   })
   @IsString({ message: passwordValidation.isString })
   @MinLength(8, { message: passwordValidation.minLength(8) })
   @MaxLength(72, { message: passwordValidation.maxLength(72) })
   @Matches(/^(?=.*[A-Za-z])(?=.*\d).+$/, {
-    message: '密码必须同时包含字母和数字',
+    message: '密码必须同时包含字母和数字'
   })
   password!: string;
 
@@ -174,7 +166,7 @@ export class AdminResetPasswordRequestDto {
     minLength: 8,
     maxLength: 72,
     example: 'Current1234',
-    description: '当前登录管理员密码。',
+    description: '当前登录管理员密码。'
   })
   @IsString({ message: currentPasswordValidation.isString })
   @MinLength(8, { message: currentPasswordValidation.minLength(8) })
@@ -193,7 +185,7 @@ export class AdminSoftDeleteRequestDto {
     minLength: 8,
     maxLength: 72,
     example: 'Current1234',
-    description: '当前登录管理员密码。',
+    description: '当前登录管理员密码。'
   })
   @IsOptional()
   @IsString({ message: currentPasswordValidation.isString })

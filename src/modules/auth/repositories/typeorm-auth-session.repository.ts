@@ -3,17 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
 import { AdminSessionEntity } from '../../admin/entities/admin-session.entity.js';
 import type { AuthSessionRepository } from './auth-session-repository.port.js';
-import type {
-  AdminSessionRecord,
-  SessionRotationResult,
-} from '../types/session.types.js';
+import type { AdminSessionRecord, SessionRotationResult } from '../types/session.types.js';
 
 /** 使用 TypeORM 保存刷新会话。 */
 @Injectable()
 export class TypeOrmAuthSessionRepository implements AuthSessionRepository {
   constructor(
     @InjectRepository(AdminSessionEntity)
-    private readonly sessions: Repository<AdminSessionEntity>,
+    private readonly sessions: Repository<AdminSessionEntity>
   ) {}
 
   async findByTokenHash(tokenHash: string): Promise<AdminSessionRecord | null> {
@@ -21,18 +18,14 @@ export class TypeOrmAuthSessionRepository implements AuthSessionRepository {
     return item ? this.toRecord(item) : null;
   }
 
-  async create(input: {
-    adminId: string;
-    tokenHash: string;
-    expiresAt: Date;
-  }): Promise<AdminSessionRecord> {
+  async create(input: { adminId: string; tokenHash: string; expiresAt: Date }): Promise<AdminSessionRecord> {
     const item = await this.sessions.save(
       this.sessions.create({
         ...input,
         revokedAt: null,
         replacedBySessionId: null,
-        lastUsedAt: null,
-      }),
+        lastUsedAt: null
+      })
     );
     return this.toRecord(item);
   }
@@ -40,9 +33,9 @@ export class TypeOrmAuthSessionRepository implements AuthSessionRepository {
   async rotate(
     sessionId: string,
     replacement: { adminId: string; tokenHash: string; expiresAt: Date },
-    now: Date,
+    now: Date
   ): Promise<SessionRotationResult> {
-    return this.sessions.manager.transaction(async (manager) => {
+    return this.sessions.manager.transaction(async manager => {
       const repository = manager.getRepository(AdminSessionEntity);
       const current = await repository
         .createQueryBuilder('session')
@@ -66,8 +59,8 @@ export class TypeOrmAuthSessionRepository implements AuthSessionRepository {
           ...replacement,
           revokedAt: null,
           replacedBySessionId: null,
-          lastUsedAt: null,
-        }),
+          lastUsedAt: null
+        })
       );
       current.revokedAt = now;
       current.lastUsedAt = now;
@@ -101,7 +94,7 @@ export class TypeOrmAuthSessionRepository implements AuthSessionRepository {
       }
       item = item.replacedBySessionId
         ? await this.sessions.findOne({
-            where: { id: item.replacedBySessionId },
+            where: { id: item.replacedBySessionId }
           })
         : null;
     }
@@ -116,7 +109,7 @@ export class TypeOrmAuthSessionRepository implements AuthSessionRepository {
       revokedAt: item.revokedAt,
       replacedBySessionId: item.replacedBySessionId,
       createdAt: item.createdAt,
-      lastUsedAt: item.lastUsedAt,
+      lastUsedAt: item.lastUsedAt
     };
   }
 }

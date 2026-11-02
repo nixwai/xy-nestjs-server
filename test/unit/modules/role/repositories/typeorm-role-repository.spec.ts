@@ -10,7 +10,7 @@ function entity(overrides: Record<string, unknown> = {}) {
     isActive: true,
     deletedAt: null,
     permissions: [{ permissionId: 'permission-1' }],
-    ...overrides,
+    ...overrides
   };
 }
 
@@ -21,50 +21,44 @@ describe('TypeOrmRoleRepository', () => {
       find: vi.fn().mockResolvedValue([roleEntity]),
       findAndCount: vi.fn().mockResolvedValue([[roleEntity], 1]),
       findOne: vi.fn().mockResolvedValue(roleEntity),
-      save: vi.fn().mockImplementation(async (item) => item),
-      create: vi.fn().mockImplementation((item) => item),
-      merge: vi
-        .fn()
-        .mockImplementation((target, input) => Object.assign(target, input)),
+      save: vi.fn().mockImplementation(async item => item),
+      create: vi.fn().mockImplementation(item => item),
+      merge: vi.fn().mockImplementation((target, input) => Object.assign(target, input)),
       softRemove: vi.fn().mockResolvedValue(roleEntity),
       createQueryBuilder: vi.fn().mockReturnValue({
         leftJoinAndSelect: vi.fn().mockReturnThis(),
         where: vi.fn().mockReturnThis(),
-        getMany: vi.fn().mockResolvedValue([roleEntity]),
+        getMany: vi.fn().mockResolvedValue([roleEntity])
       }),
       manager: {
-        transaction: vi.fn(async (work) =>
+        transaction: vi.fn(async work =>
           work({
-            getRepository: vi.fn((entity) =>
+            getRepository: vi.fn(entity =>
               entity.name === 'RoleEntity'
                 ? roles
                 : entity.name === 'RolePermissionAssignmentEntity'
                   ? rolePermissions
-                  : { delete: vi.fn().mockResolvedValue(undefined) },
-            ),
-          }),
-        ),
-      },
+                  : { delete: vi.fn().mockResolvedValue(undefined) }
+            )
+          })
+        )
+      }
     };
     const rolePermissions = {
-      find: vi
-        .fn()
-        .mockResolvedValue([
-          { roleId: 'role-1', permissionId: 'permission-1' },
-        ]),
+      find: vi.fn().mockResolvedValue([{ roleId: 'role-1', permissionId: 'permission-1' }]),
       findOne: vi.fn().mockResolvedValue(null),
       save: vi.fn().mockResolvedValue(undefined),
-      create: vi.fn().mockImplementation((item) => item),
-      delete: vi.fn().mockResolvedValue(undefined),
+      create: vi.fn().mockImplementation(item => item),
+      delete: vi.fn().mockResolvedValue(undefined)
     };
     return {
       repository: new TypeOrmRoleRepository(
         roles as never,
         rolePermissions as never,
-        { delete: vi.fn().mockResolvedValue(undefined) } as never,
+        { delete: vi.fn().mockResolvedValue(undefined) } as never
       ),
       roles,
-      rolePermissions,
+      rolePermissions
     };
   }
 
@@ -73,22 +67,18 @@ describe('TypeOrmRoleRepository', () => {
 
     await expect(repository.list()).resolves.toMatchObject({
       items: [expect.objectContaining({ id: 'role-1' })],
-      total: 1,
+      total: 1
     });
     await expect(repository.findById('role-1')).resolves.toMatchObject({
-      id: 'role-1',
+      id: 'role-1'
     });
     await expect(repository.findByIds(['role-1'])).resolves.toHaveLength(1);
     await expect(repository.findByIds([])).resolves.toEqual([]);
     await expect(repository.findByCode('operator')).resolves.toMatchObject({
-      code: 'operator',
+      code: 'operator'
     });
-    await expect(
-      repository.create({ code: 'new', name: '新角色' }),
-    ).resolves.toMatchObject({ code: 'new' });
-    await expect(
-      repository.update('role-1', { name: '更新角色' }),
-    ).resolves.toMatchObject({ name: '更新角色' });
+    await expect(repository.create({ code: 'new', name: '新角色' })).resolves.toMatchObject({ code: 'new' });
+    await expect(repository.update('role-1', { name: '更新角色' })).resolves.toMatchObject({ name: '更新角色' });
     await repository.softDelete('role-1');
 
     expect(roles.softRemove).toHaveBeenCalled();
@@ -101,7 +91,7 @@ describe('TypeOrmRoleRepository', () => {
     const result = await repository.list({
       page: 2,
       pageSize: 1,
-      skip: 1,
+      skip: 1
     } as never);
     expect(result).toMatchObject({
       page: 2,
@@ -109,12 +99,12 @@ describe('TypeOrmRoleRepository', () => {
       total: 3,
       totalPages: 3,
       hasPreviousPage: true,
-      hasNextPage: true,
+      hasNextPage: true
     });
     expect(roles.findAndCount).toHaveBeenCalledWith({
       order: { createdAt: 'DESC', id: 'DESC' },
       skip: 1,
-      take: 1,
+      take: 1
     });
   });
 
@@ -122,14 +112,12 @@ describe('TypeOrmRoleRepository', () => {
     const { repository, roles } = createRepository();
     roles.findAndCount.mockResolvedValue([[], 0]);
 
-    await expect(
-      repository.list({ page: 1, pageSize: 20, skip: 0 } as never),
-    ).resolves.toMatchObject({
+    await expect(repository.list({ page: 1, pageSize: 20, skip: 0 } as never)).resolves.toMatchObject({
       items: [],
       total: 0,
       totalPages: 0,
       hasNextPage: false,
-      hasPreviousPage: false,
+      hasPreviousPage: false
     });
   });
 
@@ -148,12 +136,12 @@ describe('TypeOrmRoleRepository', () => {
     await repository.unbindPermission('role-1', 'permission-1');
     expect(rolePermissions.delete).toHaveBeenCalledWith({
       roleId: 'role-1',
-      permissionId: 'permission-1',
+      permissionId: 'permission-1'
     });
 
     rolePermissions.findOne.mockResolvedValueOnce({ id: 'relation-1' });
-    await expect(
-      repository.bindPermission('role-1', 'permission-1'),
-    ).rejects.toMatchObject({ message: '角色权限关系已存在' });
+    await expect(repository.bindPermission('role-1', 'permission-1')).rejects.toMatchObject({
+      message: '角色权限关系已存在'
+    });
   });
 });

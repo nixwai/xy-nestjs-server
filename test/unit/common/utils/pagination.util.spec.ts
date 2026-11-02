@@ -1,14 +1,8 @@
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { describe, expect, it } from 'vitest';
-import {
-  CursorPageQueryDto,
-  PageQueryDto,
-} from '../../../../src/common/dto/index.js';
-import {
-  decodeCursor,
-  encodeCursor,
-} from '../../../../src/common/utils/index.js';
+import { CursorPageQueryDto, PageQueryDto } from '../../../../src/common/dto/index.js';
+import { decodeCursor, encodeCursor } from '../../../../src/common/utils/index.js';
 import { createPageResult } from '../../../../src/common/utils/pagination.util.js';
 
 describe('pagination utilities', () => {
@@ -34,7 +28,7 @@ describe('pagination utilities', () => {
       pageSize: 20,
       totalPages: 0,
       hasNextPage: false,
-      hasPreviousPage: false,
+      hasPreviousPage: false
     });
   });
 
@@ -43,13 +37,13 @@ describe('pagination utilities', () => {
     expect(createPageResult(['a'], 3, first)).toMatchObject({
       totalPages: 2,
       hasNextPage: true,
-      hasPreviousPage: false,
+      hasPreviousPage: false
     });
     const beyond = plainToInstance(PageQueryDto, { page: 3, pageSize: 2 });
     expect(createPageResult([], 3, beyond)).toMatchObject({
       totalPages: 2,
       hasNextPage: false,
-      hasPreviousPage: true,
+      hasPreviousPage: true
     });
   });
 
@@ -62,25 +56,21 @@ describe('pagination utilities', () => {
       pageSize: 2,
       totalPages: 3,
       hasNextPage: true,
-      hasPreviousPage: true,
+      hasPreviousPage: true
     });
   });
 
   it('应编码并校验游标', async () => {
     const cursor = encodeCursor({
       createdAt: '2026-01-01T00:00:00.000Z',
-      id: '1',
+      id: '1'
     });
     expect(decodeCursor(cursor)).toEqual({
       createdAt: '2026-01-01T00:00:00.000Z',
-      id: '1',
+      id: '1'
     });
     expect(decodeCursor('invalid')).toBeNull();
-    expect(
-      decodeCursor(
-        Buffer.from(JSON.stringify({ id: 1 })).toString('base64url'),
-      ),
-    ).toBeNull();
+    expect(decodeCursor(Buffer.from(JSON.stringify({ id: 1 })).toString('base64url'))).toBeNull();
 
     const query = plainToInstance(CursorPageQueryDto, { limit: 101 });
     expect(await validate(query)).toHaveLength(1);

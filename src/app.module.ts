@@ -39,7 +39,7 @@ import { TaskModule } from './modules/task/task.module.js';
       cache: true,
       ignoreEnvFile: true,
       load: [configuration],
-      validate: validateEnvironment,
+      validate: validateEnvironment
     }),
     SharedModule,
     HealthModule,
@@ -58,14 +58,14 @@ import { TaskModule } from './modules/task/task.module.js';
     NotificationModule,
     AuditModule,
     StorageModule,
-    TaskModule,
+    TaskModule
   ],
   providers: [
     { provide: APP_GUARD, useClass: RateLimitGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RbacGuard },
     { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
-    { provide: APP_FILTER, useClass: GlobalExceptionFilter },
-  ],
+    { provide: APP_FILTER, useClass: GlobalExceptionFilter }
+  ]
 })
 export class AppModule {}

@@ -9,6 +9,6 @@ import { RbacGuard } from './guards/rbac.guard.js';
 @Module({
   imports: [AdminModule, RoleModule, PermissionModule],
   providers: [AuthorizationService, RbacGuard],
-  exports: [AuthorizationService, RbacGuard],
+  exports: [AuthorizationService, RbacGuard]
 })
 export class AuthorizationModule {}

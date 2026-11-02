@@ -12,14 +12,12 @@ import type { RoleRecord } from './types/role.types.js';
 export class RoleService {
   constructor(
     @Inject(ROLE_REPOSITORY) private readonly repository: RoleRepository,
-    private readonly permissionService: PermissionService,
-    private readonly auditService: AuditService,
+    @Inject(PermissionService) private readonly permissionService: PermissionService,
+    @Inject(AuditService) private readonly auditService: AuditService
   ) {}
 
   /** 查询角色。 */
-  listRoles(
-    query: PageQueryDto = new PageQueryDto(),
-  ): Promise<PageResult<RoleRecord>> {
+  listRoles(query: PageQueryDto = new PageQueryDto()): Promise<PageResult<RoleRecord>> {
     return this.repository.list(query);
   }
 
@@ -39,17 +37,14 @@ export class RoleService {
   }
 
   /** 创建角色。 */
-  async createRole(
-    actorId: string,
-    input: { code: string; name: string; description?: string },
-  ): Promise<RoleRecord> {
+  async createRole(actorId: string, input: { code: string; name: string; description?: string }): Promise<RoleRecord> {
     const item = await this.repository.create(input);
     await this.auditService.record({
       actorAdminId: actorId,
       action: 'role.create',
       resourceType: 'role',
       targetId: item.id,
-      details: { code: item.code },
+      details: { code: item.code }
     });
     return item;
   }
@@ -58,7 +53,7 @@ export class RoleService {
   async updateRole(
     actorId: string,
     id: string,
-    input: Partial<Pick<RoleRecord, 'name' | 'description' | 'isActive'>>,
+    input: Partial<Pick<RoleRecord, 'name' | 'description' | 'isActive'>>
   ): Promise<RoleRecord> {
     const item = await this.repository.update(id, input);
     await this.auditService.record({
@@ -66,7 +61,7 @@ export class RoleService {
       action: 'role.update',
       resourceType: 'role',
       targetId: id,
-      details: { isActive: item.isActive },
+      details: { isActive: item.isActive }
     });
     return item;
   }
@@ -78,16 +73,12 @@ export class RoleService {
       actorAdminId: actorId,
       action: 'role.soft-delete',
       resourceType: 'role',
-      targetId: id,
+      targetId: id
     });
   }
 
   /** 绑定权限。 */
-  async bindPermission(
-    actorId: string,
-    roleId: string,
-    permissionId: string,
-  ): Promise<void> {
+  async bindPermission(actorId: string, roleId: string, permissionId: string): Promise<void> {
     if (!(await this.findById(roleId))) {
       throw new NotFoundException('角色不存在');
     }
@@ -100,16 +91,12 @@ export class RoleService {
       action: 'role.permission-bind',
       resourceType: 'role',
       targetId: roleId,
-      details: { permissionId },
+      details: { permissionId }
     });
   }
 
   /** 解绑权限。 */
-  async unbindPermission(
-    actorId: string,
-    roleId: string,
-    permissionId: string,
-  ): Promise<void> {
+  async unbindPermission(actorId: string, roleId: string, permissionId: string): Promise<void> {
     if (!(await this.findById(roleId))) {
       throw new NotFoundException('角色不存在');
     }
@@ -122,7 +109,7 @@ export class RoleService {
       action: 'role.permission-unbind',
       resourceType: 'role',
       targetId: roleId,
-      details: { permissionId },
+      details: { permissionId }
     });
   }
 }

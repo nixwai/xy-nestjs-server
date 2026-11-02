@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import { PermissionResource } from '../enums/permission-resource.enum.js';
+import type { PermissionResource } from '../enums/permission-resource.enum.js';
 
 /** 公开路由使用的元数据键。 */
 export const PUBLIC_ROUTE_KEY = 'publicRoute';

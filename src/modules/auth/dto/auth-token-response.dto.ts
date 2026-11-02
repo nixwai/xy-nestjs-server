@@ -8,7 +8,7 @@ export class AdminIdentityResponseDto {
   @ApiProperty({
     type: String,
     example: 'admin',
-    description: '管理员用户名。',
+    description: '管理员用户名。'
   })
   username!: string;
 
@@ -18,7 +18,7 @@ export class AdminIdentityResponseDto {
   @ApiProperty({
     type: String,
     enum: ['admin'],
-    description: '管理员身份类型。',
+    description: '管理员身份类型。'
   })
   role!: 'admin';
 }
@@ -27,40 +27,40 @@ export class AdminIdentityResponseDto {
 export class AuthTokenResponseDto {
   @ApiProperty({
     type: String,
-    description: '访问令牌，用于 Authorization 请求头。',
+    description: '访问令牌，用于 Authorization 请求头。'
   })
   accessToken!: string;
 
   @ApiProperty({
     type: String,
-    description: '刷新令牌，用于刷新或注销当前会话。',
+    description: '刷新令牌，用于刷新或注销当前会话。'
   })
   refreshToken!: string;
 
   @ApiProperty({
     type: String,
     example: 'Bearer',
-    description: '访问令牌类型。',
+    description: '访问令牌类型。'
   })
   tokenType!: 'Bearer';
 
   @ApiProperty({
     type: Number,
     example: 900,
-    description: '访问令牌有效期，单位为秒。',
+    description: '访问令牌有效期，单位为秒。'
   })
   accessTokenExpiresIn!: number;
 
   @ApiProperty({
     type: Number,
     example: 604800,
-    description: '刷新令牌有效期，单位为秒。',
+    description: '刷新令牌有效期，单位为秒。'
   })
   refreshTokenExpiresIn!: number;
 
   @ApiProperty({
     type: () => AdminIdentityResponseDto,
-    description: '当前登录管理员的公开身份。',
+    description: '当前登录管理员的公开身份。'
   })
   admin!: AdminIdentityResponseDto;
 }

@@ -1,4 +1,5 @@
-import { MigrationInterface, QueryRunner, TableIndex } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
+import { TableIndex } from 'typeorm';
 
 /** 为页码分页和审计游标查询增加组合索引。 */
 export class AddPaginationIndexes2026110200003 implements MigrationInterface {
@@ -8,22 +9,22 @@ export class AddPaginationIndexes2026110200003 implements MigrationInterface {
       'admin',
       new TableIndex({
         name: 'idx_admin_page',
-        columnNames: ['deleted_at', 'gmt_create', 'id'],
-      }),
+        columnNames: ['deleted_at', 'gmt_create', 'id']
+      })
     );
     await queryRunner.createIndex(
       'role',
       new TableIndex({
         name: 'idx_role_page',
-        columnNames: ['deleted_at', 'gmt_create', 'id'],
-      }),
+        columnNames: ['deleted_at', 'gmt_create', 'id']
+      })
     );
     await queryRunner.createIndex(
       'audit_log',
       new TableIndex({
         name: 'idx_audit_log_cursor',
-        columnNames: ['gmt_create', 'id'],
-      }),
+        columnNames: ['gmt_create', 'id']
+      })
     );
   }
 

@@ -12,7 +12,7 @@ export class PageQueryDto {
     type: Number,
     default: 1,
     minimum: 1,
-    description: '页码，从 1 开始。',
+    description: '页码，从 1 开始。'
   })
   @IsOptional()
   @Type(() => Number)
@@ -25,7 +25,7 @@ export class PageQueryDto {
     default: 20,
     minimum: 1,
     maximum: 100,
-    description: '每页条数，范围 1-100。',
+    description: '每页条数，范围 1-100。'
   })
   @IsOptional()
   @Type(() => Number)

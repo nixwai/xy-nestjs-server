@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  hashPassword,
-  verifyPassword,
-} from '../../../../../src/modules/auth/utils/password.util.js';
+import { hashPassword, verifyPassword } from '../../../../../src/modules/auth/utils/password.util.js';
 
 describe('password utilities', () => {
   it('uses a different salt for the same password', async () => {
@@ -14,11 +11,7 @@ describe('password utilities', () => {
 
   it('verifies only the original password', async () => {
     const saved = await hashPassword('Admin1234');
-    await expect(
-      verifyPassword('Admin1234', saved.hash, saved.salt),
-    ).resolves.toBe(true);
-    await expect(
-      verifyPassword('Wrong1234', saved.hash, saved.salt),
-    ).resolves.toBe(false);
+    await expect(verifyPassword('Admin1234', saved.hash, saved.salt)).resolves.toBe(true);
+    await expect(verifyPassword('Wrong1234', saved.hash, saved.salt)).resolves.toBe(false);
   });
 });

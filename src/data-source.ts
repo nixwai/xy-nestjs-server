@@ -20,5 +20,5 @@ export default new DataSource({
   synchronize: false,
   charset: 'utf8mb4',
   timezone: 'Z',
-  namingStrategy: new SnakeNamingStrategy(),
+  namingStrategy: new SnakeNamingStrategy()
 });

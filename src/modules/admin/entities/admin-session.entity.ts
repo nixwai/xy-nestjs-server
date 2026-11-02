@@ -1,11 +1,4 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  Index,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 /** 管理员刷新令牌会话。 */
 @Entity({ name: 'admin_session' })
@@ -18,7 +11,7 @@ export class AdminSessionEntity {
   @PrimaryGeneratedColumn({
     type: 'bigint',
     unsigned: true,
-    primaryKeyConstraintName: 'pk_admin_session_id',
+    primaryKeyConstraintName: 'pk_admin_session_id'
   })
   id!: string;
 

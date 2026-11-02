@@ -12,17 +12,11 @@ export type ConfigRecord = Record<string, unknown>;
  * @param override - 用于覆盖基础配置的对象。
  * @returns 合并后的新配置对象。
  */
-export function mergeConfig(
-  base: ConfigRecord,
-  override: ConfigRecord,
-): ConfigRecord {
+export function mergeConfig(base: ConfigRecord, override: ConfigRecord): ConfigRecord {
   const result: ConfigRecord = { ...base };
   for (const [key, value] of Object.entries(override)) {
     const current = result[key];
-    result[key] =
-      isConfigRecord(current) && isConfigRecord(value)
-        ? mergeConfig(current, value)
-        : value;
+    result[key] = isConfigRecord(current) && isConfigRecord(value) ? mergeConfig(current, value) : value;
   }
   return result;
 }
@@ -34,9 +28,7 @@ export function mergeConfig(
  * @returns 解析后的配置对象；模板为空或非对象时返回空对象。
  */
 export function loadBaseConfig(cwd = process.cwd()): ConfigRecord {
-  const parsed = yaml.load(
-    readFileSync(join(cwd, 'config', 'config.yaml'), 'utf8'),
-  );
+  const parsed = yaml.load(readFileSync(join(cwd, 'config', 'config.yaml'), 'utf8'));
   return isConfigRecord(parsed) ? parsed : {};
 }
 

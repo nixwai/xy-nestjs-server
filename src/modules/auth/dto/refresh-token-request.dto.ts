@@ -11,7 +11,7 @@ export class RefreshTokenRequestDto {
     type: String,
     minLength: 32,
     maxLength: 256,
-    description: '登录或刷新接口返回的 refreshToken。',
+    description: '登录或刷新接口返回的 refreshToken。'
   })
   @IsString({ message: refreshTokenValidation.isString })
   @IsNotEmpty({ message: refreshTokenValidation.isNotEmpty })

@@ -14,13 +14,11 @@ describe('InMemoryAdminRepository', () => {
     await repository.bindRole(first.id, 'role-1');
     await repository.bindRole(second.id, 'role-2');
 
-    await expect(
-      repository.listRoleIdsByAdminIds([first.id, second.id]),
-    ).resolves.toEqual(
+    await expect(repository.listRoleIdsByAdminIds([first.id, second.id])).resolves.toEqual(
       new Map([
         [first.id, ['role-1']],
-        [second.id, ['role-2']],
-      ]),
+        [second.id, ['role-2']]
+      ])
     );
   });
 
@@ -34,7 +32,7 @@ describe('InMemoryAdminRepository', () => {
     await expect(repository.findByUsername('removable')).resolves.toBeNull();
     await expect(repository.list()).resolves.toMatchObject({
       items: [],
-      total: 0,
+      total: 0
     });
   });
 
@@ -47,7 +45,7 @@ describe('InMemoryAdminRepository', () => {
     const result = await repository.list({
       page: 2,
       pageSize: 2,
-      skip: 2,
+      skip: 2
     } as never);
     expect(result.items).toHaveLength(1);
     expect(result.total).toBe(3);
@@ -65,7 +63,7 @@ describe('InMemoryAdminRepository', () => {
     const result = await repository.list({
       page: 2,
       pageSize: 20,
-      skip: 20,
+      skip: 20
     } as never);
     expect(result.items).toEqual([]);
     expect(result.total).toBe(1);
@@ -78,8 +76,6 @@ describe('InMemoryAdminRepository', () => {
     const repository = new InMemoryAdminRepository();
     await repository.create(adminInput('admin'));
 
-    await expect(repository.create(adminInput('admin'))).rejects.toBeInstanceOf(
-      DomainConflictError,
-    );
+    await expect(repository.create(adminInput('admin'))).rejects.toBeInstanceOf(DomainConflictError);
   });
 });

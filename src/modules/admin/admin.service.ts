@@ -1,29 +1,17 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { hashPassword, verifyPassword } from '../auth/utils/password.util.js';
 import type {
   AdminCreateInput,
   AdminRepository,
   AdminTransactionRunner,
-  AdminUpdateInput,
+  AdminUpdateInput
 } from './repositories/admin-repository.port.js';
-import {
-  ADMIN_REPOSITORY,
-  ADMIN_TRANSACTION_RUNNER,
-} from './repositories/admin-repository.port.js';
+import { ADMIN_REPOSITORY, ADMIN_TRANSACTION_RUNNER } from './repositories/admin-repository.port.js';
 import type { AdminRecord, AdminPublicRecord } from './types/admin.types.js';
 import { RoleService } from '../role/role.service.js';
 import { AuditService } from '../audit/audit.service.js';
-import {
-  AdminCreateRequestDto,
-  AdminListQueryDto,
-  AdminUpdateRequestDto,
-} from './dto/index.js';
+import type { AdminCreateRequestDto, AdminUpdateRequestDto } from './dto/index.js';
+import { AdminListQueryDto } from './dto/index.js';
 import type { PageResult } from '../../common/types/index.js';
 
 /** 管理员账户应用服务。 */
@@ -34,7 +22,7 @@ export class AdminService {
     @Inject(RoleService) private readonly roleService: RoleService,
     @Inject(AuditService) private readonly auditService: AuditService,
     @Inject(ADMIN_TRANSACTION_RUNNER)
-    private readonly transactionRunner: AdminTransactionRunner,
+    private readonly transactionRunner: AdminTransactionRunner
   ) {}
 
   /** 查询管理员。 */
@@ -48,18 +36,12 @@ export class AdminService {
   }
 
   /** 查询管理员列表。 */
-  async listAdmins(
-    query: AdminListQueryDto = new AdminListQueryDto(),
-  ): Promise<PageResult<AdminPublicRecord>> {
+  async listAdmins(query: AdminListQueryDto = new AdminListQueryDto()): Promise<PageResult<AdminPublicRecord>> {
     const result = await this.repository.list(query);
-    const roleIds = await this.repository.listRoleIdsByAdminIds(
-      result.items.map((item) => item.id),
-    );
+    const roleIds = await this.repository.listRoleIdsByAdminIds(result.items.map(item => item.id));
     return {
       ...result,
-      items: result.items.map((item) =>
-        this.toPublic(item, roleIds.get(item.id) ?? []),
-      ),
+      items: result.items.map(item => this.toPublic(item, roleIds.get(item.id) ?? []))
     };
   }
 
@@ -73,28 +55,20 @@ export class AdminService {
   }
 
   /** 创建管理员。 */
-  async createAdmin(
-    actorId: string,
-    body: AdminCreateRequestDto,
-  ): Promise<AdminPublicRecord> {
+  async createAdmin(actorId: string, body: AdminCreateRequestDto): Promise<AdminPublicRecord> {
     if (body.isSuperAdmin && !body.currentPassword) {
       throw new BadRequestException('创建超级管理员必须验证当前密码');
     }
-    if (
-      body.isSuperAdmin &&
-      !(await this.verifyPassword(actorId, body.currentPassword as string))
-    )
+    if (body.isSuperAdmin && !(await this.verifyPassword(actorId, body.currentPassword as string)))
       throw new ForbiddenException('当前密码错误');
     const password = await hashPassword(body.password);
-    const role = body.isSuperAdmin
-      ? null
-      : await this.roleService.findByCode('operator');
-    const item = await this.transactionRunner.run(async (repository) => {
+    const role = body.isSuperAdmin ? null : await this.roleService.findByCode('operator');
+    const item = await this.transactionRunner.run(async repository => {
       const created = await repository.create({
         username: body.username,
         passwordHash: password.hash,
         passwordSalt: password.salt,
-        isSuperAdmin: body.isSuperAdmin,
+        isSuperAdmin: body.isSuperAdmin
       });
       if (role) {
         await repository.bindRole(created.id, role.id);
@@ -106,29 +80,19 @@ export class AdminService {
       action: 'admin.create',
       resourceType: 'admin',
       targetId: item.id,
-      details: { isSuperAdmin: item.isSuperAdmin },
+      details: { isSuperAdmin: item.isSuperAdmin }
     });
     return this.toPublic(item, await this.repository.listRoleIds(item.id));
   }
 
   /** 更新管理员。 */
-  async updateAdmin(
-    actorId: string,
-    body: AdminUpdateRequestDto,
-  ): Promise<AdminPublicRecord> {
+  async updateAdmin(actorId: string, body: AdminUpdateRequestDto): Promise<AdminPublicRecord> {
     const target = await this.repository.findById(body.id);
     if (!target) {
       throw new NotFoundException('管理员不存在');
     }
-    const needsPassword =
-      target.isSuperAdmin ||
-      body.isSuperAdmin === true ||
-      Boolean(body.password);
-    if (
-      needsPassword &&
-      (!body.currentPassword ||
-        !(await this.verifyPassword(actorId, body.currentPassword)))
-    )
+    const needsPassword = target.isSuperAdmin || body.isSuperAdmin === true || Boolean(body.password);
+    if (needsPassword && (!body.currentPassword || !(await this.verifyPassword(actorId, body.currentPassword))))
       throw new ForbiddenException('当前密码错误');
     if (
       target.isSuperAdmin &&
@@ -140,7 +104,7 @@ export class AdminService {
     const input: AdminUpdateInput = {
       username: body.username,
       isActive: body.isActive,
-      isSuperAdmin: body.isSuperAdmin,
+      isSuperAdmin: body.isSuperAdmin
     };
     if (body.password) {
       const password = await hashPassword(body.password);
@@ -155,8 +119,8 @@ export class AdminService {
       targetId: body.id,
       details: {
         passwordChanged: Boolean(body.password),
-        isSuperAdmin: item.isSuperAdmin,
-      },
+        isSuperAdmin: item.isSuperAdmin
+      }
     });
     return this.toPublic(item, await this.repository.listRoleIds(item.id));
   }
@@ -166,32 +130,27 @@ export class AdminService {
     actorId: string,
     id: string,
     passwordValue: string,
-    currentPassword: string,
+    currentPassword: string
   ): Promise<AdminPublicRecord> {
     const target = await this.repository.findById(id);
     if (!target) throw new NotFoundException('管理员不存在');
-    if (!(await this.verifyPassword(actorId, currentPassword)))
-      throw new ForbiddenException('当前密码错误');
+    if (!(await this.verifyPassword(actorId, currentPassword))) throw new ForbiddenException('当前密码错误');
     const password = await hashPassword(passwordValue);
     const item = await this.repository.update(id, {
       passwordHash: password.hash,
-      passwordSalt: password.salt,
+      passwordSalt: password.salt
     });
     await this.auditService.record({
       actorAdminId: actorId,
       action: 'admin.reset-password',
       resourceType: 'admin',
-      targetId: id,
+      targetId: id
     });
     return this.toPublic(item, await this.repository.listRoleIds(item.id));
   }
 
   /** 删除管理员。 */
-  async softDeleteAdmin(
-    actorId: string,
-    id: string,
-    currentPassword: string,
-  ): Promise<null> {
+  async softDeleteAdmin(actorId: string, id: string, currentPassword: string): Promise<null> {
     const target = await this.repository.findById(id);
     if (!target) {
       throw new NotFoundException('管理员不存在');
@@ -199,28 +158,20 @@ export class AdminService {
     if (!(await this.verifyPassword(actorId, currentPassword))) {
       throw new ForbiddenException('当前密码错误');
     }
-    if (
-      target.isSuperAdmin &&
-      target.isActive &&
-      (await this.repository.countActiveSuperAdmins()) <= 1
-    )
+    if (target.isSuperAdmin && target.isActive && (await this.repository.countActiveSuperAdmins()) <= 1)
       throw new ForbiddenException('系统必须至少保留一名启用的超级管理员');
-    await this.transactionRunner.run((repository) => repository.softDelete(id));
+    await this.transactionRunner.run(repository => repository.softDelete(id));
     await this.auditService.record({
       actorAdminId: actorId,
       action: 'admin.soft-delete',
       resourceType: 'admin',
-      targetId: id,
+      targetId: id
     });
     return null;
   }
 
   /** 绑定角色。 */
-  async bindRole(
-    actorId: string,
-    adminId: string,
-    roleId: string,
-  ): Promise<null> {
+  async bindRole(actorId: string, adminId: string, roleId: string): Promise<null> {
     if (!(await this.repository.findById(adminId))) {
       throw new NotFoundException('管理员不存在');
     }
@@ -233,17 +184,13 @@ export class AdminService {
       action: 'admin.role-bind',
       resourceType: 'admin',
       targetId: adminId,
-      details: { roleId },
+      details: { roleId }
     });
     return null;
   }
 
   /** 解绑角色。 */
-  async unbindRole(
-    actorId: string,
-    adminId: string,
-    roleId: string,
-  ): Promise<null> {
+  async unbindRole(actorId: string, adminId: string, roleId: string): Promise<null> {
     if (!(await this.repository.findById(adminId))) {
       throw new NotFoundException('管理员不存在');
     }
@@ -256,7 +203,7 @@ export class AdminService {
       action: 'admin.role-unbind',
       resourceType: 'admin',
       targetId: adminId,
-      details: { roleId },
+      details: { roleId }
     });
     return null;
   }
@@ -269,10 +216,7 @@ export class AdminService {
   /** 校验管理员密码。 */
   async verifyPassword(adminId: string, password: string): Promise<boolean> {
     const item = await this.repository.findById(adminId);
-    return Boolean(
-      item &&
-      (await verifyPassword(password, item.passwordHash, item.passwordSalt)),
-    );
+    return Boolean(item && (await verifyPassword(password, item.passwordHash, item.passwordSalt)));
   }
 
   /** 查询管理员角色 ID。 */
@@ -281,9 +225,7 @@ export class AdminService {
   }
 
   /** 批量查询管理员角色 ID。 */
-  listAdminRoleIdsByAdminIds(
-    adminIds: string[],
-  ): Promise<Map<string, string[]>> {
+  listAdminRoleIdsByAdminIds(adminIds: string[]): Promise<Map<string, string[]>> {
     return this.repository.listRoleIdsByAdminIds(adminIds);
   }
 
@@ -295,13 +237,11 @@ export class AdminService {
       isSuperAdmin: item.isSuperAdmin,
       roleIds: [...roleIds],
       createdAt: item.createdAt,
-      updatedAt: item.updatedAt,
+      updatedAt: item.updatedAt
     };
   }
 }
 
 function removeUndefined<T extends object>(value: T): T {
-  return Object.fromEntries(
-    Object.entries(value).filter(([, item]) => item !== undefined),
-  ) as T;
+  return Object.fromEntries(Object.entries(value).filter(([, item]) => item !== undefined)) as T;
 }

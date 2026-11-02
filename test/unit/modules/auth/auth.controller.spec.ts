@@ -6,7 +6,7 @@ describe('AuthController', () => {
     const service = {
       login: vi.fn().mockResolvedValue({ accessToken: 'a' }),
       refresh: vi.fn().mockResolvedValue({ accessToken: 'b' }),
-      logout: vi.fn().mockResolvedValue(null),
+      logout: vi.fn().mockResolvedValue(null)
     };
     const controller = new AuthController(service as never);
 

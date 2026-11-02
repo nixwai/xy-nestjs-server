@@ -6,7 +6,7 @@ import { RoleResponseDto } from './role-response.dto.js';
 export class RoleListResponseDto extends PageResponseDto<RoleResponseDto> {
   @ApiProperty({
     type: () => [RoleResponseDto],
-    description: '当前页角色列表。',
+    description: '当前页角色列表。'
   })
   declare items: RoleResponseDto[];
 }

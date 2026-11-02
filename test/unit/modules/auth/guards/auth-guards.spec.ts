@@ -1,4 +1,4 @@
-import { ExecutionContext } from '@nestjs/common';
+import type { ExecutionContext } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { describe, expect, it, vi } from 'vitest';
 import { AdminService } from '../../../../../src/modules/admin/admin.service.js';
@@ -10,25 +10,25 @@ import { AdminRoleGuard } from '../../../../../src/modules/auth/guards/admin-rol
 import { JwtAuthGuard } from '../../../../../src/modules/auth/guards/jwt-auth.guard.js';
 import { InMemoryAuthSessionRepository } from '../../../../../src/modules/auth/repositories/in-memory-auth-session.repository.js';
 import { JwtTokenService } from '../../../../../src/modules/auth/tokens/jwt-token.service.js';
-import { RoleService } from '../../../../../src/modules/role/role.service.js';
+import type { RoleService } from '../../../../../src/modules/role/role.service.js';
 
 const config = new ConfigService({
   jwt: {
     secret: 'test-only-secret-with-at-least-32-chars',
     accessTokenExpiresIn: '15m',
-    refreshTokenExpiresIn: '7d',
-  },
+    refreshTokenExpiresIn: '7d'
+  }
 });
 
 function contextFor(authorization?: string, user?: object): ExecutionContext {
   const request = {
     user,
-    header: () => authorization,
+    header: () => authorization
   };
   return {
     getHandler: () => () => undefined,
     getClass: () => class TestController {},
-    switchToHttp: () => ({ getRequest: () => request }),
+    switchToHttp: () => ({ getRequest: () => request })
   } as unknown as ExecutionContext;
 }
 
@@ -38,29 +38,20 @@ function createAuthService(): AuthService {
     repository,
     {
       findByCode: async () => null,
-      findById: async () => null,
+      findById: async () => null
     } as unknown as RoleService,
     new AuditService(),
-    new InMemoryAdminTransactionRunner(repository),
+    new InMemoryAdminTransactionRunner(repository)
   );
-  return new AuthService(
-    adminService,
-    new InMemoryAuthSessionRepository(),
-    config,
-    new JwtTokenService(config),
-  );
+  return new AuthService(adminService, new InMemoryAuthSessionRepository(), config, new JwtTokenService(config));
 }
 
 describe('JwtAuthGuard', () => {
   it('应放行标记为公共接口的路由', async () => {
     const reflector = {
-      getAllAndOverride: vi.fn().mockReturnValue(true),
+      getAllAndOverride: vi.fn().mockReturnValue(true)
     };
-    const guard = new JwtAuthGuard(
-      createAuthService(),
-      new JwtTokenService(config),
-      reflector as never,
-    );
+    const guard = new JwtAuthGuard(createAuthService(), new JwtTokenService(config), reflector as never);
 
     await expect(guard.canActivate(contextFor())).resolves.toBe(true);
   });
@@ -73,7 +64,7 @@ describe('JwtAuthGuard', () => {
     const guard = new JwtAuthGuard(authService, tokenService);
     const request = { header: () => `Bearer ${token}` } as { user?: object };
     const context = {
-      switchToHttp: () => ({ getRequest: () => request }),
+      switchToHttp: () => ({ getRequest: () => request })
     } as unknown as ExecutionContext;
 
     await expect(guard.canActivate(context)).resolves.toBe(true);

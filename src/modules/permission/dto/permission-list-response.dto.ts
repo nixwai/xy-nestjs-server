@@ -5,7 +5,7 @@ import { PermissionResponseDto } from './permission-response.dto.js';
 export class PermissionListResponseDto {
   @ApiProperty({
     type: () => [PermissionResponseDto],
-    description: '权限列表。',
+    description: '权限列表。'
   })
   items!: PermissionResponseDto[];
 

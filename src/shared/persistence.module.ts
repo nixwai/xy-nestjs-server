@@ -9,10 +9,7 @@ import { AuditLogEntity } from '../modules/audit/entities/audit-log.entity.js';
 import { PermissionEntity } from '../modules/permission/entities/permission.entity.js';
 import { RolePermissionAssignmentEntity } from '../modules/role/entities/role-permission-assignment.entity.js';
 import { RoleEntity } from '../modules/role/entities/role.entity.js';
-import {
-  ADMIN_REPOSITORY,
-  ADMIN_TRANSACTION_RUNNER,
-} from '../modules/admin/repositories/admin-repository.port.js';
+import { ADMIN_REPOSITORY, ADMIN_TRANSACTION_RUNNER } from '../modules/admin/repositories/admin-repository.port.js';
 import { InMemoryAdminRepository } from '../modules/admin/repositories/in-memory-admin.repository.js';
 import { TypeOrmAdminRepository } from '../modules/admin/repositories/typeorm-admin.repository.js';
 import { InMemoryAdminTransactionRunner } from '../modules/admin/repositories/in-memory-admin-transaction-runner.js';
@@ -40,7 +37,7 @@ const databaseEntities = [
   PermissionEntity,
   RolePermissionAssignmentEntity,
   RoleEntity,
-  MenuEntity,
+  MenuEntity
 ];
 
 /** 统一装配数据库和内存持久化实现。 */
@@ -48,43 +45,33 @@ const databaseEntities = [
 @Module({
   imports: [
     ...(databaseEnabled ? [DatabaseModule] : []),
-    ...(databaseEnabled ? [TypeOrmModule.forFeature(databaseEntities)] : []),
+    ...(databaseEnabled ? [TypeOrmModule.forFeature(databaseEntities)] : [])
   ],
   providers: [
     {
       provide: ADMIN_REPOSITORY,
-      useClass: databaseEnabled
-        ? TypeOrmAdminRepository
-        : InMemoryAdminRepository,
+      useClass: databaseEnabled ? TypeOrmAdminRepository : InMemoryAdminRepository
     },
     {
       provide: ADMIN_TRANSACTION_RUNNER,
-      useClass: databaseEnabled
-        ? TypeOrmAdminTransactionRunner
-        : InMemoryAdminTransactionRunner,
+      useClass: databaseEnabled ? TypeOrmAdminTransactionRunner : InMemoryAdminTransactionRunner
     },
     {
       provide: AUTH_SESSION_REPOSITORY,
-      useClass: databaseEnabled
-        ? TypeOrmAuthSessionRepository
-        : InMemoryAuthSessionRepository,
+      useClass: databaseEnabled ? TypeOrmAuthSessionRepository : InMemoryAuthSessionRepository
     },
     {
       provide: ROLE_REPOSITORY,
-      useClass: databaseEnabled
-        ? TypeOrmRoleRepository
-        : InMemoryRoleRepository,
+      useClass: databaseEnabled ? TypeOrmRoleRepository : InMemoryRoleRepository
     },
     {
       provide: PERMISSION_REPOSITORY,
-      useClass: databaseEnabled
-        ? TypeOrmPermissionRepository
-        : InMemoryPermissionRepository,
+      useClass: databaseEnabled ? TypeOrmPermissionRepository : InMemoryPermissionRepository
     },
     {
       provide: MENU_REPOSITORY,
-      useClass: databaseEnabled ? TypeOrmMenuRepository : InMemoryMenuRepository,
-    },
+      useClass: databaseEnabled ? TypeOrmMenuRepository : InMemoryMenuRepository
+    }
   ],
   exports: [
     ADMIN_REPOSITORY,
@@ -92,7 +79,7 @@ const databaseEntities = [
     AUTH_SESSION_REPOSITORY,
     ROLE_REPOSITORY,
     PERMISSION_REPOSITORY,
-    MENU_REPOSITORY,
-  ],
+    MENU_REPOSITORY
+  ]
 })
 export class PersistenceModule {}

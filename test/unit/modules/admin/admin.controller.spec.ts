@@ -13,7 +13,7 @@ describe('AdminController', () => {
     softDeleteAdmin: vi.fn().mockResolvedValue(null),
     bindRole: vi.fn().mockResolvedValue(null),
     unbindRole: vi.fn().mockResolvedValue(null),
-    resetAdminPassword: vi.fn().mockResolvedValue({ id: '1' }),
+    resetAdminPassword: vi.fn().mockResolvedValue({ id: '1' })
   };
   const authorizationQuery = { getAuthorization: vi.fn().mockResolvedValue({ permissions: [], menus: [] }) };
   const controller = new AdminController(service as never, authorizationQuery as never);

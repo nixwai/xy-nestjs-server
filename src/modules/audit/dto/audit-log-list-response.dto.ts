@@ -6,14 +6,14 @@ import { AuditLogResponseDto } from './audit-log-response.dto.js';
 export class AuditLogListResponseDto extends CursorPageResponseDto<AuditLogResponseDto> {
   @ApiProperty({
     type: () => [AuditLogResponseDto],
-    description: '当前页审计记录。',
+    description: '当前页审计记录。'
   })
   declare items: AuditLogResponseDto[];
 
   @ApiPropertyOptional({
     type: String,
     nullable: true,
-    description: '下一页不透明游标。',
+    description: '下一页不透明游标。'
   })
   declare nextCursor: string | null;
 }

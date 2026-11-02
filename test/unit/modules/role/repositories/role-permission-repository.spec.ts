@@ -8,7 +8,7 @@ const permission = {
   method: 'GET' as never,
   name: '读取管理员',
   description: null,
-  isActive: true,
+  isActive: true
 };
 
 describe('InMemory role and permission repositories', () => {
@@ -46,7 +46,7 @@ describe('InMemory role and permission repositories', () => {
     const result = await roles.list({
       page: 2,
       pageSize: 20,
-      skip: 20,
+      skip: 20
     } as never);
     expect(result.items).toEqual([]);
     expect(result.total).toBe(1);
@@ -66,12 +66,9 @@ describe('InMemory role and permission repositories', () => {
     const foundPermissions = await permissions.findByIds([storedPermission.id]);
     foundRoles[0].permissionIds.push('unexpected');
 
-    expect(foundRoles[0].permissionIds).toEqual([
-      storedPermission.id,
-      'unexpected',
-    ]);
+    expect(foundRoles[0].permissionIds).toEqual([storedPermission.id, 'unexpected']);
     await expect(roles.findById(role.id)).resolves.toMatchObject({
-      permissionIds: [storedPermission.id],
+      permissionIds: [storedPermission.id]
     });
     expect(foundPermissions).toEqual([storedPermission]);
   });

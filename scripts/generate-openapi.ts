@@ -15,12 +15,6 @@ const moduleRef = await createTestModule().compile();
 const app = moduleRef.createNestApplication();
 await app.init();
 const appConfig = app.get(ConfigService).getOrThrow<AppConfig>('app');
-const document = SwaggerModule.createDocument(
-  app,
-  createSwaggerConfig(appConfig.globalPrefix),
-);
-writeFileSync(
-  join(process.cwd(), 'openapi.json'),
-  JSON.stringify(document, null, 2),
-);
+const document = SwaggerModule.createDocument(app, createSwaggerConfig(appConfig.globalPrefix));
+writeFileSync(join(process.cwd(), 'openapi.json'), JSON.stringify(document, null, 2));
 await app.close();

@@ -11,9 +11,9 @@ describe('TransformInterceptor', () => {
         .intercept(
           {
             getType: () => 'http',
-            switchToHttp: () => ({ getResponse: () => ({ status }) }),
+            switchToHttp: () => ({ getResponse: () => ({ status }) })
           } as never,
-          { handle: () => of('ok') },
+          { handle: () => of('ok') }
         )
         .subscribe({ next: resolve, error: reject });
     });
@@ -27,7 +27,7 @@ describe('TransformInterceptor', () => {
     const result = await new Promise<unknown>((resolve, reject) => {
       interceptor
         .intercept({ getType: () => 'rpc' } as never, {
-          handle: () => of('ok'),
+          handle: () => of('ok')
         })
         .subscribe({ next: resolve, error: reject });
     });

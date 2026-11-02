@@ -15,5 +15,5 @@ export enum PermissionResource {
   /** 菜单管理资源。 */
   MENU = 'menu',
   /** 管理审计资源。 */
-  AUDIT = 'audit',
+  AUDIT = 'audit'
 }

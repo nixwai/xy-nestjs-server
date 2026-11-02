@@ -14,14 +14,14 @@ export class AdminResponseDto {
   @ApiProperty({
     type: Boolean,
     description: '是否拥有系统全部权限。',
-    example: true,
+    example: true
   })
   isSuperAdmin!: boolean;
 
   @ApiProperty({
     type: [String],
     description: '已绑定的角色 ID 列表。',
-    example: ['1', '2'],
+    example: ['1', '2']
   })
   roleIds!: string[];
 
@@ -31,7 +31,7 @@ export class AdminResponseDto {
   @ApiProperty({
     type: String,
     format: 'date-time',
-    description: '最后更新时间。',
+    description: '最后更新时间。'
   })
   updatedAt!: Date;
 }

@@ -7,9 +7,9 @@ const service = new JwtTokenService(
   new ConfigService({
     jwt: {
       secret: 'test-only-secret-with-at-least-32-chars',
-      accessTokenExpiresIn: '15m',
-    },
-  }),
+      accessTokenExpiresIn: '15m'
+    }
+  })
 );
 
 describe('JwtTokenService', () => {
@@ -18,14 +18,12 @@ describe('JwtTokenService', () => {
     expect(service.verifyAccessToken(token)).toMatchObject({
       sub: '1',
       role: 'admin',
-      type: 'access',
+      type: 'access'
     });
   });
 
   it('rejects a tampered token', () => {
     const token = service.signAccessToken('1');
-    expect(() => service.verifyAccessToken(`${token}x`)).toThrow(
-      UnauthorizedException,
-    );
+    expect(() => service.verifyAccessToken(`${token}x`)).toThrow(UnauthorizedException);
   });
 });

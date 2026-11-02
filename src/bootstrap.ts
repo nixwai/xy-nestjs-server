@@ -1,16 +1,13 @@
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
-import { INestApplication, Logger } from '@nestjs/common';
+import type { INestApplication } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import helmet from 'helmet';
 import { AppModule } from './app.module.js';
 import { createStrictValidationPipe } from './common/pipes/index.js';
 import { createSwaggerConfig } from './common/swagger/index.js';
-import type {
-  AppConfig,
-  CorsConfig,
-  SwaggerConfig,
-} from './config/config.types.js';
+import type { AppConfig, CorsConfig, SwaggerConfig } from './config/config.types.js';
 
 /**
  * 将 CORS 白名单转换为 Nest 可接受的来源配置。
@@ -18,9 +15,7 @@ import type {
  * @param origins - CORS 允许的来源列表。
  * @returns 有来源时返回副本，没有来源时禁用 CORS。
  */
-export function resolveCorsOrigin(
-  origins: readonly string[],
-): false | string[] {
+export function resolveCorsOrigin(origins: readonly string[]): false | string[] {
   if (origins.length === 0) {
     return false;
   }
@@ -44,26 +39,16 @@ export async function createApplication(): Promise<INestApplication> {
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'same-site' } }));
   app.enableCors({
     origin: resolveCorsOrigin(corsConfig.origins),
-    credentials: true,
+    credentials: true
   });
   app.useGlobalPipes(createStrictValidationPipe());
 
   if (swaggerConfig.enabled) {
-    const document = SwaggerModule.createDocument(
-      app,
-      createSwaggerConfig(appConfig.globalPrefix),
-    );
-    SwaggerModule.setup(
-      `${appConfig.globalPrefix}/${swaggerConfig.path}`,
-      app,
-      document,
-    );
+    const document = SwaggerModule.createDocument(app, createSwaggerConfig(appConfig.globalPrefix));
+    SwaggerModule.setup(`${appConfig.globalPrefix}/${swaggerConfig.path}`, app, document);
   }
 
-  Logger.log(
-    `Application configured for ${appConfig.environment}`,
-    'Bootstrap',
-  );
+  Logger.log(`Application configured for ${appConfig.environment}`, 'Bootstrap');
   return app;
 }
 

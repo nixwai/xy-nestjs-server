@@ -2,18 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull } from 'typeorm';
 import type { Repository } from 'typeorm';
-import {
-  DomainConflictError,
-  DomainNotFoundError,
-} from '../../../common/errors/index.js';
+import { DomainConflictError, DomainNotFoundError } from '../../../common/errors/index.js';
 import { AdminEntity } from '../entities/admin.entity.js';
 import { AdminRoleAssignmentEntity } from '../entities/admin-role-assignment.entity.js';
 import { AdminSessionEntity } from '../entities/admin-session.entity.js';
-import type {
-  AdminCreateInput,
-  AdminRepository,
-  AdminUpdateInput,
-} from './admin-repository.port.js';
+import type { AdminCreateInput, AdminRepository, AdminUpdateInput } from './admin-repository.port.js';
 import { PageQueryDto } from '../../../common/dto/index.js';
 import type { PageResult } from '../../../common/types/index.js';
 import type { AdminRecord } from '../types/admin.types.js';
@@ -27,40 +20,38 @@ export class TypeOrmAdminRepository implements AdminRepository {
     @InjectRepository(AdminRoleAssignmentEntity)
     private readonly adminRoles: Repository<AdminRoleAssignmentEntity>,
     @InjectRepository(AdminSessionEntity)
-    private readonly adminSessions: Repository<AdminSessionEntity>,
+    private readonly adminSessions: Repository<AdminSessionEntity>
   ) {}
 
   async findByUsername(username: string): Promise<AdminRecord | null> {
     const item = await this.admins.findOne({
-      where: { username },
+      where: { username }
     });
     return item ? this.toRecord(item) : null;
   }
 
   async findById(id: string): Promise<AdminRecord | null> {
     const item = await this.admins.findOne({
-      where: { id },
+      where: { id }
     });
     return item ? this.toRecord(item) : null;
   }
 
-  async list(
-    query: PageQueryDto = new PageQueryDto(),
-  ): Promise<PageResult<AdminRecord>> {
+  async list(query: PageQueryDto = new PageQueryDto()): Promise<PageResult<AdminRecord>> {
     const [items, total] = await this.admins.findAndCount({
       order: { createdAt: 'DESC', id: 'DESC' },
       skip: query.skip,
-      take: query.pageSize,
+      take: query.pageSize
     });
     const totalPages = total === 0 ? 0 : Math.ceil(total / query.pageSize);
     return {
-      items: items.map((item) => this.toRecord(item)),
+      items: items.map(item => this.toRecord(item)),
       total,
       page: query.page,
       pageSize: query.pageSize,
       totalPages,
       hasNextPage: query.page < totalPages,
-      hasPreviousPage: query.page > 1 && total > 0,
+      hasPreviousPage: query.page > 1 && total > 0
     };
   }
 
@@ -71,8 +62,8 @@ export class TypeOrmAdminRepository implements AdminRepository {
           ...input,
           isActive: true,
           isSuperAdmin: input.isSuperAdmin ?? false,
-          deletedAt: null,
-        }),
+          deletedAt: null
+        })
       );
       return this.toRecord(item);
     } catch (error: unknown) {
@@ -103,26 +94,24 @@ export class TypeOrmAdminRepository implements AdminRepository {
     await this.adminRoles.delete({ adminId: id });
     await this.adminSessions.update(
       { adminId: id, revokedAt: IsNull() },
-      { revokedAt: deletedAt, lastUsedAt: deletedAt },
+      { revokedAt: deletedAt, lastUsedAt: deletedAt }
     );
   }
 
   async countActiveSuperAdmins(): Promise<number> {
     return this.admins.count({
-      where: { isActive: true, isSuperAdmin: true },
+      where: { isActive: true, isSuperAdmin: true }
     });
   }
 
   async listRoleIds(adminId: string): Promise<string[]> {
     await this.findEntityOrThrow(adminId);
     const items = await this.adminRoles.find({ where: { adminId } });
-    return items.map((item) => String(item.roleId));
+    return items.map(item => String(item.roleId));
   }
 
-  async listRoleIdsByAdminIds(
-    adminIds: string[],
-  ): Promise<Map<string, string[]>> {
-    const result = new Map<string, string[]>(adminIds.map((id) => [id, []]));
+  async listRoleIdsByAdminIds(adminIds: string[]): Promise<Map<string, string[]>> {
+    const result = new Map<string, string[]>(adminIds.map(id => [id, []]));
     if (adminIds.length === 0) {
       return result;
     }
@@ -161,7 +150,7 @@ export class TypeOrmAdminRepository implements AdminRepository {
 
   private async findEntityOrThrow(id: string): Promise<AdminEntity> {
     const item = await this.admins.findOne({
-      where: { id },
+      where: { id }
     });
     if (!item) {
       throw new DomainNotFoundError('管理员');
@@ -179,16 +168,11 @@ export class TypeOrmAdminRepository implements AdminRepository {
       isSuperAdmin: item.isSuperAdmin,
       deletedAt: item.deletedAt,
       createdAt: item.createdAt,
-      updatedAt: item.updatedAt,
+      updatedAt: item.updatedAt
     };
   }
 
   private isDuplicate(error: unknown): boolean {
-    return (
-      typeof error === 'object' &&
-      error !== null &&
-      'code' in error &&
-      error.code === 'ER_DUP_ENTRY'
-    );
+    return typeof error === 'object' && error !== null && 'code' in error && error.code === 'ER_DUP_ENTRY';
   }
 }

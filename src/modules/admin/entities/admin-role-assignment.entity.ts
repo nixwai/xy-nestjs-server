@@ -1,16 +1,9 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  Index,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 /** 管理员与角色的分配记录。 */
 @Entity({ name: 'admin_role_assignment' })
 @Index('uk_admin_role_assignment_admin_id_role_id', ['adminId', 'roleId'], {
-  unique: true,
+  unique: true
 })
 @Index('idx_admin_role_assignment_role_id', ['roleId'])
 export class AdminRoleAssignmentEntity {
@@ -18,7 +11,7 @@ export class AdminRoleAssignmentEntity {
   @PrimaryGeneratedColumn({
     type: 'bigint',
     unsigned: true,
-    primaryKeyConstraintName: 'pk_admin_role_assignment_id',
+    primaryKeyConstraintName: 'pk_admin_role_assignment_id'
   })
   id!: string;
 

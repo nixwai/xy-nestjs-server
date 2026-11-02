@@ -1,9 +1,6 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Inject } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import {
-  ApiCommonResponses,
-  ApiOkResponseData,
-} from '../../common/decorators/index.js';
+import { ApiCommonResponses, ApiOkResponseData } from '../../common/decorators/index.js';
 import { Public } from '../authorization/decorators/index.js';
 import { HealthResponseDto, ReadinessResponseDto } from './dto/index.js';
 import { HealthService } from './health.service.js';
@@ -14,13 +11,13 @@ import { HealthService } from './health.service.js';
 @Controller('health')
 @Public()
 export class HealthController {
-  constructor(private readonly healthService: HealthService) {}
+  constructor(@Inject(HealthService) private readonly healthService: HealthService) {}
 
   /** 返回应用进程存活状态。 */
   @Get()
   @ApiOperation({
     summary: '存活检查',
-    description: '用于容器和负载均衡器确认应用进程仍在运行。',
+    description: '用于容器和负载均衡器确认应用进程仍在运行。'
   })
   @ApiOkResponseData(HealthResponseDto, { description: '应用存活状态。' })
   getHealth() {
@@ -31,10 +28,10 @@ export class HealthController {
   @Get('ready')
   @ApiOperation({
     summary: '就绪检查',
-    description: '用于确认应用依赖是否可用；数据库未启用时视为就绪。',
+    description: '用于确认应用依赖是否可用；数据库未启用时视为就绪。'
   })
   @ApiOkResponseData(ReadinessResponseDto, {
-    description: '应用依赖就绪状态。',
+    description: '应用依赖就绪状态。'
   })
   async getReadiness() {
     return this.healthService.getReadiness();

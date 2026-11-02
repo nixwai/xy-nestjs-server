@@ -1,8 +1,5 @@
 import type { AuthSessionRepository } from './auth-session-repository.port.js';
-import type {
-  AdminSessionRecord,
-  SessionRotationResult,
-} from '../types/session.types.js';
+import type { AdminSessionRecord, SessionRotationResult } from '../types/session.types.js';
 
 /** 在无数据库测试环境中保存刷新会话。 */
 export class InMemoryAuthSessionRepository implements AuthSessionRepository {
@@ -10,25 +7,17 @@ export class InMemoryAuthSessionRepository implements AuthSessionRepository {
   private nextId = 1;
 
   async findByTokenHash(tokenHash: string): Promise<AdminSessionRecord | null> {
-    return (
-      [...this.sessions.values()].find(
-        (item) => item.tokenHash === tokenHash,
-      ) ?? null
-    );
+    return [...this.sessions.values()].find(item => item.tokenHash === tokenHash) ?? null;
   }
 
-  async create(input: {
-    adminId: string;
-    tokenHash: string;
-    expiresAt: Date;
-  }): Promise<AdminSessionRecord> {
+  async create(input: { adminId: string; tokenHash: string; expiresAt: Date }): Promise<AdminSessionRecord> {
     const item: AdminSessionRecord = {
       id: String(this.nextId++),
       ...input,
       revokedAt: null,
       replacedBySessionId: null,
       createdAt: new Date(),
-      lastUsedAt: null,
+      lastUsedAt: null
     };
     this.sessions.set(item.id, item);
     return item;
@@ -37,7 +26,7 @@ export class InMemoryAuthSessionRepository implements AuthSessionRepository {
   async rotate(
     sessionId: string,
     replacement: { adminId: string; tokenHash: string; expiresAt: Date },
-    now: Date,
+    now: Date
   ): Promise<SessionRotationResult> {
     const current = this.sessions.get(sessionId);
     if (!current) {
@@ -50,7 +39,7 @@ export class InMemoryAuthSessionRepository implements AuthSessionRepository {
       this.sessions.set(sessionId, {
         ...current,
         revokedAt: now,
-        lastUsedAt: now,
+        lastUsedAt: now
       });
       return { status: 'expired' };
     }
@@ -59,7 +48,7 @@ export class InMemoryAuthSessionRepository implements AuthSessionRepository {
       ...current,
       revokedAt: now,
       lastUsedAt: now,
-      replacedBySessionId: next.id,
+      replacedBySessionId: next.id
     });
     return { status: 'rotated', session: next };
   }
@@ -83,12 +72,10 @@ export class InMemoryAuthSessionRepository implements AuthSessionRepository {
         this.sessions.set(item.id, {
           ...item,
           revokedAt: now,
-          lastUsedAt: now,
+          lastUsedAt: now
         });
       }
-      item = item.replacedBySessionId
-        ? this.sessions.get(item.replacedBySessionId)
-        : undefined;
+      item = item.replacedBySessionId ? this.sessions.get(item.replacedBySessionId) : undefined;
     }
   }
 }

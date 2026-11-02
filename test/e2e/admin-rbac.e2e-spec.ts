@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common';
+import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createTestModule } from './create-test-module.js';
@@ -22,13 +22,13 @@ describe('RBAC management API (e2e)', () => {
       username: 'root',
       passwordHash: root.hash,
       passwordSalt: root.salt,
-      isSuperAdmin: true,
+      isSuperAdmin: true
     });
     const operator = await hashPassword('Operator1234');
     await repository.create({
       username: 'operator',
       passwordHash: operator.hash,
-      passwordSalt: operator.salt,
+      passwordSalt: operator.salt
     });
   });
   afterEach(async () => {
@@ -96,9 +96,7 @@ describe('RBAC management API (e2e)', () => {
     expect(firstAuditPage.body.data).not.toHaveProperty('total');
     if (firstAuditPage.body.data.hasMore) {
       const secondAuditPage = await request(app.getHttpServer())
-        .get(
-          `/api/audit/list?limit=1&cursor=${encodeURIComponent(firstAuditPage.body.data.nextCursor)}`,
-        )
+        .get(`/api/audit/list?limit=1&cursor=${encodeURIComponent(firstAuditPage.body.data.nextCursor)}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
       expect(secondAuditPage.body.data.items).toHaveLength(1);
@@ -115,7 +113,7 @@ describe('RBAC management API (e2e)', () => {
         path: '/test-menu',
         icon: 'carbon:test',
         order: 99,
-        permissionCode: null,
+        permissionCode: null
       })
       .expect(200);
     expect(created.body.code).toBe(0);
@@ -124,9 +122,7 @@ describe('RBAC management API (e2e)', () => {
       .get('/api/menu/list')
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
-    expect(
-      listed.body.data.items.some((item: { id: string }) => item.id === menuId),
-    ).toBe(true);
+    expect(listed.body.data.items.some((item: { id: string }) => item.id === menuId)).toBe(true);
     await request(app.getHttpServer())
       .post('/api/menu/soft-delete')
       .set('Authorization', `Bearer ${token}`)
@@ -139,16 +135,19 @@ describe('RBAC management API (e2e)', () => {
       .get('/api/admin/me')
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
-    expect(
-      own.body.data.menus.map((item: { path: string }) => item.path),
-    ).toEqual(['/home', '/admin', '/permission', '/menu']);
+    expect(own.body.data.menus.map((item: { path: string }) => item.path)).toEqual([
+      '/home',
+      '/admin',
+      '/permission',
+      '/menu'
+    ]);
     const reset = await request(app.getHttpServer())
       .post('/api/admin/reset-password')
       .set('Authorization', `Bearer ${token}`)
       .send({
         id: '2',
         password: 'NewOperator1234',
-        currentPassword: 'Root1234',
+        currentPassword: 'Root1234'
       })
       .expect(200);
     expect(reset.body.code).toBe(0);
@@ -163,9 +162,7 @@ describe('RBAC management API (e2e)', () => {
       .expect(200);
     expect(own.body.data.username).toBe('operator');
     expect(own.body.data.permissions).toEqual([]);
-    expect(
-      own.body.data.menus.map((item: { path: string }) => item.path),
-    ).toEqual(['/home']);
+    expect(own.body.data.menus.map((item: { path: string }) => item.path)).toEqual(['/home']);
     const denied = await request(app.getHttpServer())
       .get('/api/admin/list')
       .set('Authorization', `Bearer ${token}`)

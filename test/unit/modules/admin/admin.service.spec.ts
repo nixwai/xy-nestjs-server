@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { AdminService } from '../../../../src/modules/admin/admin.service.js';
 import type {
   AdminRepository,
-  AdminTransactionRunner,
+  AdminTransactionRunner
 } from '../../../../src/modules/admin/repositories/admin-repository.port.js';
 import type { AdminRecord } from '../../../../src/modules/admin/types/admin.types.js';
 import { hashPassword } from '../../../../src/modules/auth/utils/password.util.js';
@@ -23,7 +23,7 @@ function admin(overrides: Partial<AdminRecord> = {}): AdminRecord {
     deletedAt: null,
     createdAt: now,
     updatedAt: now,
-    ...overrides,
+    ...overrides
   };
 }
 
@@ -32,7 +32,7 @@ function createService(
     repository?: Partial<AdminRepository>;
     roleService?: Partial<RoleService>;
     auditService?: Partial<AuditService>;
-  } = {},
+  } = {}
 ): {
   service: AdminService;
   repository: Partial<AdminRepository>;
@@ -48,7 +48,7 @@ function createService(
       pageSize: 20,
       totalPages: 1,
       hasNextPage: false,
-      hasPreviousPage: false,
+      hasPreviousPage: false
     }),
     listRoleIds: vi.fn().mockResolvedValue([]),
     listRoleIdsByAdminIds: vi.fn().mockResolvedValue(new Map([['1', []]])),
@@ -58,19 +58,19 @@ function createService(
     softDelete: vi.fn().mockResolvedValue(undefined),
     bindRole: vi.fn().mockResolvedValue(undefined),
     unbindRole: vi.fn().mockResolvedValue(undefined),
-    ...options.repository,
+    ...options.repository
   };
   const roleService: Partial<RoleService> = {
     findByCode: vi.fn().mockResolvedValue(null),
     findById: vi.fn().mockResolvedValue({ id: 'role-1' }),
-    ...options.roleService,
+    ...options.roleService
   };
   const auditService: Partial<AuditService> = {
     record: vi.fn().mockResolvedValue(undefined),
-    ...options.auditService,
+    ...options.auditService
   };
   const transactionRunner: AdminTransactionRunner = {
-    run: (work) => work(repository as AdminRepository),
+    run: work => work(repository as AdminRepository)
   };
 
   return {
@@ -78,10 +78,10 @@ function createService(
       repository as AdminRepository,
       roleService as RoleService,
       auditService as AuditService,
-      transactionRunner,
+      transactionRunner
     ),
     repository,
-    auditService,
+    auditService
   };
 }
 
@@ -96,67 +96,65 @@ describe('AdminService', () => {
           pageSize: 20,
           totalPages: 1,
           hasNextPage: false,
-          hasPreviousPage: false,
+          hasPreviousPage: false
         }),
         listRoleIdsByAdminIds: vi.fn().mockResolvedValue(
           new Map([
             ['1', ['role-1']],
-            ['2', []],
-          ]),
-        ),
-      },
+            ['2', []]
+          ])
+        )
+      }
     });
 
     await expect(service.listAdmins()).resolves.toMatchObject({
       items: [
         expect.objectContaining({ id: '1', roleIds: ['role-1'] }),
-        expect.objectContaining({ id: '2', roleIds: [] }),
+        expect.objectContaining({ id: '2', roleIds: [] })
       ],
       total: 2,
       page: 1,
       pageSize: 20,
       totalPages: 1,
       hasNextPage: false,
-      hasPreviousPage: false,
+      hasPreviousPage: false
     });
   });
 
   it('查询不存在的管理员时应抛出 NotFoundException', async () => {
     const { service } = createService({
-      repository: { findById: vi.fn().mockResolvedValue(null) },
+      repository: { findById: vi.fn().mockResolvedValue(null) }
     });
 
-    await expect(service.getMe('missing')).rejects.toBeInstanceOf(
-      NotFoundException,
-    );
+    await expect(service.getMe('missing')).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('创建普通管理员时应绑定默认角色并记录审计', async () => {
     const created = admin({
       id: '2',
       username: 'operator',
-      isSuperAdmin: false,
+      isSuperAdmin: false
     });
     const { service, repository, auditService } = createService({
       repository: {
         create: vi.fn().mockResolvedValue(created),
-        listRoleIds: vi.fn().mockResolvedValue(['role-1']),
+        listRoleIds: vi.fn().mockResolvedValue(['role-1'])
       },
       roleService: {
-        findByCode: vi.fn().mockResolvedValue({ id: 'role-1' }),
-      },
+        findByCode: vi.fn().mockResolvedValue({ id: 'role-1' })
+      }
     });
 
     const result = await service.createAdmin('1', {
       username: 'operator',
       password: 'Admin1234',
-      isSuperAdmin: false,
+      isSuperAdmin: false
     });
 
     expect(result).toMatchObject({ id: '2', roleIds: ['role-1'] });
     expect(repository.bindRole).toHaveBeenCalledWith('2', 'role-1');
     expect(auditService.record).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'admin.create', targetId: '2' }),
+      expect.objectContaining({ action: 'admin.create', targetId: '2' })
     );
   });
 
@@ -167,8 +165,8 @@ describe('AdminService', () => {
       service.createAdmin('1', {
         username: 'root-2',
         password: 'Admin1234',
-        isSuperAdmin: true,
-      }),
+        isSuperAdmin: true
+      })
     ).rejects.toBeInstanceOf(BadRequestException);
   });
 
@@ -176,12 +174,8 @@ describe('AdminService', () => {
     const password = await hashPassword('Admin1234');
     const { service } = createService({
       repository: {
-        findById: vi
-          .fn()
-          .mockResolvedValue(
-            admin({ passwordHash: password.hash, passwordSalt: password.salt }),
-          ),
-      },
+        findById: vi.fn().mockResolvedValue(admin({ passwordHash: password.hash, passwordSalt: password.salt }))
+      }
     });
 
     await expect(
@@ -189,8 +183,8 @@ describe('AdminService', () => {
         username: 'root-2',
         password: 'Admin1234',
         currentPassword: 'Wrong1234',
-        isSuperAdmin: true,
-      }),
+        isSuperAdmin: true
+      })
     ).rejects.toThrow('当前密码错误');
   });
 
@@ -199,29 +193,25 @@ describe('AdminService', () => {
     const updated = admin({ username: 'root-2' });
     const { service, repository } = createService({
       repository: {
-        findById: vi
-          .fn()
-          .mockResolvedValue(
-            admin({ passwordHash: password.hash, passwordSalt: password.salt }),
-          ),
+        findById: vi.fn().mockResolvedValue(admin({ passwordHash: password.hash, passwordSalt: password.salt })),
         update: vi.fn().mockResolvedValue(updated),
-        listRoleIds: vi.fn().mockResolvedValue([]),
-      },
+        listRoleIds: vi.fn().mockResolvedValue([])
+      }
     });
 
     await service.updateAdmin('1', {
       id: '1',
       username: 'root-2',
       currentPassword: 'Admin1234',
-      password: 'NewAdmin1234',
+      password: 'NewAdmin1234'
     });
 
     expect(repository.update).toHaveBeenCalledWith(
       '1',
       expect.objectContaining({
         username: 'root-2',
-        passwordHash: expect.any(String),
-      }),
+        passwordHash: expect.any(String)
+      })
     );
   });
 
@@ -229,36 +219,24 @@ describe('AdminService', () => {
     const password = await hashPassword('Admin1234');
     const { service, repository, auditService } = createService({
       repository: {
-        findById: vi
-          .fn()
-          .mockResolvedValue(
-            admin({ passwordHash: password.hash, passwordSalt: password.salt }),
-          ),
-      },
+        findById: vi.fn().mockResolvedValue(admin({ passwordHash: password.hash, passwordSalt: password.salt }))
+      }
     });
 
-    await expect(
-      service.softDeleteAdmin('1', '1', 'Admin1234'),
-    ).resolves.toBeNull();
+    await expect(service.softDeleteAdmin('1', '1', 'Admin1234')).resolves.toBeNull();
     expect(repository.softDelete).toHaveBeenCalledWith('1');
-    expect(auditService.record).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'admin.soft-delete' }),
-    );
+    expect(auditService.record).toHaveBeenCalledWith(expect.objectContaining({ action: 'admin.soft-delete' }));
   });
 
   it('绑定角色时应校验管理员和角色是否存在', async () => {
     const { service } = createService({
-      repository: { findById: vi.fn().mockResolvedValue(null) },
+      repository: { findById: vi.fn().mockResolvedValue(null) }
     });
-    await expect(
-      service.bindRole('1', 'missing', 'role-1'),
-    ).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.bindRole('1', 'missing', 'role-1')).rejects.toBeInstanceOf(NotFoundException);
 
     const { service: roleService } = createService({
-      roleService: { findById: vi.fn().mockResolvedValue(null) },
+      roleService: { findById: vi.fn().mockResolvedValue(null) }
     });
-    await expect(
-      roleService.bindRole('1', '1', 'missing'),
-    ).rejects.toBeInstanceOf(NotFoundException);
+    await expect(roleService.bindRole('1', '1', 'missing')).rejects.toBeInstanceOf(NotFoundException);
   });
 });

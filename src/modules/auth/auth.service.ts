@@ -1,8 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createHash, randomBytes } from 'node:crypto';
 import { hashPassword, verifyPassword } from './utils/password.util.js';
-import { JwtTokenService, parseDuration } from './tokens/jwt-token.service.js';
+import { JwtTokenService } from './tokens/jwt-token.service.js';
+import { parseDuration } from './tokens/jwt-token.service.js';
 import type { AdminRecord } from '../admin/types/admin.types.js';
 import { AdminService } from '../admin/admin.service.js';
 
@@ -13,26 +14,19 @@ import type { AuthTokenResponseDto } from './dto/index.js';
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly adminService: AdminService,
+    @Inject(AdminService) private readonly adminService: AdminService,
     private readonly sessionRepository: AuthSessionRepository,
-    private readonly configService: ConfigService,
-    private readonly jwtTokenService: JwtTokenService,
+    @Inject(ConfigService) private readonly configService: ConfigService,
+    @Inject(JwtTokenService) private readonly jwtTokenService: JwtTokenService
   ) {}
   /** 校验管理员凭据并创建登录会话。 */
-  async login(
-    username: string,
-    password: string,
-  ): Promise<AuthTokenResponseDto> {
+  async login(username: string, password: string): Promise<AuthTokenResponseDto> {
     const admin = await this.findAdminByUsername(username);
     if (!admin || !admin.isActive) {
       throw new UnauthorizedException('用户名或密码错误');
     }
 
-    const passwordValid = await verifyPassword(
-      password,
-      admin.passwordHash,
-      admin.passwordSalt,
-    );
+    const passwordValid = await verifyPassword(password, admin.passwordHash, admin.passwordSalt);
     if (!passwordValid) {
       throw new UnauthorizedException('用户名或密码错误');
     }
@@ -40,9 +34,7 @@ export class AuthService {
   }
   /** 使用 Refresh Token 轮换管理员会话。 */
   async refresh(refreshToken: string): Promise<AuthTokenResponseDto> {
-    const current = await this.sessionRepository.findByTokenHash(
-      hashRefreshToken(refreshToken),
-    );
+    const current = await this.sessionRepository.findByTokenHash(hashRefreshToken(refreshToken));
     if (!current) {
       throw new UnauthorizedException('刷新令牌无效');
     }
@@ -58,9 +50,9 @@ export class AuthService {
       {
         adminId: admin.id,
         tokenHash: hashRefreshToken(next),
-        expiresAt: addSeconds(now, this.refreshTokenExpiresIn),
+        expiresAt: addSeconds(now, this.refreshTokenExpiresIn)
       },
-      now,
+      now
     );
     if (rotation.status === 'rotated') {
       return this.buildTokenResponse(admin, next);
@@ -73,22 +65,16 @@ export class AuthService {
   }
   /** 撤销 Refresh Token。 */
   async logout(refreshToken: string): Promise<null> {
-    await this.sessionRepository.revokeByTokenHash(
-      hashRefreshToken(refreshToken),
-      new Date(),
-    );
+    await this.sessionRepository.revokeByTokenHash(hashRefreshToken(refreshToken), new Date());
     return null;
   }
   /** 创建首个超级管理员。 */
-  async createInitialAdmin(
-    username: string,
-    password: string,
-  ): Promise<AdminRecord> {
+  async createInitialAdmin(username: string, password: string): Promise<AdminRecord> {
     const { hash, salt } = await hashPassword(password);
     return this.adminService.createInitialAdmin({
       username,
       passwordHash: hash,
-      passwordSalt: salt,
+      passwordSalt: salt
     });
   }
   /** 校验管理员身份是否仍然可用。 */
@@ -100,19 +86,11 @@ export class AuthService {
     return admin;
   }
   /** 验证管理员当前密码。 */
-  async verifyAdminPassword(
-    adminId: string,
-    password: string,
-  ): Promise<boolean> {
+  async verifyAdminPassword(adminId: string, password: string): Promise<boolean> {
     const admin = await this.findAdminById(adminId);
-    return Boolean(
-      admin &&
-      (await verifyPassword(password, admin.passwordHash, admin.passwordSalt)),
-    );
+    return Boolean(admin && (await verifyPassword(password, admin.passwordHash, admin.passwordSalt)));
   }
-  private async findAdminByUsername(
-    username: string,
-  ): Promise<AdminRecord | null> {
+  private async findAdminByUsername(username: string): Promise<AdminRecord | null> {
     return this.adminService.findByUsername(username);
   }
   private async findAdminById(id: string): Promise<AdminRecord | null> {
@@ -123,14 +101,11 @@ export class AuthService {
     await this.sessionRepository.create({
       adminId: admin.id,
       tokenHash: hashRefreshToken(refreshToken),
-      expiresAt: addSeconds(new Date(), this.refreshTokenExpiresIn),
+      expiresAt: addSeconds(new Date(), this.refreshTokenExpiresIn)
     });
     return this.buildTokenResponse(admin, refreshToken);
   }
-  private buildTokenResponse(
-    admin: AdminRecord,
-    refreshToken: string,
-  ): AuthTokenResponseDto {
+  private buildTokenResponse(admin: AdminRecord, refreshToken: string): AuthTokenResponseDto {
     return {
       accessToken: this.jwtTokenService.signAccessToken(admin.id),
       refreshToken,
@@ -141,19 +116,15 @@ export class AuthService {
         id: admin.id,
         username: admin.username,
         isSuperAdmin: admin.isSuperAdmin,
-        role: 'admin',
-      },
+        role: 'admin'
+      }
     };
   }
   private get accessTokenExpiresIn(): number {
-    return parseDuration(
-      this.configService.getOrThrow<string>('jwt.accessTokenExpiresIn'),
-    );
+    return parseDuration(this.configService.getOrThrow<string>('jwt.accessTokenExpiresIn'));
   }
   private get refreshTokenExpiresIn(): number {
-    return parseDuration(
-      this.configService.getOrThrow<string>('jwt.refreshTokenExpiresIn'),
-    );
+    return parseDuration(this.configService.getOrThrow<string>('jwt.refreshTokenExpiresIn'));
   }
 }
 /** 创建不可预测的 Refresh Token。 */

@@ -25,5 +25,5 @@ export enum HttpCode {
   TOO_MANY_REQUESTS = 42900,
 
   /** 服务端发生未预期错误。 */
-  INTERNAL_SERVER_ERROR = 50000,
+  INTERNAL_SERVER_ERROR = 50000
 }

@@ -1,4 +1,5 @@
-import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import type { ExecutionContext } from '@nestjs/common';
+import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { describe, expect, it } from 'vitest';
 import { AdminService } from '../../../../../src/modules/admin/admin.service.js';
@@ -9,12 +10,12 @@ import { AuthService } from '../../../../../src/modules/auth/auth.service.js';
 import { InMemoryAuthSessionRepository } from '../../../../../src/modules/auth/repositories/in-memory-auth-session.repository.js';
 import { JwtAuthGuard } from '../../../../../src/modules/auth/guards/jwt-auth.guard.js';
 import { JwtTokenService } from '../../../../../src/modules/auth/tokens/jwt-token.service.js';
-import { RoleService } from '../../../../../src/modules/role/role.service.js';
+import type { RoleService } from '../../../../../src/modules/role/role.service.js';
 
 function contextFor(authorization?: string): ExecutionContext {
   const request = { header: () => authorization };
   return {
-    switchToHttp: () => ({ getRequest: () => request }),
+    switchToHttp: () => ({ getRequest: () => request })
   } as unknown as ExecutionContext;
 }
 
@@ -24,17 +25,12 @@ function createAuthService(config: ConfigService): AuthService {
     repository,
     {
       findByCode: async () => null,
-      findById: async () => null,
+      findById: async () => null
     } as unknown as RoleService,
     new AuditService(),
-    new InMemoryAdminTransactionRunner(repository),
+    new InMemoryAdminTransactionRunner(repository)
   );
-  return new AuthService(
-    adminService,
-    new InMemoryAuthSessionRepository(),
-    config,
-    new JwtTokenService(config),
-  );
+  return new AuthService(adminService, new InMemoryAuthSessionRepository(), config, new JwtTokenService(config));
 }
 
 describe('JwtAuthGuard', () => {
@@ -43,15 +39,10 @@ describe('JwtAuthGuard', () => {
       jwt: {
         secret: 'test-only-secret-with-at-least-32-chars',
         accessTokenExpiresIn: '15m',
-        refreshTokenExpiresIn: '7d',
-      },
+        refreshTokenExpiresIn: '7d'
+      }
     });
-    const guard = new JwtAuthGuard(
-      createAuthService(config),
-      new JwtTokenService(config),
-    );
-    await expect(guard.canActivate(contextFor())).rejects.toBeInstanceOf(
-      UnauthorizedException,
-    );
+    const guard = new JwtAuthGuard(createAuthService(config), new JwtTokenService(config));
+    await expect(guard.canActivate(contextFor())).rejects.toBeInstanceOf(UnauthorizedException);
   });
 });

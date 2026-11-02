@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { DomainNotFoundError } from '../../common/errors/index.js';
-import { HttpMethod, PermissionResource } from './enums/index.js';
+import type { HttpMethod, PermissionResource } from './enums/index.js';
 import { AdminService } from '../admin/admin.service.js';
 import { RoleService } from '../role/role.service.js';
 import { PermissionService } from '../permission/permission.service.js';
@@ -10,9 +10,9 @@ import type { AdminAuthorization } from '../admin/types/admin.types.js';
 @Injectable()
 export class AuthorizationService {
   constructor(
-    private readonly adminService: AdminService,
-    private readonly roleService: RoleService,
-    private readonly permissionService: PermissionService,
+    @Inject(AdminService) private readonly adminService: AdminService,
+    @Inject(RoleService) private readonly roleService: RoleService,
+    @Inject(PermissionService) private readonly permissionService: PermissionService
   ) {}
 
   /** 查询管理员授权上下文。 */
@@ -23,9 +23,7 @@ export class AuthorizationService {
     }
     const roleIds = await this.adminService.listAdminRoleIds(adminId);
     const roles = await this.roleService.findByIds(roleIds);
-    const permissionIds = [
-      ...new Set(roles.flatMap((role) => role.permissionIds)),
-    ];
+    const permissionIds = [...new Set(roles.flatMap(role => role.permissionIds))];
     const permissions = await this.permissionService.findByIds(permissionIds);
     return {
       admin: {
@@ -35,19 +33,15 @@ export class AuthorizationService {
         isSuperAdmin: admin.isSuperAdmin,
         roleIds,
         createdAt: admin.createdAt,
-        updatedAt: admin.updatedAt,
+        updatedAt: admin.updatedAt
       },
       roles,
-      permissions,
+      permissions
     };
   }
 
   /** 判断管理员是否拥有指定权限。 */
-  async hasPermission(
-    adminId: string,
-    resource: PermissionResource,
-    method: HttpMethod,
-  ): Promise<boolean> {
+  async hasPermission(adminId: string, resource: PermissionResource, method: HttpMethod): Promise<boolean> {
     const admin = await this.adminService.findById(adminId);
     if (!admin || !admin.isActive) {
       return false;
@@ -57,8 +51,7 @@ export class AuthorizationService {
     }
     const authorization = await this.getAuthorization(adminId);
     return authorization.permissions.some(
-      (item) =>
-        item.isActive && item.resource === resource && item.method === method,
+      item => item.isActive && item.resource === resource && item.method === method
     );
   }
 }

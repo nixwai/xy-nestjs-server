@@ -1,15 +1,5 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  Index,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-import {
-  HttpMethod,
-  PermissionResource,
-} from '../../authorization/enums/index.js';
+import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import type { HttpMethod, PermissionResource } from '../../authorization/enums/index.js';
 
 /** 代码注册的权限目录。 */
 @Entity({ name: 'permission' })
@@ -20,7 +10,7 @@ export class PermissionEntity {
   @PrimaryGeneratedColumn({
     type: 'bigint',
     unsigned: true,
-    primaryKeyConstraintName: 'pk_permission_id',
+    primaryKeyConstraintName: 'pk_permission_id'
   })
   id!: string;
 

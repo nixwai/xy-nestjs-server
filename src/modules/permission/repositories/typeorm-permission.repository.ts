@@ -3,10 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
 import { DomainNotFoundError } from '../../../common/errors/index.js';
 import { PermissionEntity } from '../entities/permission.entity.js';
-import type {
-  PermissionRecord,
-  RegisteredPermission,
-} from '../../authorization/types/permission.types.js';
+import type { PermissionRecord, RegisteredPermission } from '../../authorization/types/permission.types.js';
 import type { PermissionRepository } from './permission-repository.port.js';
 
 /** 使用 TypeORM 保存权限目录。 */
@@ -14,13 +11,11 @@ import type { PermissionRepository } from './permission-repository.port.js';
 export class TypeOrmPermissionRepository implements PermissionRepository {
   constructor(
     @InjectRepository(PermissionEntity)
-    private readonly permissions: Repository<PermissionEntity>,
+    private readonly permissions: Repository<PermissionEntity>
   ) {}
 
   async list(): Promise<PermissionRecord[]> {
-    return (
-      await this.permissions.find({ order: { code: 'ASC', id: 'ASC' } })
-    ).map((item) => this.toRecord(item));
+    return (await this.permissions.find({ order: { code: 'ASC', id: 'ASC' } })).map(item => this.toRecord(item));
   }
 
   async findById(id: string): Promise<PermissionRecord | null> {
@@ -36,24 +31,18 @@ export class TypeOrmPermissionRepository implements PermissionRepository {
       .createQueryBuilder('permission')
       .where('permission.id IN (:...ids)', { ids })
       .getMany();
-    const records = new Map(
-      items.map((item) => [String(item.id), this.toRecord(item)]),
-    );
-    return ids.flatMap((id) => {
+    const records = new Map(items.map(item => [String(item.id), this.toRecord(item)]));
+    return ids.flatMap(id => {
       const item = records.get(id);
       return item ? [item] : [];
     });
   }
 
-  async upsertRegistered(
-    input: RegisteredPermission,
-  ): Promise<PermissionRecord> {
+  async upsertRegistered(input: RegisteredPermission): Promise<PermissionRecord> {
     const existing = await this.permissions.findOne({
-      where: { code: input.code },
+      where: { code: input.code }
     });
-    const item = existing
-      ? this.permissions.merge(existing, input)
-      : this.permissions.create(input);
+    const item = existing ? this.permissions.merge(existing, input) : this.permissions.create(input);
     return this.toRecord(await this.permissions.save(item));
   }
 
@@ -74,7 +63,7 @@ export class TypeOrmPermissionRepository implements PermissionRepository {
       method: item.method,
       name: item.name,
       description: item.description,
-      isActive: item.isActive,
+      isActive: item.isActive
     };
   }
 }

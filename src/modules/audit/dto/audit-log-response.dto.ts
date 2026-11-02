@@ -9,14 +9,14 @@ export class AuditLogResponseDto {
     type: String,
     nullable: true,
     description: '操作者管理员 ID。系统操作可能为空。',
-    example: '1',
+    example: '1'
   })
   actorAdminId!: string | null;
 
   @ApiProperty({
     type: String,
     description: '操作动作编码。',
-    example: 'admin.create',
+    example: 'admin.create'
   })
   action!: string;
 
@@ -27,7 +27,7 @@ export class AuditLogResponseDto {
     type: String,
     nullable: true,
     description: '被操作资源 ID。',
-    example: '2',
+    example: '2'
   })
   targetId!: string | null;
 
@@ -36,7 +36,7 @@ export class AuditLogResponseDto {
     additionalProperties: true,
     nullable: true,
     description: '结构化变更摘要。没有摘要时为 null。',
-    example: { isSuperAdmin: false },
+    example: { isSuperAdmin: false }
   })
   details!: Record<string, unknown> | null;
 
@@ -49,7 +49,7 @@ export class AuditLogResponseDto {
   @ApiProperty({
     type: String,
     format: 'date-time',
-    description: '最后更新时间。',
+    description: '最后更新时间。'
   })
   updatedAt!: Date;
 }

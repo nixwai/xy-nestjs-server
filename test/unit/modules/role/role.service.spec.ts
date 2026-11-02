@@ -1,15 +1,12 @@
 import { NotFoundException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
-import { PermissionService } from '../../../../src/modules/permission/permission.service.js';
+import type { PermissionService } from '../../../../src/modules/permission/permission.service.js';
 import { RoleService } from '../../../../src/modules/role/role.service.js';
 import type { PermissionRecord } from '../../../../src/modules/authorization/types/permission.types.js';
 import type { RoleRecord } from '../../../../src/modules/role/types/role.types.js';
 import type { RoleRepository } from '../../../../src/modules/role/repositories/role-repository.port.js';
 import type { AuditService } from '../../../../src/modules/audit/audit.service.js';
-import {
-  HttpMethod,
-  PermissionResource,
-} from '../../../../src/modules/authorization/enums/index.js';
+import { HttpMethod, PermissionResource } from '../../../../src/modules/authorization/enums/index.js';
 
 const role: RoleRecord = {
   id: 'role-1',
@@ -18,7 +15,7 @@ const role: RoleRecord = {
   description: null,
   isActive: true,
   deletedAt: null,
-  permissionIds: [],
+  permissionIds: []
 };
 const permission: PermissionRecord = {
   id: 'permission-1',
@@ -27,7 +24,7 @@ const permission: PermissionRecord = {
   method: HttpMethod.GET,
   name: '查询角色',
   description: null,
-  isActive: true,
+  isActive: true
 };
 
 function createService(
@@ -35,7 +32,7 @@ function createService(
     repository?: Partial<RoleRepository>;
     permissionService?: Partial<PermissionService>;
     auditService?: Partial<AuditService>;
-  } = {},
+  } = {}
 ): {
   service: RoleService;
   repository: Partial<RoleRepository>;
@@ -50,7 +47,7 @@ function createService(
       pageSize: 20,
       totalPages: 1,
       hasNextPage: false,
-      hasPreviousPage: false,
+      hasPreviousPage: false
     }),
     findById: vi.fn().mockResolvedValue(role),
     findByIds: vi.fn().mockResolvedValue([role]),
@@ -60,26 +57,26 @@ function createService(
     softDelete: vi.fn().mockResolvedValue(undefined),
     bindPermission: vi.fn().mockResolvedValue(undefined),
     unbindPermission: vi.fn().mockResolvedValue(undefined),
-    ...options.repository,
+    ...options.repository
   };
   const permissionService: Partial<PermissionService> = {
     findById: vi.fn().mockResolvedValue(permission),
-    ...options.permissionService,
+    ...options.permissionService
   };
   const auditService: Partial<AuditService> = {
     record: vi.fn().mockResolvedValue(undefined),
-    ...options.auditService,
+    ...options.auditService
   };
 
   return {
     service: new RoleService(
       repository as RoleRepository,
       permissionService as PermissionService,
-      auditService as AuditService,
+      auditService as AuditService
     ),
     repository,
     permissionService,
-    auditService,
+    auditService
   };
 }
 
@@ -89,14 +86,14 @@ describe('RoleService', () => {
 
     await service.createRole('admin-1', {
       code: 'operator',
-      name: '普通管理员',
+      name: '普通管理员'
     });
     await service.updateRole('admin-1', 'role-1', { isActive: false });
     await service.softDeleteRole('admin-1', 'role-1');
 
     expect(repository.create).toHaveBeenCalled();
     expect(repository.update).toHaveBeenCalledWith('role-1', {
-      isActive: false,
+      isActive: false
     });
     expect(repository.softDelete).toHaveBeenCalledWith('role-1');
     expect(auditService.record).toHaveBeenCalledTimes(3);
@@ -104,18 +101,18 @@ describe('RoleService', () => {
 
   it('绑定权限前应校验角色和权限', async () => {
     const { service } = createService({
-      repository: { findById: vi.fn().mockResolvedValue(null) },
+      repository: { findById: vi.fn().mockResolvedValue(null) }
     });
-    await expect(
-      service.bindPermission('admin-1', 'missing', 'permission-1'),
-    ).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.bindPermission('admin-1', 'missing', 'permission-1')).rejects.toBeInstanceOf(
+      NotFoundException
+    );
 
     const { service: missingPermissionService } = createService({
-      permissionService: { findById: vi.fn().mockResolvedValue(null) },
+      permissionService: { findById: vi.fn().mockResolvedValue(null) }
     });
-    await expect(
-      missingPermissionService.bindPermission('admin-1', 'role-1', 'missing'),
-    ).rejects.toBeInstanceOf(NotFoundException);
+    await expect(missingPermissionService.bindPermission('admin-1', 'role-1', 'missing')).rejects.toBeInstanceOf(
+      NotFoundException
+    );
   });
 
   it('应绑定和解绑权限并记录审计', async () => {
@@ -124,14 +121,8 @@ describe('RoleService', () => {
     await service.bindPermission('admin-1', 'role-1', 'permission-1');
     await service.unbindPermission('admin-1', 'role-1', 'permission-1');
 
-    expect(repository.bindPermission).toHaveBeenCalledWith(
-      'role-1',
-      'permission-1',
-    );
-    expect(repository.unbindPermission).toHaveBeenCalledWith(
-      'role-1',
-      'permission-1',
-    );
+    expect(repository.bindPermission).toHaveBeenCalledWith('role-1', 'permission-1');
+    expect(repository.unbindPermission).toHaveBeenCalledWith('role-1', 'permission-1');
     expect(auditService.record).toHaveBeenCalledTimes(2);
   });
 
@@ -140,7 +131,7 @@ describe('RoleService', () => {
 
     await expect(service.listRoles()).resolves.toMatchObject({
       items: [role],
-      total: 1,
+      total: 1
     });
     await expect(service.findById('role-1')).resolves.toEqual(role);
     await expect(service.findByIds(['role-1'])).resolves.toEqual([role]);

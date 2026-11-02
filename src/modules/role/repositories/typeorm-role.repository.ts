@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
-import {
-  DomainConflictError,
-  DomainNotFoundError,
-} from '../../../common/errors/index.js';
+import { DomainConflictError, DomainNotFoundError } from '../../../common/errors/index.js';
 import { RolePermissionAssignmentEntity } from '../entities/role-permission-assignment.entity.js';
 import { AdminRoleAssignmentEntity } from '../../admin/entities/admin-role-assignment.entity.js';
 import { RoleEntity } from '../entities/role.entity.js';
@@ -22,16 +19,14 @@ export class TypeOrmRoleRepository implements RoleRepository {
     @InjectRepository(RolePermissionAssignmentEntity)
     private readonly rolePermissions: Repository<RolePermissionAssignmentEntity>,
     @InjectRepository(AdminRoleAssignmentEntity)
-    private readonly adminRoles: Repository<AdminRoleAssignmentEntity>,
+    private readonly adminRoles: Repository<AdminRoleAssignmentEntity>
   ) {}
 
-  async list(
-    query: PageQueryDto = new PageQueryDto(),
-  ): Promise<PageResult<RoleRecord>> {
+  async list(query: PageQueryDto = new PageQueryDto()): Promise<PageResult<RoleRecord>> {
     const [items, total] = await this.roles.findAndCount({
       order: { createdAt: 'DESC', id: 'DESC' },
       skip: query.skip,
-      take: query.pageSize,
+      take: query.pageSize
     });
     const pageItems = await this.toRecords(items);
     const totalPages = total === 0 ? 0 : Math.ceil(total / query.pageSize);
@@ -42,7 +37,7 @@ export class TypeOrmRoleRepository implements RoleRepository {
       pageSize: query.pageSize,
       totalPages,
       hasNextPage: query.page < totalPages,
-      hasPreviousPage: query.page > 1 && total > 0,
+      hasPreviousPage: query.page > 1 && total > 0
     };
   }
 
@@ -55,14 +50,9 @@ export class TypeOrmRoleRepository implements RoleRepository {
     if (ids.length === 0) {
       return [];
     }
-    const items = await this.roles
-      .createQueryBuilder('role')
-      .where('role.id IN (:...ids)', { ids })
-      .getMany();
-    const records = new Map(
-      (await this.toRecords(items)).map((item) => [item.id, item]),
-    );
-    return ids.flatMap((id) => {
+    const items = await this.roles.createQueryBuilder('role').where('role.id IN (:...ids)', { ids }).getMany();
+    const records = new Map((await this.toRecords(items)).map(item => [item.id, item]));
+    return ids.flatMap(id => {
       const item = records.get(id);
       return item ? [item] : [];
     });
@@ -73,19 +63,15 @@ export class TypeOrmRoleRepository implements RoleRepository {
     return item ? (await this.toRecords([item]))[0] : null;
   }
 
-  async create(input: {
-    code: string;
-    name: string;
-    description?: string;
-  }): Promise<RoleRecord> {
+  async create(input: { code: string; name: string; description?: string }): Promise<RoleRecord> {
     try {
       const item = await this.roles.save(
         this.roles.create({
           ...input,
           description: input.description ?? null,
           isActive: true,
-          deletedAt: null,
-        }),
+          deletedAt: null
+        })
       );
       return this.toRecord(item);
     } catch (error: unknown) {
@@ -96,21 +82,16 @@ export class TypeOrmRoleRepository implements RoleRepository {
     }
   }
 
-  async update(
-    id: string,
-    input: Partial<Pick<RoleRecord, 'name' | 'description' | 'isActive'>>,
-  ): Promise<RoleRecord> {
+  async update(id: string, input: Partial<Pick<RoleRecord, 'name' | 'description' | 'isActive'>>): Promise<RoleRecord> {
     const item = await this.findEntityOrThrow(id);
     this.roles.merge(item, input);
     return this.toRecord(await this.roles.save(item));
   }
 
   async softDelete(id: string): Promise<void> {
-    await this.roles.manager.transaction(async (manager) => {
+    await this.roles.manager.transaction(async manager => {
       const roles = manager.getRepository(RoleEntity);
-      const rolePermissions = manager.getRepository(
-        RolePermissionAssignmentEntity,
-      );
+      const rolePermissions = manager.getRepository(RolePermissionAssignmentEntity);
       const adminRoles = manager.getRepository(AdminRoleAssignmentEntity);
       const item = await roles.findOne({ where: { id } });
       if (!item) {
@@ -124,15 +105,11 @@ export class TypeOrmRoleRepository implements RoleRepository {
 
   async bindPermission(roleId: string, permissionId: string): Promise<void> {
     await this.findEntityOrThrow(roleId);
-    if (
-      await this.rolePermissions.findOne({ where: { roleId, permissionId } })
-    ) {
+    if (await this.rolePermissions.findOne({ where: { roleId, permissionId } })) {
       throw new DomainConflictError('角色权限关系');
     }
     try {
-      await this.rolePermissions.save(
-        this.rolePermissions.create({ roleId, permissionId }),
-      );
+      await this.rolePermissions.save(this.rolePermissions.create({ roleId, permissionId }));
     } catch (error: unknown) {
       if (this.isDuplicate(error)) {
         throw new DomainConflictError('角色权限关系');
@@ -159,19 +136,14 @@ export class TypeOrmRoleRepository implements RoleRepository {
       return [];
     }
     const relations = await this.rolePermissions.find({
-      where: items.map(({ id }) => ({ roleId: id })),
+      where: items.map(({ id }) => ({ roleId: id }))
     });
     const permissionIds = new Map<string, string[]>();
     for (const relation of relations) {
       const current = permissionIds.get(String(relation.roleId)) ?? [];
-      permissionIds.set(String(relation.roleId), [
-        ...current,
-        String(relation.permissionId),
-      ]);
+      permissionIds.set(String(relation.roleId), [...current, String(relation.permissionId)]);
     }
-    return items.map((item) =>
-      this.toRecord(item, permissionIds.get(String(item.id)) ?? []),
-    );
+    return items.map(item => this.toRecord(item, permissionIds.get(String(item.id)) ?? []));
   }
 
   private toRecord(item: RoleEntity, permissionIds: string[] = []): RoleRecord {
@@ -182,16 +154,11 @@ export class TypeOrmRoleRepository implements RoleRepository {
       description: item.description,
       isActive: item.isActive,
       deletedAt: item.deletedAt,
-      permissionIds: [...permissionIds],
+      permissionIds: [...permissionIds]
     };
   }
 
   private isDuplicate(error: unknown): boolean {
-    return (
-      typeof error === 'object' &&
-      error !== null &&
-      'code' in error &&
-      error.code === 'ER_DUP_ENTRY'
-    );
+    return typeof error === 'object' && error !== null && 'code' in error && error.code === 'ER_DUP_ENTRY';
   }
 }

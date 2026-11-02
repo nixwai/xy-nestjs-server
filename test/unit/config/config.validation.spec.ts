@@ -2,13 +2,13 @@ import { describe, expect, it } from 'vitest';
 import {
   createApplicationConfigSchema,
   createConfigValidationSchema,
-  validateEnvironment,
+  validateEnvironment
 } from '../../../src/config/config.validation.js';
 
 describe('config validation', () => {
   it('rejects a missing JWT secret', () => {
     const { error } = createConfigValidationSchema().validate({
-      NODE_ENV: 'development',
+      NODE_ENV: 'development'
     });
     expect(error).toBeDefined();
   });
@@ -16,7 +16,7 @@ describe('config validation', () => {
   it('rejects an invalid environment', () => {
     const { error } = createConfigValidationSchema().validate({
       NODE_ENV: 'invalid',
-      JWT_SECRET: 'test-only-secret-with-at-least-32-chars',
+      JWT_SECRET: 'test-only-secret-with-at-least-32-chars'
     });
     expect(error).toBeDefined();
   });
@@ -26,8 +26,8 @@ describe('config validation', () => {
       validateEnvironment({
         NODE_ENV: 'test',
         DB_ENABLED: 'false',
-        JWT_SECRET: 'test-only-secret-with-at-least-32-chars',
-      }),
+        JWT_SECRET: 'test-only-secret-with-at-least-32-chars'
+      })
     ).toMatchObject({ NODE_ENV: 'test', DB_ENABLED: false });
   });
 
@@ -36,8 +36,8 @@ describe('config validation', () => {
       validateEnvironment({
         NODE_ENV: 'development',
         DB_ENABLED: 'false',
-        JWT_SECRET: 'test-only-secret-with-at-least-32-chars',
-      }),
+        JWT_SECRET: 'test-only-secret-with-at-least-32-chars'
+      })
     ).toThrow('开发和生产环境必须显式启用数据库');
   });
 
@@ -46,8 +46,8 @@ describe('config validation', () => {
       validateEnvironment({
         NODE_ENV: 'production',
         DB_ENABLED: 'true',
-        JWT_SECRET: 'test-only-secret-with-at-least-32-chars',
-      }),
+        JWT_SECRET: 'test-only-secret-with-at-least-32-chars'
+      })
     ).toThrow('生产环境缺少数据库配置');
   });
 
@@ -60,7 +60,7 @@ describe('config validation', () => {
       DB_USERNAME: 'app',
       DB_PASSWORD: 'strong-password',
       DB_DATABASE: 'scenic_booking',
-      JWT_SECRET: 'test-only-secret-with-at-least-32-chars',
+      JWT_SECRET: 'test-only-secret-with-at-least-32-chars'
     });
     expect(error).toBeDefined();
   });
@@ -76,12 +76,12 @@ describe('config validation', () => {
         username: 'root',
         password: 'password',
         database: 'scenic_booking',
-        synchronize: false,
+        synchronize: false
       },
       jwt: {
         secret: 'test-only-secret-with-at-least-32-chars',
         accessTokenExpiresIn: '15m',
-        refreshTokenExpiresIn: '7d',
+        refreshTokenExpiresIn: '7d'
       },
       swagger: { enabled: true, path: 'docs' },
       storage: {
@@ -89,13 +89,11 @@ describe('config validation', () => {
         region: '',
         bucket: '',
         secretId: '',
-        secretKey: '',
+        secretKey: ''
       },
       wechat: { enabled: false, appId: '', appSecret: '' },
-      throttler: { ttl: 60000, limit: 100 },
+      throttler: { ttl: 60000, limit: 100 }
     };
-    expect(
-      createApplicationConfigSchema().validate(config).error,
-    ).toBeDefined();
+    expect(createApplicationConfigSchema().validate(config).error).toBeDefined();
   });
 });

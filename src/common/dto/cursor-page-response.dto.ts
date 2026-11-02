@@ -8,7 +8,7 @@ export class CursorPageResponseDto<T> {
   @ApiPropertyOptional({
     type: String,
     nullable: true,
-    description: '下一页游标，没有下一页时为 null。',
+    description: '下一页游标，没有下一页时为 null。'
   })
   nextCursor!: string | null;
 

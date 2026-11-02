@@ -12,8 +12,8 @@ export function createSwaggerConfig(globalPrefix = 'api') {
         '1. 需要登录的接口使用 Bearer Token，在 Authorize 中填入 accessToken。',
         '2. HTTP 200 只表示请求已被服务处理，业务结果通过响应体 code 判断。',
         '3. 成功响应格式为 { code: 0, message: "success", data }。',
-        '4. 业务错误响应格式为 { code, message, data: null }。',
-      ].join('\n'),
+        '4. 业务错误响应格式为 { code, message, data: null }。'
+      ].join('\n')
     )
     .setVersion('1.0.0')
     .addServer(`/${globalPrefix}`, '当前环境 API 根路径')
@@ -22,9 +22,9 @@ export function createSwaggerConfig(globalPrefix = 'api') {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
-        description: '填写登录接口返回的 accessToken，不需要填写 Bearer 前缀。',
+        description: '填写登录接口返回的 accessToken，不需要填写 Bearer 前缀。'
       },
-      'bearer',
+      'bearer'
     )
     .addTag('健康检查', '服务存活和依赖就绪检查')
     .addTag('认证', '管理员登录、令牌刷新和会话注销')

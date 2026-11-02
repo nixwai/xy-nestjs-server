@@ -1,15 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import {
-  loadBaseConfig,
-  mergeConfig,
-} from '../../../../src/common/utils/config.util.js';
+import { loadBaseConfig, mergeConfig } from '../../../../src/common/utils/config.util.js';
 
 describe('config utilities', () => {
   it('deep merges nested configuration without mutating inputs', () => {
     const base = { database: { host: 'localhost', port: 3306 } };
     const override = { database: { port: 3307 } };
     expect(mergeConfig(base, override)).toEqual({
-      database: { host: 'localhost', port: 3307 },
+      database: { host: 'localhost', port: 3307 }
     });
     expect(base).toEqual({ database: { host: 'localhost', port: 3306 } });
   });
@@ -18,7 +15,7 @@ describe('config utilities', () => {
     const config = loadBaseConfig();
     expect(config.app).toMatchObject({
       environment: 'development',
-      globalPrefix: 'api',
+      globalPrefix: 'api'
     });
     expect(config.database).toMatchObject({ enabled: true });
   });

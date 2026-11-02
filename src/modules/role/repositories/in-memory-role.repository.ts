@@ -1,7 +1,4 @@
-import {
-  DomainConflictError,
-  DomainNotFoundError,
-} from '../../../common/errors/index.js';
+import { DomainConflictError, DomainNotFoundError } from '../../../common/errors/index.js';
 import { PageQueryDto } from '../../../common/dto/index.js';
 import type { PageResult } from '../../../common/types/index.js';
 import type { RoleRecord } from '../types/role.types.js';
@@ -13,24 +10,20 @@ export class InMemoryRoleRepository implements RoleRepository {
   private readonly createdAt = new Map<string, number>();
   private nextId = 1;
 
-  async list(
-    query: PageQueryDto = new PageQueryDto(),
-  ): Promise<PageResult<RoleRecord>> {
+  async list(query: PageQueryDto = new PageQueryDto()): Promise<PageResult<RoleRecord>> {
     const items = [...this.roles.values()]
-      .filter((item) => item.deletedAt === null)
+      .filter(item => item.deletedAt === null)
       .sort((left, right) => Number(BigInt(right.id) - BigInt(left.id)));
     const total = items.length;
     const totalPages = total === 0 ? 0 : Math.ceil(total / query.pageSize);
     return {
-      items: items
-        .slice(query.skip, query.skip + query.pageSize)
-        .map((item) => this.copy(item)),
+      items: items.slice(query.skip, query.skip + query.pageSize).map(item => this.copy(item)),
       total,
       page: query.page,
       pageSize: query.pageSize,
       totalPages,
       hasNextPage: query.page < totalPages,
-      hasPreviousPage: query.page > 1 && total > 0,
+      hasPreviousPage: query.page > 1 && total > 0
     };
   }
 
@@ -40,22 +33,16 @@ export class InMemoryRoleRepository implements RoleRepository {
   }
 
   async findByIds(ids: string[]): Promise<RoleRecord[]> {
-    const records = await Promise.all(ids.map((id) => this.findById(id)));
+    const records = await Promise.all(ids.map(id => this.findById(id)));
     return records.filter((item): item is RoleRecord => item !== null);
   }
 
   async findByCode(code: string): Promise<RoleRecord | null> {
-    const item = [...this.roles.values()].find(
-      (role) => role.deletedAt === null && role.code === code,
-    );
+    const item = [...this.roles.values()].find(role => role.deletedAt === null && role.code === code);
     return item ? this.copy(item) : null;
   }
 
-  async create(input: {
-    code: string;
-    name: string;
-    description?: string;
-  }): Promise<RoleRecord> {
+  async create(input: { code: string; name: string; description?: string }): Promise<RoleRecord> {
     if (await this.findByCode(input.code)) {
       throw new DomainConflictError('角色编码');
     }
@@ -66,17 +53,14 @@ export class InMemoryRoleRepository implements RoleRepository {
       description: input.description ?? null,
       isActive: true,
       deletedAt: null,
-      permissionIds: [],
+      permissionIds: []
     };
     this.roles.set(item.id, item);
     this.createdAt.set(item.id, Date.now());
     return this.copy(item);
   }
 
-  async update(
-    id: string,
-    input: Partial<Pick<RoleRecord, 'name' | 'description' | 'isActive'>>,
-  ): Promise<RoleRecord> {
+  async update(id: string, input: Partial<Pick<RoleRecord, 'name' | 'description' | 'isActive'>>): Promise<RoleRecord> {
     const item = await this.findByIdOrThrow(id);
     const updated = { ...item, ...input };
     this.roles.set(id, updated);
@@ -95,7 +79,7 @@ export class InMemoryRoleRepository implements RoleRepository {
     }
     this.roles.set(roleId, {
       ...item,
-      permissionIds: [...item.permissionIds, permissionId],
+      permissionIds: [...item.permissionIds, permissionId]
     });
   }
 
@@ -103,7 +87,7 @@ export class InMemoryRoleRepository implements RoleRepository {
     const item = await this.findByIdOrThrow(roleId);
     this.roles.set(roleId, {
       ...item,
-      permissionIds: item.permissionIds.filter((id) => id !== permissionId),
+      permissionIds: item.permissionIds.filter(id => id !== permissionId)
     });
   }
 

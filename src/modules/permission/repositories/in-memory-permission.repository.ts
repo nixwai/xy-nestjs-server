@@ -1,8 +1,5 @@
 import { DomainNotFoundError } from '../../../common/errors/index.js';
-import type {
-  PermissionRecord,
-  RegisteredPermission,
-} from '../../authorization/types/permission.types.js';
+import type { PermissionRecord, RegisteredPermission } from '../../authorization/types/permission.types.js';
 import type { PermissionRepository } from './permission-repository.port.js';
 
 /** 在单元测试中保存权限目录。 */
@@ -12,12 +9,8 @@ export class InMemoryPermissionRepository implements PermissionRepository {
 
   async list(): Promise<PermissionRecord[]> {
     return [...this.permissions.values()]
-      .sort(
-        (left, right) =>
-          left.code.localeCompare(right.code) ||
-          Number(left.id) - Number(right.id),
-      )
-      .map((item) => ({ ...item }));
+      .sort((left, right) => left.code.localeCompare(right.code) || Number(left.id) - Number(right.id))
+      .map(item => ({ ...item }));
   }
 
   async findById(id: string): Promise<PermissionRecord | null> {
@@ -26,18 +19,14 @@ export class InMemoryPermissionRepository implements PermissionRepository {
   }
 
   async findByIds(ids: string[]): Promise<PermissionRecord[]> {
-    return ids.flatMap((id) => {
+    return ids.flatMap(id => {
       const item = this.permissions.get(id);
       return item ? [{ ...item }] : [];
     });
   }
 
-  async upsertRegistered(
-    input: RegisteredPermission,
-  ): Promise<PermissionRecord> {
-    const existing = [...this.permissions.values()].find(
-      (item) => item.code === input.code,
-    );
+  async upsertRegistered(input: RegisteredPermission): Promise<PermissionRecord> {
+    const existing = [...this.permissions.values()].find(item => item.code === input.code);
     if (existing) {
       const updated = { ...existing, ...input };
       this.permissions.set(existing.id, updated);

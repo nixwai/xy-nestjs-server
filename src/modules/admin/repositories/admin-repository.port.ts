@@ -12,10 +12,7 @@ export type AdminCreateInput = {
 
 /** 管理员更新输入。 */
 export type AdminUpdateInput = Partial<
-  Pick<
-    AdminRecord,
-    'username' | 'isActive' | 'isSuperAdmin' | 'passwordHash' | 'passwordSalt'
-  >
+  Pick<AdminRecord, 'username' | 'isActive' | 'isSuperAdmin' | 'passwordHash' | 'passwordSalt'>
 >;
 
 /** 管理员仓储注入令牌。 */

@@ -11,7 +11,7 @@ describe('RoleController', () => {
     updateRole: vi.fn().mockResolvedValue({ id: '1' }),
     softDeleteRole: vi.fn().mockResolvedValue(undefined),
     bindPermission: vi.fn().mockResolvedValue(undefined),
-    unbindPermission: vi.fn().mockResolvedValue(undefined),
+    unbindPermission: vi.fn().mockResolvedValue(undefined)
   };
   const controller = new RoleController(service as never);
 

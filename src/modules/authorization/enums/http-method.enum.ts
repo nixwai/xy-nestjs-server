@@ -3,5 +3,5 @@ export enum HttpMethod {
   /** 查询资源。 */
   GET = 'GET',
   /** 创建或修改资源。 */
-  POST = 'POST',
+  POST = 'POST'
 }

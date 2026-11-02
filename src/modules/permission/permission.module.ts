@@ -8,6 +8,6 @@ import { PermissionService } from './permission.service.js';
   imports: [AuditModule],
   controllers: [PermissionController],
   providers: [PermissionService],
-  exports: [PermissionService],
+  exports: [PermissionService]
 })
 export class PermissionModule {}

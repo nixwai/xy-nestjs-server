@@ -13,7 +13,7 @@ export class CursorPageQueryDto {
     default: 20,
     minimum: 1,
     maximum: 100,
-    description: '每页条数，范围 1-100。',
+    description: '每页条数，范围 1-100。'
   })
   @IsOptional()
   @Type(() => Number)
@@ -24,7 +24,7 @@ export class CursorPageQueryDto {
 
   @ApiPropertyOptional({
     type: String,
-    description: '上一页返回的不透明游标。',
+    description: '上一页返回的不透明游标。'
   })
   @IsOptional()
   @IsString({ message: cursorValidation.isString })

@@ -5,7 +5,7 @@ import {
   Entity,
   Index,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from 'typeorm';
 
 /** RBAC 角色。 */
@@ -18,7 +18,7 @@ export class RoleEntity {
   @PrimaryGeneratedColumn({
     type: 'bigint',
     unsigned: true,
-    primaryKeyConstraintName: 'pk_role_id',
+    primaryKeyConstraintName: 'pk_role_id'
   })
   id!: string;
 

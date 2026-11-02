@@ -1,8 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  HttpMethod,
-  PermissionResource,
-} from '../../authorization/enums/index.js';
+import { HttpMethod, PermissionResource } from '../../authorization/enums/index.js';
 
 /** 权限目录公开信息。 */
 export class PermissionResponseDto {
@@ -12,28 +9,28 @@ export class PermissionResponseDto {
   @ApiProperty({
     type: String,
     description: '权限唯一编码。',
-    example: 'admin.list',
+    example: 'admin.list'
   })
   code!: string;
 
   @ApiProperty({
     enum: PermissionResource,
     description: '权限所属资源。',
-    example: PermissionResource.ADMIN,
+    example: PermissionResource.ADMIN
   })
   resource!: PermissionResource;
 
   @ApiProperty({
     enum: HttpMethod,
     description: '权限对应的 HTTP 方法。',
-    example: HttpMethod.GET,
+    example: HttpMethod.GET
   })
   method!: HttpMethod;
 
   @ApiProperty({
     type: String,
     description: '权限名称。',
-    example: '查询管理员列表',
+    example: '查询管理员列表'
   })
   name!: string;
 
@@ -41,7 +38,7 @@ export class PermissionResponseDto {
     type: String,
     nullable: true,
     description: '权限描述。未填写时为 null。',
-    example: '查询所有未删除的管理员。',
+    example: '查询所有未删除的管理员。'
   })
   description!: string | null;
 

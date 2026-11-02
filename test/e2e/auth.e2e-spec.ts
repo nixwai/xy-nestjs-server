@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common';
+import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createTestModule } from './create-test-module.js';
@@ -20,7 +20,7 @@ describe('Admin authentication API (e2e)', () => {
     await repository.create({
       username: 'admin',
       passwordHash: hash,
-      passwordSalt: salt,
+      passwordSalt: salt
     });
   });
 
@@ -37,8 +37,8 @@ describe('Admin authentication API (e2e)', () => {
       code: 0,
       data: {
         admin: { username: 'admin', role: 'admin' },
-        tokenType: 'Bearer',
-      },
+        tokenType: 'Bearer'
+      }
     });
 
     const firstRefreshToken = login.body.data.refreshToken as string;

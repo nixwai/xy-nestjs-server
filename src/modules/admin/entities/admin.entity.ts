@@ -5,7 +5,7 @@ import {
   Entity,
   Index,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from 'typeorm';
 
 /** 管理员账户数据。 */
@@ -18,7 +18,7 @@ export class AdminEntity {
   @PrimaryGeneratedColumn({
     type: 'bigint',
     unsigned: true,
-    primaryKeyConstraintName: 'pk_admin_id',
+    primaryKeyConstraintName: 'pk_admin_id'
   })
   id!: string;
 

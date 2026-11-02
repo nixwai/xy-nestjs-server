@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  applyEnvironmentOverrides,
-  buildApplicationConfig,
-} from '../../../src/config/configuration.js';
+import { applyEnvironmentOverrides, buildApplicationConfig } from '../../../src/config/configuration.js';
 import { loadBaseConfig } from '../../../src/common/utils/config.util.js';
 
 describe('application configuration', () => {
@@ -13,16 +10,16 @@ describe('application configuration', () => {
       CORS_ORIGINS: 'http://localhost:5173,https://admin.example.com',
       DB_ENABLED: 'true',
       JWT_SECRET: 'test-only-secret-with-at-least-32-chars',
-      SWAGGER_ENABLED: 'false',
+      SWAGGER_ENABLED: 'false'
     });
 
     expect(config).toMatchObject({
       app: { environment: 'test', port: 3100 },
       cors: {
-        origins: ['http://localhost:5173', 'https://admin.example.com'],
+        origins: ['http://localhost:5173', 'https://admin.example.com']
       },
       database: { enabled: false },
-      swagger: { enabled: false },
+      swagger: { enabled: false }
     });
   });
 
@@ -31,7 +28,7 @@ describe('application configuration', () => {
       NODE_ENV: 'test',
       PORT: '9000',
       APP_PORT: '3100',
-      JWT_SECRET: 'test-only-secret-with-at-least-32-chars',
+      JWT_SECRET: 'test-only-secret-with-at-least-32-chars'
     });
 
     expect(config).toMatchObject({ app: { port: 9000 } });
@@ -48,7 +45,7 @@ describe('application configuration', () => {
     try {
       expect(buildApplicationConfig()).toMatchObject({
         app: { environment: 'test' },
-        database: { enabled: false },
+        database: { enabled: false }
       });
     } finally {
       if (originalEnvironment === undefined) {

@@ -1,12 +1,5 @@
-import {
-  DomainConflictError,
-  DomainNotFoundError,
-} from '../../../common/errors/index.js';
-import type {
-  AdminCreateInput,
-  AdminRepository,
-  AdminUpdateInput,
-} from './admin-repository.port.js';
+import { DomainConflictError, DomainNotFoundError } from '../../../common/errors/index.js';
+import type { AdminCreateInput, AdminRepository, AdminUpdateInput } from './admin-repository.port.js';
 import { PageQueryDto } from '../../../common/dto/index.js';
 import type { PageResult } from '../../../common/types/index.js';
 import type { AdminRecord } from '../types/admin.types.js';
@@ -18,11 +11,7 @@ export class InMemoryAdminRepository implements AdminRepository {
   private nextId = 1;
 
   async findByUsername(username: string): Promise<AdminRecord | null> {
-    return (
-      [...this.admins.values()].find(
-        (item) => item.deletedAt === null && item.username === username,
-      ) ?? null
-    );
+    return [...this.admins.values()].find(item => item.deletedAt === null && item.username === username) ?? null;
   }
 
   async findById(id: string): Promise<AdminRecord | null> {
@@ -30,24 +19,20 @@ export class InMemoryAdminRepository implements AdminRepository {
     return item && item.deletedAt === null ? { ...item } : null;
   }
 
-  async list(
-    query: PageQueryDto = new PageQueryDto(),
-  ): Promise<PageResult<AdminRecord>> {
+  async list(query: PageQueryDto = new PageQueryDto()): Promise<PageResult<AdminRecord>> {
     const items = [...this.admins.values()]
-      .filter((item) => item.deletedAt === null)
+      .filter(item => item.deletedAt === null)
       .sort((left, right) => Number(BigInt(right.id) - BigInt(left.id)));
     const total = items.length;
     const totalPages = total === 0 ? 0 : Math.ceil(total / query.pageSize);
     return {
-      items: items
-        .slice(query.skip, query.skip + query.pageSize)
-        .map((item) => ({ ...item })),
+      items: items.slice(query.skip, query.skip + query.pageSize).map(item => ({ ...item })),
       total,
       page: query.page,
       pageSize: query.pageSize,
       totalPages,
       hasNextPage: query.page < totalPages,
-      hasPreviousPage: query.page > 1 && total > 0,
+      hasPreviousPage: query.page > 1 && total > 0
     };
   }
 
@@ -65,7 +50,7 @@ export class InMemoryAdminRepository implements AdminRepository {
       isActive: true,
       deletedAt: null,
       createdAt: now,
-      updatedAt: now,
+      updatedAt: now
     };
     this.admins.set(item.id, item);
     return { ...item };
@@ -73,11 +58,7 @@ export class InMemoryAdminRepository implements AdminRepository {
 
   async update(id: string, input: AdminUpdateInput): Promise<AdminRecord> {
     const item = await this.findByIdOrThrow(id);
-    if (
-      input.username &&
-      input.username !== item.username &&
-      (await this.findByUsername(input.username))
-    )
+    if (input.username && input.username !== item.username && (await this.findByUsername(input.username)))
       throw new DomainConflictError('管理员用户名');
     const updated = { ...item, ...input, updatedAt: new Date() };
     this.admins.set(id, updated);
@@ -90,7 +71,7 @@ export class InMemoryAdminRepository implements AdminRepository {
     this.admins.set(id, {
       ...item,
       deletedAt,
-      updatedAt: deletedAt,
+      updatedAt: deletedAt
     });
     for (const relation of this.adminRoles) {
       if (relation.startsWith(`${id}:`)) {
@@ -100,22 +81,19 @@ export class InMemoryAdminRepository implements AdminRepository {
   }
 
   async countActiveSuperAdmins(): Promise<number> {
-    return [...this.admins.values()].filter(
-      (item) => item.deletedAt === null && item.isActive && item.isSuperAdmin,
-    ).length;
+    return [...this.admins.values()].filter(item => item.deletedAt === null && item.isActive && item.isSuperAdmin)
+      .length;
   }
 
   async listRoleIds(adminId: string): Promise<string[]> {
     await this.findByIdOrThrow(adminId);
     return [...this.adminRoles]
-      .filter((item) => item.startsWith(`${adminId}:`))
-      .map((item) => item.slice(adminId.length + 1));
+      .filter(item => item.startsWith(`${adminId}:`))
+      .map(item => item.slice(adminId.length + 1));
   }
 
-  async listRoleIdsByAdminIds(
-    adminIds: string[],
-  ): Promise<Map<string, string[]>> {
-    const result = new Map<string, string[]>(adminIds.map((id) => [id, []]));
+  async listRoleIdsByAdminIds(adminIds: string[]): Promise<Map<string, string[]>> {
+    const result = new Map<string, string[]>(adminIds.map(id => [id, []]));
     for (const key of this.adminRoles) {
       const separator = key.indexOf(':');
       const adminId = key.slice(0, separator);

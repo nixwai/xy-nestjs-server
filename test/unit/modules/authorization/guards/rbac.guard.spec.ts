@@ -1,34 +1,28 @@
 import { ForbiddenException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
-import {
-  HttpMethod,
-  PermissionResource,
-} from '../../../../../src/modules/authorization/enums/index.js';
+import { HttpMethod, PermissionResource } from '../../../../../src/modules/authorization/enums/index.js';
 import { RbacGuard } from '../../../../../src/modules/authorization/guards/rbac.guard.js';
 
-function contextFor(
-  user?: { sub?: string; isSuperAdmin?: boolean },
-  method = 'GET',
-) {
+function contextFor(user?: { sub?: string; isSuperAdmin?: boolean }, method = 'GET') {
   const handler = () => undefined;
   const controller = class TestController {};
   return {
     getHandler: () => handler,
     getClass: () => controller,
-    switchToHttp: () => ({ getRequest: () => ({ user, method }) }),
+    switchToHttp: () => ({ getRequest: () => ({ user, method }) })
   } as never;
 }
 
 function createGuard(metadata: Record<string, unknown>, hasPermission = true) {
   const reflector = {
-    getAllAndOverride: vi.fn((key: string) => metadata[key]),
+    getAllAndOverride: vi.fn((key: string) => metadata[key])
   };
   const authorizationService = {
-    hasPermission: vi.fn().mockResolvedValue(hasPermission),
+    hasPermission: vi.fn().mockResolvedValue(hasPermission)
   };
   return {
     guard: new RbacGuard(reflector as never, authorizationService as never),
-    authorizationService,
+    authorizationService
   };
 }
 
@@ -40,93 +34,75 @@ describe('RbacGuard', () => {
 
   it('rejects routes without permission metadata', async () => {
     const { guard } = createGuard({});
-    await expect(
-      guard.canActivate(contextFor({ sub: '1' })),
-    ).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(guard.canActivate(contextFor({ sub: '1' }))).rejects.toBeInstanceOf(ForbiddenException);
   });
 
   it('rejects non-super administrators on super administrator routes', async () => {
     const { guard } = createGuard({
       requiredPermission: {
-        resource: PermissionResource.ADMIN,
+        resource: PermissionResource.ADMIN
       },
-      superAdminOnly: true,
+      superAdminOnly: true
     });
-    await expect(guard.canActivate(contextFor({ sub: '1' }))).rejects.toThrow(
-      '仅超级管理员可执行',
-    );
+    await expect(guard.canActivate(contextFor({ sub: '1' }))).rejects.toThrow('仅超级管理员可执行');
   });
 
   it('allows super administrators on super administrator routes', async () => {
     const { guard } = createGuard({
       requiredPermission: {
-        resource: PermissionResource.ADMIN,
+        resource: PermissionResource.ADMIN
       },
-      superAdminOnly: true,
+      superAdminOnly: true
     });
-    await expect(
-      guard.canActivate(contextFor({ sub: '1', isSuperAdmin: true })),
-    ).resolves.toBe(true);
+    await expect(guard.canActivate(contextFor({ sub: '1', isSuperAdmin: true }))).resolves.toBe(true);
   });
 
   it('allows the current administrator route after authentication', async () => {
     const { guard, authorizationService } = createGuard({
       requiredPermission: {
-        resource: PermissionResource.ADMIN_SELF,
-      },
+        resource: PermissionResource.ADMIN_SELF
+      }
     });
-    await expect(guard.canActivate(contextFor({ sub: '1' }))).resolves.toBe(
-      true,
-    );
+    await expect(guard.canActivate(contextFor({ sub: '1' }))).resolves.toBe(true);
     expect(authorizationService.hasPermission).not.toHaveBeenCalled();
   });
 
   it('matches the request method when checking a permission', async () => {
     const { guard, authorizationService } = createGuard({
       requiredPermission: {
-        resource: PermissionResource.ADMIN,
-      },
+        resource: PermissionResource.ADMIN
+      }
     });
-    await expect(
-      guard.canActivate(contextFor({ sub: '1' }, 'post')),
-    ).resolves.toBe(true);
-    expect(authorizationService.hasPermission).toHaveBeenCalledWith(
-      '1',
-      PermissionResource.ADMIN,
-      HttpMethod.POST,
-    );
+    await expect(guard.canActivate(contextFor({ sub: '1' }, 'post'))).resolves.toBe(true);
+    expect(authorizationService.hasPermission).toHaveBeenCalledWith('1', PermissionResource.ADMIN, HttpMethod.POST);
   });
 
   it('rejects an administrator without the required permission', async () => {
     const { guard } = createGuard(
       {
         requiredPermission: {
-          resource: PermissionResource.ADMIN,
-        },
+          resource: PermissionResource.ADMIN
+        }
       },
-      false,
+      false
     );
-    await expect(guard.canActivate(contextFor({ sub: '1' }))).rejects.toThrow(
-      '无权访问',
-    );
+    await expect(guard.canActivate(contextFor({ sub: '1' }))).rejects.toThrow('无权访问');
   });
 
   it('rejects unsupported request methods', async () => {
     const { guard } = createGuard({
       requiredPermission: {
-        resource: PermissionResource.ADMIN,
-      },
+        resource: PermissionResource.ADMIN
+      }
     });
-    await expect(
-      guard.canActivate(contextFor({ sub: '1' }, 'PATCH')),
-    ).rejects.toThrow('不支持的请求方法');
+    await expect(guard.canActivate(contextFor({ sub: '1' }, 'PATCH'))).rejects.toThrow('不支持的请求方法');
   });
 
   it('rejects requests without an authenticated administrator', async () => {
     const { guard } = createGuard({
       requiredPermission: {
-        resource: PermissionResource.ADMIN,
-      },
+        resource: PermissionResource.ADMIN
+      }
     });
     await expect(guard.canActivate(contextFor())).rejects.toThrow('无权访问');
   });

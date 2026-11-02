@@ -22,5 +22,5 @@ export const CONFIG_KEYS = {
   wechat: 'wechat',
 
   /** 限流配置键。 */
-  throttler: 'throttler',
+  throttler: 'throttler'
 } as const;

@@ -9,14 +9,14 @@ export function ApiPageQuery(): MethodDecorator & ClassDecorator {
       required: false,
       type: Number,
       example: 1,
-      description: '页码，从 1 开始。',
+      description: '页码，从 1 开始。'
     }),
     ApiQuery({
       name: 'pageSize',
       required: false,
       type: Number,
       example: 20,
-      description: '每页条数，范围 1-100。',
-    }),
+      description: '每页条数，范围 1-100。'
+    })
   );
 }

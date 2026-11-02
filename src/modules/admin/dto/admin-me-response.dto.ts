@@ -19,7 +19,7 @@ export class AdminMeResponseDto extends AdminResponseDto {
 
   @ApiProperty({
     type: () => [AdminMenuItemResponseDto],
-    description: '当前管理员可见菜单。',
+    description: '当前管理员可见菜单。'
   })
   menus!: AdminMenuItemResponseDto[];
 }

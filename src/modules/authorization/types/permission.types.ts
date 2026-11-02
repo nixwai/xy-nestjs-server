@@ -1,5 +1,5 @@
-import { HttpMethod } from '../enums/http-method.enum.js';
-import { PermissionResource } from '../enums/permission-resource.enum.js';
+import type { HttpMethod } from '../enums/http-method.enum.js';
+import type { PermissionResource } from '../enums/permission-resource.enum.js';
 
 /** 权限目录中的权限记录。 */
 export interface PermissionRecord {

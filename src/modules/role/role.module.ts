@@ -9,6 +9,6 @@ import { RoleService } from './role.service.js';
   imports: [PermissionModule, AuditModule],
   controllers: [RoleController],
   providers: [RoleService],
-  exports: [RoleService],
+  exports: [RoleService]
 })
 export class RoleModule {}

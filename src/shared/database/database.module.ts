@@ -5,9 +5,7 @@ import type { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 /** 构建运行时 TypeORM 数据源配置。 */
-export function createDatabaseOptions(
-  config: ConfigService,
-): TypeOrmModuleOptions {
+export function createDatabaseOptions(config: ConfigService): TypeOrmModuleOptions {
   return {
     type: 'mysql' as const,
     host: config.getOrThrow<string>('database.host'),
@@ -20,7 +18,7 @@ export function createDatabaseOptions(
     synchronize: false,
     charset: 'utf8mb4',
     timezone: 'Z',
-    namingStrategy: new SnakeNamingStrategy(),
+    namingStrategy: new SnakeNamingStrategy()
   };
 }
 
@@ -31,9 +29,9 @@ export function createDatabaseOptions(
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: createDatabaseOptions,
-    }),
+      useFactory: createDatabaseOptions
+    })
   ],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule]
 })
 export class DatabaseModule {}

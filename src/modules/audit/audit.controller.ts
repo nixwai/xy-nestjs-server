@@ -1,15 +1,9 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Inject, Query } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
-import {
-  ApiCommonResponses,
-  ApiOkResponseData,
-} from '../../common/decorators/index.js';
+import { ApiCommonResponses, ApiOkResponseData } from '../../common/decorators/index.js';
 import { CurrentAdmin } from '../auth/decorators/index.js';
 import type { AdminJwtPayload } from '../auth/tokens/jwt-token.service.js';
-import {
-  RequirePermission,
-  SuperAdminOnly,
-} from '../authorization/decorators/index.js';
+import { RequirePermission, SuperAdminOnly } from '../authorization/decorators/index.js';
 import { PermissionResource } from '../authorization/enums/index.js';
 import { AuditLogListQueryDto, AuditLogListResponseDto } from './dto/index.js';
 import { AuditService } from './audit.service.js';
@@ -20,7 +14,7 @@ import { AuditService } from './audit.service.js';
 @Controller('audit')
 @SuperAdminOnly()
 export class AuditController {
-  constructor(private readonly auditService: AuditService) {}
+  constructor(@Inject(AuditService) private readonly auditService: AuditService) {}
 
   /** 查询管理员、角色和权限变更审计记录。 */
   @Get('list')
@@ -29,25 +23,25 @@ export class AuditController {
     required: false,
     type: Number,
     example: 20,
-    description: '每页条数，范围 1-100。',
+    description: '每页条数，范围 1-100。'
   })
   @ApiQuery({
     name: 'cursor',
     required: false,
     type: String,
-    description: '上一页返回的不透明游标。',
+    description: '上一页返回的不透明游标。'
   })
   @ApiOperation({
     summary: '查询审计记录',
-    description: '按创建时间和 ID 倒序返回审计记录，使用游标分页，不计算总数。',
+    description: '按创建时间和 ID 倒序返回审计记录，使用游标分页，不计算总数。'
   })
   @ApiOkResponseData(AuditLogListResponseDto, {
-    description: '审计记录游标分页结果，不返回总数。',
+    description: '审计记录游标分页结果，不返回总数。'
   })
   @RequirePermission(PermissionResource.AUDIT)
   async list(
     @CurrentAdmin() _admin: AdminJwtPayload,
-    @Query() query: AuditLogListQueryDto = new AuditLogListQueryDto(),
+    @Query() query: AuditLogListQueryDto = new AuditLogListQueryDto()
   ) {
     return this.auditService.list(query);
   }

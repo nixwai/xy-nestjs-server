@@ -1,18 +1,9 @@
-import {
-  ArgumentsHost,
-  BadRequestException,
-  HttpException,
-  HttpStatus,
-  InternalServerErrorException,
-  Logger,
-} from '@nestjs/common';
+import type { ArgumentsHost } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, InternalServerErrorException, Logger } from '@nestjs/common';
 import { QueryFailedError } from 'typeorm';
 import { describe, expect, it, vi } from 'vitest';
 import { HttpCode } from '../../../../src/common/enums/index.js';
-import {
-  DomainConflictError,
-  DomainNotFoundError,
-} from '../../../../src/common/errors/index.js';
+import { DomainConflictError, DomainNotFoundError } from '../../../../src/common/errors/index.js';
 import { GlobalExceptionFilter } from '../../../../src/common/filters/global-exception.filter.js';
 
 interface ResponseMock {
@@ -20,12 +11,13 @@ interface ResponseMock {
   json: ReturnType<typeof vi.fn>;
 }
 
-function createHost(
-  request: Partial<{ method: string; path: string; originalUrl: string }> = {},
-): { host: ArgumentsHost; response: ResponseMock } {
+function createHost(request: Partial<{ method: string; path: string; originalUrl: string }> = {}): {
+  host: ArgumentsHost;
+  response: ResponseMock;
+} {
   const response: ResponseMock = {
     status: vi.fn().mockReturnThis(),
-    json: vi.fn(),
+    json: vi.fn()
   };
   const host = {
     switchToHttp: () => ({
@@ -33,10 +25,10 @@ function createHost(
         method: 'GET',
         path: '/api/admin',
         originalUrl: '/api/admin',
-        ...request,
+        ...request
       }),
-      getResponse: () => response,
-    }),
+      getResponse: () => response
+    })
   } as unknown as ArgumentsHost;
 
   return { host, response };
@@ -47,7 +39,7 @@ function createQueryFailedError(
     code?: string;
     errno?: number;
     sqlMessage?: string;
-  },
+  }
 ): QueryFailedError {
   return new QueryFailedError('INSERT INTO secret_table', [], driverError);
 }
@@ -56,23 +48,20 @@ describe('GlobalExceptionFilter', () => {
   it('应将客户端 HttpException 转换为 HTTP 200 业务错误响应', () => {
     const { host, response } = createHost();
 
-    new GlobalExceptionFilter().catch(
-      new BadRequestException('请求参数错误'),
-      host,
-    );
+    new GlobalExceptionFilter().catch(new BadRequestException('请求参数错误'), host);
 
     expect(response.status).toHaveBeenCalledWith(HttpStatus.OK);
     expect(response.json).toHaveBeenCalledWith({
       code: HttpCode.BAD_REQUEST,
       message: '请求参数错误',
-      data: null,
+      data: null
     });
   });
 
   it('应合并参数校验异常中的多条消息', () => {
     const { host, response } = createHost();
     const exception = new BadRequestException({
-      message: ['用户名不能为空', '密码长度不足'],
+      message: ['用户名不能为空', '密码长度不足']
     });
 
     new GlobalExceptionFilter().catch(exception, host);
@@ -80,7 +69,7 @@ describe('GlobalExceptionFilter', () => {
     expect(response.json).toHaveBeenCalledWith({
       code: HttpCode.BAD_REQUEST,
       message: '用户名不能为空; 密码长度不足',
-      data: null,
+      data: null
     });
   });
 
@@ -92,14 +81,14 @@ describe('GlobalExceptionFilter', () => {
     expect(response.json).toHaveBeenCalledWith({
       code: HttpCode.NOT_FOUND,
       message: '管理员不存在',
-      data: null,
+      data: null
     });
 
     filter.catch(new DomainConflictError('管理员用户名'), host);
     expect(response.json).toHaveBeenLastCalledWith({
       code: HttpCode.CONFLICT,
       message: '管理员用户名已存在',
-      data: null,
+      data: null
     });
   });
 
@@ -108,8 +97,8 @@ describe('GlobalExceptionFilter', () => {
     const error = createQueryFailedError(
       Object.assign(new Error('Duplicate entry'), {
         code: 'ER_DUP_ENTRY',
-        sqlMessage: "Duplicate entry 'admin' for key 'uk_admin_username'",
-      }),
+        sqlMessage: "Duplicate entry 'admin' for key 'uk_admin_username'"
+      })
     );
 
     new GlobalExceptionFilter().catch(error, host);
@@ -118,69 +107,56 @@ describe('GlobalExceptionFilter', () => {
     expect(response.json).toHaveBeenCalledWith({
       code: HttpCode.CONFLICT,
       message: '用户名已存在',
-      data: null,
+      data: null
     });
   });
 
   it('应将框架默认英文异常转换为中文', () => {
     const { host, response } = createHost();
 
-    new GlobalExceptionFilter().catch(
-      new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED),
-      host,
-    );
+    new GlobalExceptionFilter().catch(new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED), host);
 
     expect(response.json).toHaveBeenCalledWith({
       code: HttpCode.UNAUTHORIZED,
       message: '请先登录',
-      data: null,
+      data: null
     });
   });
 
   it('应隐藏未知英文客户端异常消息', () => {
     const { host, response } = createHost();
 
-    new GlobalExceptionFilter().catch(
-      new HttpException('database failure', HttpStatus.BAD_REQUEST),
-      host,
-    );
+    new GlobalExceptionFilter().catch(new HttpException('database failure', HttpStatus.BAD_REQUEST), host);
 
     expect(response.json).toHaveBeenCalledWith({
       code: HttpCode.BAD_REQUEST,
       message: '请求参数错误',
-      data: null,
+      data: null
     });
   });
 
   it('应隐藏服务端 HttpException 的敏感消息并返回 HTTP 500', () => {
     const { host, response } = createHost();
 
-    new GlobalExceptionFilter().catch(
-      new InternalServerErrorException('数据库密码 secret'),
-      host,
-    );
+    new GlobalExceptionFilter().catch(new InternalServerErrorException('数据库密码 secret'), host);
 
-    expect(response.status).toHaveBeenCalledWith(
-      HttpStatus.INTERNAL_SERVER_ERROR,
-    );
+    expect(response.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
     expect(response.json).toHaveBeenCalledWith({
       code: HttpCode.INTERNAL_SERVER_ERROR,
       message: '服务器内部错误',
-      data: null,
+      data: null
     });
   });
 
   it('应记录不包含查询参数的服务端异常上下文', () => {
-    const loggerSpy = vi
-      .spyOn(Logger.prototype, 'error')
-      .mockImplementation(() => undefined);
+    const loggerSpy = vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
 
     new GlobalExceptionFilter().catch(
       new Error('internal failure'),
       createHost({
         path: '/api/health',
-        originalUrl: '/api/health?access_token=secret',
-      }).host,
+        originalUrl: '/api/health?access_token=secret'
+      }).host
     );
 
     expect(loggerSpy).toHaveBeenCalledWith('GET /api/health Error');
@@ -191,33 +167,25 @@ describe('GlobalExceptionFilter', () => {
   it('应将非客户端错误状态按服务端异常处理', () => {
     const { host, response } = createHost();
 
-    new GlobalExceptionFilter().catch(
-      new HttpException('异常状态', HttpStatus.MOVED_PERMANENTLY),
-      host,
-    );
+    new GlobalExceptionFilter().catch(new HttpException('异常状态', HttpStatus.MOVED_PERMANENTLY), host);
 
-    expect(response.status).toHaveBeenCalledWith(
-      HttpStatus.INTERNAL_SERVER_ERROR,
-    );
+    expect(response.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
     expect(response.json).toHaveBeenCalledWith({
       code: HttpCode.INTERNAL_SERVER_ERROR,
       message: '服务器内部错误',
-      data: null,
+      data: null
     });
   });
 
   it('应为未覆盖的客户端状态码使用安全的通用业务码', () => {
     const { host, response } = createHost();
 
-    new GlobalExceptionFilter().catch(
-      new HttpException('请求被拒绝', 418),
-      host,
-    );
+    new GlobalExceptionFilter().catch(new HttpException('请求被拒绝', 418), host);
 
     expect(response.json).toHaveBeenCalledWith({
       code: HttpCode.BAD_REQUEST,
       message: '请求被拒绝',
-      data: null,
+      data: null
     });
   });
 });

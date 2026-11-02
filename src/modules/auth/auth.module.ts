@@ -20,20 +20,15 @@ import { AUTH_SESSION_REPOSITORY } from './repositories/auth-session-repository.
     JwtAuthGuard,
     {
       provide: AuthService,
-      inject: [
-        AdminService,
-        AUTH_SESSION_REPOSITORY,
-        ConfigService,
-        JwtTokenService,
-      ],
+      inject: [AdminService, AUTH_SESSION_REPOSITORY, ConfigService, JwtTokenService],
       useFactory: (
         adminService: AdminService,
         sessionRepository: AuthSessionRepository,
         config: ConfigService,
-        jwt: JwtTokenService,
-      ) => new AuthService(adminService, sessionRepository, config, jwt),
-    },
+        jwt: JwtTokenService
+      ) => new AuthService(adminService, sessionRepository, config, jwt)
+    }
   ],
-  exports: [AuthService, JwtAuthGuard, JwtTokenService],
+  exports: [AuthService, JwtAuthGuard, JwtTokenService]
 })
 export class AuthModule {}

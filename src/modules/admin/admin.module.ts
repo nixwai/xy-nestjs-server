@@ -12,6 +12,6 @@ import { AdminService } from './admin.service.js';
   imports: [RoleModule, PermissionModule, MenuModule, AuditModule],
   controllers: [AdminController],
   providers: [AdminService, AdminAuthorizationQueryService],
-  exports: [AdminService, AdminAuthorizationQueryService],
+  exports: [AdminService, AdminAuthorizationQueryService]
 })
 export class AdminModule {}

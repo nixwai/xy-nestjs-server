@@ -6,7 +6,7 @@ import {
   RequirePermission,
   Public,
   SUPER_ADMIN_ONLY_KEY,
-  SuperAdminOnly,
+  SuperAdminOnly
 } from '../../../../../src/modules/authorization/decorators/index.js';
 import { PermissionResource } from '../../../../../src/modules/authorization/enums/index.js';
 
@@ -18,30 +18,26 @@ Object.defineProperty(TestController.prototype, 'publicRoute', {
   configurable: true,
   enumerable: false,
   value: publicRoute,
-  writable: true,
+  writable: true
 });
 Object.defineProperty(TestController.prototype, 'protectedRoute', {
   configurable: true,
   enumerable: false,
   value: protectedRoute,
-  writable: true,
+  writable: true
 });
 Public()(TestController.prototype, 'publicRoute', {
   configurable: true,
   enumerable: false,
   value: publicRoute,
-  writable: true,
+  writable: true
 });
-RequirePermission(PermissionResource.ADMIN)(
-  TestController.prototype,
-  'protectedRoute',
-  {
-    configurable: true,
-    enumerable: false,
-    value: protectedRoute,
-    writable: true,
-  },
-);
+RequirePermission(PermissionResource.ADMIN)(TestController.prototype, 'protectedRoute', {
+  configurable: true,
+  enumerable: false,
+  value: protectedRoute,
+  writable: true
+});
 SuperAdminOnly()(TestController);
 
 describe('authorization decorators', () => {
@@ -49,7 +45,7 @@ describe('authorization decorators', () => {
     const reflector = new Reflector();
     expect(reflector.get(PUBLIC_ROUTE_KEY, publicRoute)).toBe(true);
     expect(reflector.get(PERMISSION_KEY, protectedRoute)).toEqual({
-      resource: PermissionResource.ADMIN,
+      resource: PermissionResource.ADMIN
     });
   });
 

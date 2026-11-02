@@ -9,5 +9,4 @@ export interface AdminSessionRecord {
   lastUsedAt: Date | null;
 }
 export type SessionRotationResult =
-  | { status: 'rotated'; session: AdminSessionRecord }
-  | { status: 'missing' | 'expired' | 'replayed' };
+  { status: 'rotated'; session: AdminSessionRecord } | { status: 'missing' | 'expired' | 'replayed' };

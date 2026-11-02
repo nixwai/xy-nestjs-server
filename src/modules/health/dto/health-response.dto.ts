@@ -6,14 +6,14 @@ export class HealthResponseDto {
     type: String,
     enum: ['ok'],
     description: '服务状态。',
-    example: 'ok',
+    example: 'ok'
   })
   status!: 'ok';
 
   @ApiProperty({
     type: String,
     description: '当前运行环境。',
-    example: 'development',
+    example: 'development'
   })
   environment!: string;
 }
@@ -24,7 +24,7 @@ export class ReadinessResponseDto {
     type: String,
     enum: ['ready', 'not_ready'],
     description: '应用就绪状态。',
-    example: 'ready',
+    example: 'ready'
   })
   status!: 'ready' | 'not_ready';
 
@@ -32,7 +32,7 @@ export class ReadinessResponseDto {
     type: 'object',
     additionalProperties: { type: 'string', enum: ['up', 'down'] },
     description: '依赖检查结果。',
-    example: { database: 'up' },
+    example: { database: 'up' }
   })
   checks!: Record<string, 'up' | 'down'>;
 }

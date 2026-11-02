@@ -2,7 +2,7 @@ import { Test, type TestingModuleBuilder } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module.js';
 import {
   ADMIN_REPOSITORY,
-  ADMIN_TRANSACTION_RUNNER,
+  ADMIN_TRANSACTION_RUNNER
 } from '../../src/modules/admin/repositories/admin-repository.port.js';
 import { InMemoryAdminRepository } from '../../src/modules/admin/repositories/in-memory-admin.repository.js';
 import { InMemoryAdminTransactionRunner } from '../../src/modules/admin/repositories/in-memory-admin-transaction-runner.js';

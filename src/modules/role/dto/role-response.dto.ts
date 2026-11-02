@@ -15,7 +15,7 @@ export class RoleResponseDto {
     type: String,
     nullable: true,
     description: '角色描述。未填写时为 null。',
-    example: '负责日常运营管理。',
+    example: '负责日常运营管理。'
   })
   description!: string | null;
 
@@ -25,7 +25,7 @@ export class RoleResponseDto {
   @ApiProperty({
     type: [String],
     description: '已绑定的权限 ID 列表。',
-    example: ['1', '2'],
+    example: ['1', '2']
   })
   permissionIds!: string[];
 
@@ -34,7 +34,7 @@ export class RoleResponseDto {
     format: 'date-time',
     nullable: true,
     description: '软删除时间。未删除时为 null。',
-    example: null,
+    example: null
   })
   deletedAt!: Date | null;
 }

@@ -6,7 +6,7 @@ import { AdminResponseDto } from './admin-response.dto.js';
 export class AdminListResponseDto extends PageResponseDto<AdminResponseDto> {
   @ApiProperty({
     type: () => [AdminResponseDto],
-    description: '当前页管理员列表。',
+    description: '当前页管理员列表。'
   })
   declare items: AdminResponseDto[];
 }

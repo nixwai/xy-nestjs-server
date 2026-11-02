@@ -5,6 +5,6 @@ import { PersistenceModule } from '../persistence.module.js';
 @Global()
 @Module({
   imports: [PersistenceModule],
-  exports: [PersistenceModule],
+  exports: [PersistenceModule]
 })
 export class SharedModule {}

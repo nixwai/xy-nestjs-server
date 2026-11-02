@@ -9,10 +9,7 @@ import { RolePermissionAssignmentEntity } from '../src/modules/role/entities/rol
 import { hashPassword } from '../src/modules/auth/utils/password.util.js';
 import { REGISTERED_PERMISSIONS } from '../src/modules/permission/constants/registered-permissions.constant.js';
 import { createPermissionCode } from '../src/modules/authorization/utils/permission-code.util.js';
-import {
-  HttpMethod,
-  PermissionResource,
-} from '../src/modules/authorization/enums/index.js';
+import { HttpMethod, PermissionResource } from '../src/modules/authorization/enums/index.js';
 
 const USERNAME_PATTERN = /^[A-Za-z0-9._-]{3,64}$/;
 const PASSWORD_PATTERN = /^(?=.*[A-Za-z])(?=.*\d).{8,72}$/;
@@ -34,23 +31,19 @@ async function main(): Promise<void> {
       throw new Error('两次输入的密码不一致');
     }
     await dataSource.initialize();
-    await dataSource.transaction(async (manager) => {
+    await dataSource.transaction(async manager => {
       const permissions = await Promise.all(
-        REGISTERED_PERMISSIONS.map(async (input) => {
+        REGISTERED_PERMISSIONS.map(async input => {
           const repository = manager.getRepository(PermissionEntity);
           const existing = await repository.findOne({
-            where: { code: input.code },
+            where: { code: input.code }
           });
-          return repository.save(
-            existing
-              ? repository.merge(existing, input)
-              : repository.create(input),
-          );
-        }),
+          return repository.save(existing ? repository.merge(existing, input) : repository.create(input));
+        })
       );
       const roleRepository = manager.getRepository(RoleEntity);
       let role = await roleRepository.findOne({
-        where: { code: 'operator' },
+        where: { code: 'operator' }
       });
       if (!role) {
         role = await roleRepository.save(
@@ -58,50 +51,42 @@ async function main(): Promise<void> {
             code: 'operator',
             name: '普通管理员',
             description: '默认普通管理员角色',
-            isActive: true,
-          }),
+            isActive: true
+          })
         );
       }
       const selfPermission = permissions.find(
-        (item) =>
-          item.code ===
-          createPermissionCode(PermissionResource.ADMIN_SELF, HttpMethod.GET),
+        item => item.code === createPermissionCode(PermissionResource.ADMIN_SELF, HttpMethod.GET)
       );
       if (selfPermission) {
-        const relationRepository = manager.getRepository(
-          RolePermissionAssignmentEntity,
-        );
+        const relationRepository = manager.getRepository(RolePermissionAssignmentEntity);
         const exists = await relationRepository.findOne({
-          where: { roleId: role.id, permissionId: selfPermission.id },
+          where: { roleId: role.id, permissionId: selfPermission.id }
         });
         if (!exists) {
           await relationRepository.save(
             relationRepository.create({
               roleId: role.id,
-              permissionId: selfPermission.id,
-            }),
+              permissionId: selfPermission.id
+            })
           );
         }
       }
       const adminRepository = manager.getRepository(AdminEntity);
       const existingAdmins = await adminRepository.find({
-        where: { isSuperAdmin: false },
+        where: { isSuperAdmin: false }
       });
-      const adminRoleRepository = manager.getRepository(
-        AdminRoleAssignmentEntity,
-      );
+      const adminRoleRepository = manager.getRepository(AdminRoleAssignmentEntity);
       for (const admin of existingAdmins) {
         const relation = await adminRoleRepository.findOne({
-          where: { adminId: admin.id, roleId: role.id },
+          where: { adminId: admin.id, roleId: role.id }
         });
         if (!relation) {
-          await adminRoleRepository.save(
-            adminRoleRepository.create({ adminId: admin.id, roleId: role.id }),
-          );
+          await adminRoleRepository.save(adminRoleRepository.create({ adminId: admin.id, roleId: role.id }));
         }
       }
       const existing = await adminRepository.findOne({
-        where: { username },
+        where: { username }
       });
       const { hash, salt } = await hashPassword(password);
       if (existing) {
@@ -118,8 +103,8 @@ async function main(): Promise<void> {
             passwordHash: hash,
             passwordSalt: salt,
             isActive: true,
-            isSuperAdmin: true,
-          }),
+            isSuperAdmin: true
+          })
         );
         console.log(`超级管理员 ${username} 创建成功`);
       }
