@@ -12,7 +12,7 @@ const usernameValidation = createValidationMessages('用户名');
 const passwordValidation = createValidationMessages('密码');
 
 /** 管理员登录请求。 */
-export class AdminLoginDto {
+export class AdminLoginRequestDto {
   /** 大小写敏感的管理员用户名。 */
   @ApiProperty({ type: String, minLength: 3, maxLength: 64, example: 'admin' })
   @IsString({ message: usernameValidation.isString })

@@ -19,7 +19,7 @@ import {
 import type { AdminRecord, AdminPublicRecord } from './types/admin.types.js';
 import { RoleService } from '../role/role.service.js';
 import { AuditService } from '../audit/audit.service.js';
-import { CreateAdminDto, UpdateAdminDto } from './dto/index.js';
+import { AdminCreateRequestDto, AdminUpdateRequestDto } from './dto/index.js';
 
 /** 管理员账户应用服务。 */
 @Injectable()
@@ -63,7 +63,7 @@ export class AdminService {
   /** 创建管理员。 */
   async createAdmin(
     actorId: string,
-    body: CreateAdminDto,
+    body: AdminCreateRequestDto,
   ): Promise<AdminPublicRecord> {
     if (body.isSuperAdmin && !body.currentPassword) {
       throw new BadRequestException('创建超级管理员必须验证当前密码');
@@ -102,7 +102,7 @@ export class AdminService {
   /** 更新管理员。 */
   async updateAdmin(
     actorId: string,
-    body: UpdateAdminDto,
+    body: AdminUpdateRequestDto,
   ): Promise<AdminPublicRecord> {
     const target = await this.repository.findById(body.id);
     if (!target) {
@@ -150,13 +150,27 @@ export class AdminService {
   }
 
   /** 重置管理员密码。 */
-  async resetAdminPassword(actorId: string, id: string, passwordValue: string, currentPassword: string): Promise<AdminPublicRecord> {
+  async resetAdminPassword(
+    actorId: string,
+    id: string,
+    passwordValue: string,
+    currentPassword: string,
+  ): Promise<AdminPublicRecord> {
     const target = await this.repository.findById(id);
     if (!target) throw new NotFoundException('管理员不存在');
-    if (!(await this.verifyPassword(actorId, currentPassword))) throw new ForbiddenException('当前密码错误');
+    if (!(await this.verifyPassword(actorId, currentPassword)))
+      throw new ForbiddenException('当前密码错误');
     const password = await hashPassword(passwordValue);
-    const item = await this.repository.update(id, { passwordHash: password.hash, passwordSalt: password.salt });
-    await this.auditService.record({ actorAdminId: actorId, action: 'admin.reset-password', resourceType: 'admin', targetId: id });
+    const item = await this.repository.update(id, {
+      passwordHash: password.hash,
+      passwordSalt: password.salt,
+    });
+    await this.auditService.record({
+      actorAdminId: actorId,
+      action: 'admin.reset-password',
+      resourceType: 'admin',
+      targetId: id,
+    });
     return this.toPublic(item, await this.repository.listRoleIds(item.id));
   }
 

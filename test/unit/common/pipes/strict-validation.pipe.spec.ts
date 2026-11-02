@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AdminLoginDto } from '../../../../src/modules/auth/dto/admin-login.dto.js';
+import { AdminLoginRequestDto } from '../../../../src/modules/auth/dto/admin-login-request.dto.js';
 import { createStrictValidationPipe } from '../../../../src/common/pipes/strict-validation.pipe.js';
 
 describe('createStrictValidationPipe', () => {
@@ -13,7 +13,7 @@ describe('createStrictValidationPipe', () => {
     await expect(
       pipe.transform(
         { username: 'a', password: '1' },
-        { type: 'body', metatype: AdminLoginDto, data: 'body' },
+        { type: 'body', metatype: AdminLoginRequestDto, data: 'body' },
       ),
     ).rejects.toMatchObject({
       response: {
@@ -32,7 +32,7 @@ describe('createStrictValidationPipe', () => {
     await expect(
       pipe.transform(
         { username: 'admin', password: 'Admin1234', unexpected: true },
-        { type: 'body', metatype: AdminLoginDto, data: 'body' },
+        { type: 'body', metatype: AdminLoginRequestDto, data: 'body' },
       ),
     ).rejects.toMatchObject({
       response: { message: ['不允许提交字段：unexpected'] },

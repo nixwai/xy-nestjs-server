@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 /** 管理员公开身份。 */
-export class AdminIdentityDto {
+export class AdminIdentityResponseDto {
   @ApiProperty({ type: String, example: '1', description: '管理员 ID。' })
   id!: string;
 
@@ -59,8 +59,8 @@ export class AuthTokenResponseDto {
   refreshTokenExpiresIn!: number;
 
   @ApiProperty({
-    type: () => AdminIdentityDto,
+    type: () => AdminIdentityResponseDto,
     description: '当前登录管理员的公开身份。',
   })
-  admin!: AdminIdentityDto;
+  admin!: AdminIdentityResponseDto;
 }

@@ -26,7 +26,7 @@ const isActiveValidation = createValidationMessages('启用状态');
 const isSuperAdminValidation = createValidationMessages('超级管理员标识');
 
 /** 分页查询参数。 */
-export class ListQueryDto {
+export class AdminListQueryDto {
   @ApiPropertyOptional({
     type: Number,
     default: 1,
@@ -55,7 +55,7 @@ export class ListQueryDto {
 }
 
 /** 创建管理员请求。 */
-export class CreateAdminDto {
+export class AdminCreateRequestDto {
   @ApiProperty({
     type: String,
     minLength: 3,
@@ -110,7 +110,7 @@ export class CreateAdminDto {
 }
 
 /** 更新管理员请求。 */
-export class UpdateAdminDto {
+export class AdminUpdateRequestDto {
   @ApiProperty({ type: String, example: '1', description: '待更新管理员 ID。' })
   @IsString({ message: idValidation.isString })
   @IsNotEmpty({ message: idValidation.isNotEmpty })
@@ -179,7 +179,7 @@ export class UpdateAdminDto {
 }
 
 /** 重置管理员密码请求。 */
-export class ResetAdminPasswordDto {
+export class AdminResetPasswordRequestDto {
   @ApiProperty({ type: String, example: '2', description: '待重置管理员 ID。' })
   @IsString({ message: idValidation.isString })
   @IsNotEmpty({ message: idValidation.isNotEmpty })
@@ -213,7 +213,7 @@ export class ResetAdminPasswordDto {
   currentPassword!: string;
 }
 /** 删除管理员请求。 */
-export class SoftDeleteAdminDto {
+export class AdminSoftDeleteRequestDto {
   @ApiProperty({ type: String, example: '1', description: '待删除管理员 ID。' })
   @IsString({ message: idValidation.isString })
   @IsNotEmpty({ message: idValidation.isNotEmpty })
@@ -234,7 +234,7 @@ export class SoftDeleteAdminDto {
 }
 
 /** 管理员角色绑定请求。 */
-export class AdminRoleBindingDto {
+export class AdminRoleBindingRequestDto {
   @ApiProperty({ type: String, example: '2', description: '管理员 ID。' })
   @IsString({ message: adminIdValidation.isString })
   @IsNotEmpty({ message: adminIdValidation.isNotEmpty })

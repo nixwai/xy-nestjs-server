@@ -5,7 +5,7 @@ import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
 const refreshTokenValidation = createValidationMessages('刷新令牌');
 
 /** Refresh Token 请求。 */
-export class RefreshTokenDto {
+export class RefreshTokenRequestDto {
   /** 当前会话的 Refresh Token。 */
   @ApiProperty({
     type: String,

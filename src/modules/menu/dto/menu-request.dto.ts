@@ -20,7 +20,7 @@ const idValidation = createValidationMessages('菜单 ID');
 const isActiveValidation = createValidationMessages('启用状态');
 
 /** 创建菜单请求。 */
-export class CreateMenuDto {
+export class MenuCreateRequestDto {
   @ApiPropertyOptional({ type: String, nullable: true })
   @IsOptional()
   @IsString({ message: parentIdValidation.isString })
@@ -56,7 +56,7 @@ export class CreateMenuDto {
 }
 
 /** 更新菜单请求。 */
-export class UpdateMenuDto extends CreateMenuDto {
+export class MenuUpdateRequestDto extends MenuCreateRequestDto {
   @ApiProperty({ type: String })
   @IsString({ message: idValidation.isString })
   @IsNotEmpty({ message: idValidation.isNotEmpty })
@@ -69,7 +69,7 @@ export class UpdateMenuDto extends CreateMenuDto {
 }
 
 /** 菜单启停请求。 */
-export class MenuStatusDto {
+export class MenuStatusRequestDto {
   @ApiProperty({ type: String })
   @IsString({ message: idValidation.isString })
   @IsNotEmpty({ message: idValidation.isNotEmpty })

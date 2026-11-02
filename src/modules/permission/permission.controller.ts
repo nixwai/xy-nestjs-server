@@ -22,7 +22,7 @@ import { PermissionResource } from '../authorization/enums/index.js';
 import {
   PermissionListResponseDto,
   PermissionResponseDto,
-  PermissionStatusDto,
+  PermissionStatusRequestDto,
 } from './dto/index.js';
 import { PermissionService } from './permission.service.js';
 
@@ -57,14 +57,14 @@ export class PermissionController {
     summary: '启用权限',
     description: '将指定权限设置为启用状态，变更会写入审计记录。',
   })
-  @ApiBody({ type: PermissionStatusDto, description: '待启用权限 ID。' })
+  @ApiBody({ type: PermissionStatusRequestDto, description: '待启用权限 ID。' })
   @ApiOkResponseData(PermissionResponseDto, {
     description: '启用后的权限信息。',
   })
   @RequirePermission(PermissionResource.PERMISSION)
   async enable(
     @CurrentAdmin() admin: AdminJwtPayload,
-    @Body() body: PermissionStatusDto,
+    @Body() body: PermissionStatusRequestDto,
   ) {
     return this.permissionService.setActive(admin.sub, body.id, true);
   }
@@ -76,14 +76,14 @@ export class PermissionController {
     summary: '停用权限',
     description: '将指定权限设置为停用状态，变更会写入审计记录。',
   })
-  @ApiBody({ type: PermissionStatusDto, description: '待停用权限 ID。' })
+  @ApiBody({ type: PermissionStatusRequestDto, description: '待停用权限 ID。' })
   @ApiOkResponseData(PermissionResponseDto, {
     description: '停用后的权限信息。',
   })
   @RequirePermission(PermissionResource.PERMISSION)
   async disable(
     @CurrentAdmin() admin: AdminJwtPayload,
-    @Body() body: PermissionStatusDto,
+    @Body() body: PermissionStatusRequestDto,
   ) {
     return this.permissionService.setActive(admin.sub, body.id, false);
   }

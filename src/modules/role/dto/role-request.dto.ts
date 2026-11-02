@@ -18,7 +18,7 @@ const roleIdValidation = createValidationMessages('角色 ID');
 const permissionIdValidation = createValidationMessages('权限 ID');
 
 /** 创建角色请求。 */
-export class CreateRoleDto {
+export class RoleCreateRequestDto {
   @ApiProperty({
     type: String,
     maxLength: 64,
@@ -55,7 +55,7 @@ export class CreateRoleDto {
 }
 
 /** 更新角色请求。 */
-export class UpdateRoleDto {
+export class RoleUpdateRequestDto {
   @ApiProperty({ type: String, example: '1', description: '待更新角色 ID。' })
   @IsString({ message: idValidation.isString })
   @IsNotEmpty({ message: idValidation.isNotEmpty })
@@ -95,7 +95,7 @@ export class UpdateRoleDto {
 }
 
 /** 软删除角色请求。 */
-export class SoftDeleteRoleDto {
+export class RoleSoftDeleteRequestDto {
   @ApiProperty({ type: String, example: '1', description: '待删除角色 ID。' })
   @IsString({ message: idValidation.isString })
   @IsNotEmpty({ message: idValidation.isNotEmpty })
@@ -103,7 +103,7 @@ export class SoftDeleteRoleDto {
 }
 
 /** 角色权限绑定请求。 */
-export class RolePermissionBindingDto {
+export class RolePermissionBindingRequestDto {
   @ApiProperty({ type: String, example: '1', description: '角色 ID。' })
   @IsString({ message: roleIdValidation.isString })
   @IsNotEmpty({ message: roleIdValidation.isNotEmpty })

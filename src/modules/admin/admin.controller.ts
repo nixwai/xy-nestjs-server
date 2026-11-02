@@ -25,12 +25,12 @@ import {
   AdminListResponseDto,
   AdminResponseDto,
   AdminMeResponseDto,
-  ResetAdminPasswordDto,
-  AdminRoleBindingDto,
-  CreateAdminDto,
-  ListQueryDto,
-  SoftDeleteAdminDto,
-  UpdateAdminDto,
+  AdminResetPasswordRequestDto,
+  AdminRoleBindingRequestDto,
+  AdminCreateRequestDto,
+  AdminListQueryDto,
+  AdminSoftDeleteRequestDto,
+  AdminUpdateRequestDto,
 } from './dto/index.js';
 import { AdminService } from './admin.service.js';
 import { AdminAuthorizationQueryService } from './authorization-query.service.js';
@@ -52,11 +52,14 @@ export class AdminController {
     summary: '查询当前管理员',
     description: '返回当前 accessToken 对应管理员的公开信息和角色 ID。',
   })
-  @ApiOkResponseData(AdminMeResponseDto, { description: '当前管理员信息和授权信息。' })
+  @ApiOkResponseData(AdminMeResponseDto, {
+    description: '当前管理员信息和授权信息。',
+  })
   @RequirePermission(PermissionResource.ADMIN_SELF)
   async me(@CurrentAdmin() admin: AdminJwtPayload) {
     const profile = await this.adminService.getMe(admin.sub);
-    const authorization = await this.authorizationQueryService.getAuthorization(profile);
+    const authorization =
+      await this.authorizationQueryService.getAuthorization(profile);
     return { ...profile, ...authorization };
   }
 
@@ -71,7 +74,7 @@ export class AdminController {
   })
   @RequirePermission(PermissionResource.ADMIN)
   @SuperAdminOnly()
-  async list(@Query() _query: ListQueryDto) {
+  async list(@Query() _query: AdminListQueryDto) {
     const items = await this.adminService.listAdmins();
     return { items, total: items.length };
   }
@@ -83,7 +86,7 @@ export class AdminController {
     summary: '创建管理员',
     description: '创建管理员账户。创建超级管理员时必须提供当前登录管理员密码。',
   })
-  @ApiBody({ type: CreateAdminDto, description: '管理员创建参数。' })
+  @ApiBody({ type: AdminCreateRequestDto, description: '管理员创建参数。' })
   @ApiOkResponseData(AdminResponseDto, {
     description: '创建成功后的管理员信息。',
   })
@@ -91,7 +94,7 @@ export class AdminController {
   @SuperAdminOnly()
   async create(
     @CurrentAdmin() admin: AdminJwtPayload,
-    @Body() body: CreateAdminDto,
+    @Body() body: AdminCreateRequestDto,
   ) {
     return this.adminService.createAdmin(admin.sub, body);
   }
@@ -105,7 +108,7 @@ export class AdminController {
       '更新管理员用户名、密码、启用状态或超级管理员状态。敏感变更需要当前密码。',
   })
   @ApiBody({
-    type: UpdateAdminDto,
+    type: AdminUpdateRequestDto,
     description: '管理员更新参数，必须包含 id。',
   })
   @ApiOkResponseData(AdminResponseDto, {
@@ -115,7 +118,7 @@ export class AdminController {
   @SuperAdminOnly()
   async update(
     @CurrentAdmin() admin: AdminJwtPayload,
-    @Body() body: UpdateAdminDto,
+    @Body() body: AdminUpdateRequestDto,
   ) {
     return this.adminService.updateAdmin(admin.sub, body);
   }
@@ -127,13 +130,18 @@ export class AdminController {
     summary: '重置管理员密码',
     description: '重置指定管理员密码，需要当前登录管理员密码。',
   })
-  @ApiBody({ type: ResetAdminPasswordDto, description: '管理员密码重置参数。' })
-  @ApiOkResponseData(AdminResponseDto, { description: '密码重置后的管理员信息。' })
+  @ApiBody({
+    type: AdminResetPasswordRequestDto,
+    description: '管理员密码重置参数。',
+  })
+  @ApiOkResponseData(AdminResponseDto, {
+    description: '密码重置后的管理员信息。',
+  })
   @RequirePermission(PermissionResource.ADMIN)
   @SuperAdminOnly()
   async resetPassword(
     @CurrentAdmin() admin: AdminJwtPayload,
-    @Body() body: ResetAdminPasswordDto,
+    @Body() body: AdminResetPasswordRequestDto,
   ) {
     return this.adminService.resetAdminPassword(
       admin.sub,
@@ -151,13 +159,13 @@ export class AdminController {
     description:
       '将管理员标记为已删除，不执行物理删除。操作需要当前登录管理员密码。',
   })
-  @ApiBody({ type: SoftDeleteAdminDto, description: '管理员删除参数。' })
+  @ApiBody({ type: AdminSoftDeleteRequestDto, description: '管理员删除参数。' })
   @ApiOkResponseEmpty({ description: '删除成功，data 固定为 null。' })
   @RequirePermission(PermissionResource.ADMIN)
   @SuperAdminOnly()
   async softDelete(
     @CurrentAdmin() admin: AdminJwtPayload,
-    @Body() body: SoftDeleteAdminDto,
+    @Body() body: AdminSoftDeleteRequestDto,
   ) {
     return this.adminService.softDeleteAdmin(
       admin.sub,
@@ -173,13 +181,16 @@ export class AdminController {
     summary: '绑定管理员角色',
     description: '为指定管理员增加一个角色绑定。重复绑定会返回业务冲突错误。',
   })
-  @ApiBody({ type: AdminRoleBindingDto, description: '管理员和角色 ID。' })
+  @ApiBody({
+    type: AdminRoleBindingRequestDto,
+    description: '管理员和角色 ID。',
+  })
   @ApiOkResponseEmpty({ description: '绑定成功，data 固定为 null。' })
   @RequirePermission(PermissionResource.ADMIN_ROLE)
   @SuperAdminOnly()
   async bindRole(
     @CurrentAdmin() admin: AdminJwtPayload,
-    @Body() body: AdminRoleBindingDto,
+    @Body() body: AdminRoleBindingRequestDto,
   ) {
     return this.adminService.bindRole(admin.sub, body.adminId, body.roleId);
   }
@@ -191,13 +202,16 @@ export class AdminController {
     summary: '解绑管理员角色',
     description: '解除指定管理员和角色之间的绑定关系。',
   })
-  @ApiBody({ type: AdminRoleBindingDto, description: '管理员和角色 ID。' })
+  @ApiBody({
+    type: AdminRoleBindingRequestDto,
+    description: '管理员和角色 ID。',
+  })
   @ApiOkResponseEmpty({ description: '解绑成功，data 固定为 null。' })
   @RequirePermission(PermissionResource.ADMIN_ROLE)
   @SuperAdminOnly()
   async unbindRole(
     @CurrentAdmin() admin: AdminJwtPayload,
-    @Body() body: AdminRoleBindingDto,
+    @Body() body: AdminRoleBindingRequestDto,
   ) {
     return this.adminService.unbindRole(admin.sub, body.adminId, body.roleId);
   }
