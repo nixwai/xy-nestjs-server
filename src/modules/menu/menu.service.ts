@@ -1,7 +1,7 @@
-import type { OnModuleInit } from '@nestjs/common';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, BadRequestException, NotFoundException, type OnModuleInit } from '@nestjs/common';
 import { AuditService } from '../audit/audit.service.js';
 import { MENU_REPOSITORY } from './repositories/menu-repository.port.js';
+import { PermissionService } from '../permission/permission.service.js';
 import type { MenuRepository } from './repositories/menu-repository.port.js';
 import type { MenuRecord } from './types/menu.types.js';
 
@@ -13,6 +13,7 @@ const DEFAULT_MENUS = [
     icon: 'carbon:dashboard',
     order: 1,
     permissionCode: null,
+    isRootOnly: false,
     isActive: true
   },
   {
@@ -21,7 +22,8 @@ const DEFAULT_MENUS = [
     path: '/admin',
     icon: 'carbon:user-admin',
     order: 2,
-    permissionCode: 'admin:GET',
+    permissionCode: null,
+    isRootOnly: true,
     isActive: true
   },
   {
@@ -30,7 +32,8 @@ const DEFAULT_MENUS = [
     path: '/permission',
     icon: 'carbon:security',
     order: 3,
-    permissionCode: 'role:GET',
+    permissionCode: null,
+    isRootOnly: true,
     isActive: true
   },
   {
@@ -39,7 +42,8 @@ const DEFAULT_MENUS = [
     path: '/menu',
     icon: 'carbon:menu',
     order: 4,
-    permissionCode: 'menu:GET',
+    permissionCode: null,
+    isRootOnly: true,
     isActive: true
   }
 ] as const;
@@ -47,7 +51,8 @@ const DEFAULT_MENUS = [
 export class MenuService implements OnModuleInit {
   constructor(
     @Inject(MENU_REPOSITORY) private readonly repo: MenuRepository,
-    @Inject(AuditService) private readonly audit: AuditService
+    @Inject(AuditService) private readonly audit: AuditService,
+    @Inject(PermissionService) private readonly permissionService: PermissionService
   ) {}
   async onModuleInit() {
     try {
@@ -60,6 +65,7 @@ export class MenuService implements OnModuleInit {
     return this.repo.list();
   }
   async create(actorId: string, input: Omit<MenuRecord, 'id' | 'deletedAt'>) {
+    await this.validatePermissionCode(input.permissionCode, input.isRootOnly);
     const item = await this.repo.create(input);
     await this.audit.record({ actorAdminId: actorId, action: 'menu.create', resourceType: 'menu', targetId: item.id });
     return item;
@@ -67,8 +73,15 @@ export class MenuService implements OnModuleInit {
   async update(
     actorId: string,
     id: string,
-    input: Partial<Pick<MenuRecord, 'parentId' | 'title' | 'path' | 'icon' | 'order' | 'permissionCode' | 'isActive'>>
+    input: Partial<
+      Pick<MenuRecord, 'parentId' | 'title' | 'path' | 'icon' | 'order' | 'permissionCode' | 'isRootOnly' | 'isActive'>
+    >
   ) {
+    const current = await this.repo.findById(id);
+    if (!current) {
+      throw new NotFoundException('菜单不存在');
+    }
+    await this.validatePermissionCode(input.permissionCode, input.isRootOnly ?? current.isRootOnly);
     const item = await this.repo.update(id, input);
     await this.audit.record({ actorAdminId: actorId, action: 'menu.update', resourceType: 'menu', targetId: id });
     return item;
@@ -79,6 +92,25 @@ export class MenuService implements OnModuleInit {
   }
   async setActive(actorId: string, id: string, isActive: boolean) {
     return this.update(actorId, id, { isActive });
+  }
+
+  private async validatePermissionCode(
+    permissionCode: string | null | undefined,
+    isRootOnly: boolean | undefined
+  ): Promise<void> {
+    if (!permissionCode) {
+      return;
+    }
+    const permission = await this.permissionService.findByCode(permissionCode);
+    if (!permission) {
+      throw new NotFoundException('菜单权限不存在');
+    }
+    if (!permission.isActive) {
+      throw new BadRequestException('菜单权限未启用');
+    }
+    if (permission.isProtected && !isRootOnly) {
+      throw new BadRequestException('受保护权限只能配置为根管理员菜单');
+    }
   }
 }
 

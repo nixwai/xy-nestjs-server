@@ -6,6 +6,7 @@ export interface MenuRecord {
   icon: string | null;
   order: number;
   permissionCode: string | null;
+  isRootOnly: boolean;
   isActive: boolean;
   deletedAt: Date | null;
 }

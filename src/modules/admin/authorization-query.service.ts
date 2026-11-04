@@ -16,13 +16,15 @@ export class AdminAuthorizationQueryService {
 
   async getAuthorization(admin: AdminPublicRecord) {
     const roles = await this.roleService.findByIds(admin.roleIds);
-    const permissionIds = [...new Set(roles.flatMap(role => role.permissionIds))];
-    const permissions = admin.isSuperAdmin
+    const permissionIds = [...new Set(roles.filter(role => role.isActive).flatMap(role => role.permissionIds))];
+    const permissions = admin.isRoot
       ? await this.permissionService.listPermissions()
       : await this.permissionService.findByIds(permissionIds);
-    const permissionCodes = permissions.filter(item => item.isActive).map(item => item.code);
+    const permissionCodes = permissions
+      .filter(item => item.isActive && (admin.isRoot || (item.isAssignable && !item.isProtected)))
+      .map(item => item.code);
     const menus = await this.menuService.list();
-    return { permissions: permissionCodes, menus: buildMenuTree(menus, admin.isSuperAdmin, new Set(permissionCodes)) };
+    return { permissions: permissionCodes, menus: buildMenuTree(menus, admin.isRoot, new Set(permissionCodes)) };
   }
 }
 
@@ -32,12 +34,16 @@ export type MenuTreeItem = {
   path: string;
   icon?: string;
   order: number;
+  permissionCode: string | null;
   children?: MenuTreeItem[];
 };
 
-function buildMenuTree(items: MenuRecord[], isSuperAdmin: boolean, permissions: Set<string>) {
+function buildMenuTree(items: MenuRecord[], isRoot: boolean, permissions: Set<string>) {
   const available = items.filter(
-    item => item.isActive && (isSuperAdmin || !item.permissionCode || permissions.has(item.permissionCode))
+    item =>
+      item.isActive &&
+      (!item.isRootOnly || isRoot) &&
+      (!item.permissionCode || isRoot || permissions.has(item.permissionCode))
   );
   const byParent = new Map<string | null, MenuRecord[]>();
   available.forEach(item => byParent.set(item.parentId, [...(byParent.get(item.parentId) ?? []), item]));
@@ -50,6 +56,7 @@ function buildMenuTree(items: MenuRecord[], isSuperAdmin: boolean, permissions: 
         path: item.path,
         ...(item.icon ? { icon: item.icon } : {}),
         order: item.order,
+        permissionCode: item.permissionCode,
         ...(byParent.has(item.id) ? { children: build(item.id) } : {})
       }));
   return build(null);

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuditModule } from '../audit/audit.module.js';
+import { PermissionModule } from '../permission/permission.module.js';
 import { MenuEntity } from './entities/menu.entity.js';
 import { MenuController } from './menu.controller.js';
 import { MenuService } from './menu.service.js';
@@ -11,7 +12,7 @@ import { shouldLoadDatabaseModule } from '#/config/configuration.js';
 
 const databaseEnabled = shouldLoadDatabaseModule();
 @Module({
-  imports: [AuditModule, ...(databaseEnabled ? [TypeOrmModule.forFeature([MenuEntity])] : [])],
+  imports: [AuditModule, PermissionModule, ...(databaseEnabled ? [TypeOrmModule.forFeature([MenuEntity])] : [])],
   controllers: [MenuController],
   providers: [
     MenuService,

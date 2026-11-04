@@ -1,14 +1,12 @@
-import type { HttpMethod } from '../enums/http-method.enum.js';
-import type { PermissionResource } from '../enums/permission-resource.enum.js';
-
 /** 权限目录中的权限记录。 */
 export interface PermissionRecord {
   id: string;
   code: string;
-  resource: PermissionResource;
-  method: HttpMethod;
   name: string;
   description: string | null;
+  category: string;
+  isAssignable: boolean;
+  isProtected: boolean;
   isActive: boolean;
 }
 

@@ -3,8 +3,7 @@ import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiCommonResponses, ApiPageQuery, ApiOkResponseData, ApiOkResponseEmpty } from '#/common/decorators/index.js';
 import { CurrentAdmin } from '../auth/decorators/index.js';
 import type { AdminJwtPayload } from '../auth/tokens/jwt-token.service.js';
-import { RequirePermission, SuperAdminOnly } from '../authorization/decorators/index.js';
-import { PermissionResource } from '../authorization/enums/index.js';
+import { RootOnly } from '../authorization/decorators/index.js';
 import {
   RoleCreateRequestDto,
   RoleListResponseDto,
@@ -20,7 +19,7 @@ import { RoleService } from './role.service.js';
 @ApiTags('角色管理')
 @ApiCommonResponses()
 @Controller('role')
-@SuperAdminOnly()
+@RootOnly()
 export class RoleController {
   constructor(@Inject(RoleService) private readonly roleService: RoleService) {}
 
@@ -34,7 +33,6 @@ export class RoleController {
   @ApiOkResponseData(RoleListResponseDto, {
     description: '角色分页列表和分页元数据。'
   })
-  @RequirePermission(PermissionResource.ROLE)
   async list(@Query() query: PageQueryDto = new PageQueryDto()) {
     return this.roleService.listRoles(query);
   }
@@ -47,7 +45,6 @@ export class RoleController {
   })
   @ApiBody({ type: RoleCreateRequestDto, description: '角色创建参数。' })
   @ApiOkResponseData(RoleResponseDto, { description: '创建成功后的角色信息。' })
-  @RequirePermission(PermissionResource.ROLE)
   async create(@CurrentAdmin() admin: AdminJwtPayload, @Body() body: RoleCreateRequestDto) {
     return this.roleService.createRole(admin.sub, body);
   }
@@ -60,7 +57,6 @@ export class RoleController {
   })
   @ApiBody({ type: RoleUpdateRequestDto, description: '角色更新参数。' })
   @ApiOkResponseData(RoleResponseDto, { description: '更新成功后的角色信息。' })
-  @RequirePermission(PermissionResource.ROLE)
   async update(@CurrentAdmin() admin: AdminJwtPayload, @Body() body: RoleUpdateRequestDto) {
     return this.roleService.updateRole(admin.sub, body.id, body);
   }
@@ -73,7 +69,6 @@ export class RoleController {
   })
   @ApiBody({ type: RoleSoftDeleteRequestDto, description: '待删除角色 ID。' })
   @ApiOkResponseEmpty({ description: '删除成功，data 固定为 null。' })
-  @RequirePermission(PermissionResource.ROLE)
   async softDelete(@CurrentAdmin() admin: AdminJwtPayload, @Body() body: RoleSoftDeleteRequestDto) {
     await this.roleService.softDeleteRole(admin.sub, body.id);
     return null;
@@ -90,7 +85,6 @@ export class RoleController {
     description: '角色和权限 ID。'
   })
   @ApiOkResponseEmpty({ description: '绑定成功，data 固定为 null。' })
-  @RequirePermission(PermissionResource.ROLE_PERMISSION)
   async bindPermission(@CurrentAdmin() admin: AdminJwtPayload, @Body() body: RolePermissionBindingRequestDto) {
     await this.roleService.bindPermission(admin.sub, body.roleId, body.permissionId);
     return null;
@@ -107,7 +101,6 @@ export class RoleController {
     description: '角色和权限 ID。'
   })
   @ApiOkResponseEmpty({ description: '解绑成功，data 固定为 null。' })
-  @RequirePermission(PermissionResource.ROLE_PERMISSION)
   async unbindPermission(@CurrentAdmin() admin: AdminJwtPayload, @Body() body: RolePermissionBindingRequestDto) {
     await this.roleService.unbindPermission(admin.sub, body.roleId, body.permissionId);
     return null;

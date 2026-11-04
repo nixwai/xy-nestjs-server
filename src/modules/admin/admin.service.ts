@@ -57,20 +57,20 @@ export class AdminService {
 
   /** 创建管理员。 */
   async createAdmin(actorId: string, body: AdminCreateRequestDto): Promise<AdminPublicRecord> {
-    if (body.isSuperAdmin && !body.currentPassword) {
-      throw new BadRequestException('创建超级管理员必须验证当前密码');
+    if (body.isRoot && !body.currentPassword) {
+      throw new BadRequestException('创建根管理员必须验证当前密码');
     }
-    if (body.isSuperAdmin && !(await this.verifyPassword(actorId, body.currentPassword as string)))
+    if (body.isRoot && !(await this.verifyPassword(actorId, body.currentPassword as string)))
       throw new ForbiddenException('当前密码错误');
     validatePassword(body.password);
     const password = await hashPassword(body.password);
-    const role = body.isSuperAdmin ? null : await this.roleService.findByCode('operator');
+    const role = body.isRoot ? null : await this.roleService.findByCode('operator');
     const item = await this.transactionRunner.run(async repository => {
       const created = await repository.create({
         username: body.username,
         passwordHash: password.hash,
         passwordSalt: password.salt,
-        isSuperAdmin: body.isSuperAdmin
+        isRoot: body.isRoot
       });
       if (role) {
         await repository.bindRole(created.id, role.id);
@@ -82,7 +82,7 @@ export class AdminService {
       action: 'admin.create',
       resourceType: 'admin',
       targetId: item.id,
-      details: { isSuperAdmin: item.isSuperAdmin }
+      details: { isRoot: item.isRoot }
     });
     return this.toPublic(item, await this.repository.listRoleIds(item.id));
   }
@@ -93,20 +93,20 @@ export class AdminService {
     if (!target) {
       throw new NotFoundException('管理员不存在');
     }
-    const needsPassword = target.isSuperAdmin || body.isSuperAdmin === true || Boolean(body.password);
+    const needsPassword = target.isRoot || body.isRoot === true || Boolean(body.password);
     if (needsPassword && (!body.currentPassword || !(await this.verifyPassword(actorId, body.currentPassword))))
       throw new ForbiddenException('当前密码错误');
     if (
-      target.isSuperAdmin &&
+      target.isRoot &&
       target.isActive &&
-      (body.isSuperAdmin === false || body.isActive === false) &&
-      (await this.repository.countActiveSuperAdmins()) <= 1
+      (body.isRoot === false || body.isActive === false) &&
+      (await this.repository.countActiveRoots()) <= 1
     )
-      throw new ForbiddenException('系统必须至少保留一名启用的超级管理员');
+      throw new ForbiddenException('系统必须至少保留一名启用的根管理员');
     const input: AdminUpdateInput = {
       username: body.username,
       isActive: body.isActive,
-      isSuperAdmin: body.isSuperAdmin
+      isRoot: body.isRoot
     };
     if (body.password) {
       validatePassword(body.password);
@@ -122,7 +122,7 @@ export class AdminService {
       targetId: body.id,
       details: {
         passwordChanged: Boolean(body.password),
-        isSuperAdmin: item.isSuperAdmin
+        isRoot: item.isRoot
       }
     });
     return this.toPublic(item, await this.repository.listRoleIds(item.id));
@@ -162,8 +162,8 @@ export class AdminService {
     if (!(await this.verifyPassword(actorId, currentPassword))) {
       throw new ForbiddenException('当前密码错误');
     }
-    if (target.isSuperAdmin && target.isActive && (await this.repository.countActiveSuperAdmins()) <= 1)
-      throw new ForbiddenException('系统必须至少保留一名启用的超级管理员');
+    if (target.isRoot && target.isActive && (await this.repository.countActiveRoots()) <= 1)
+      throw new ForbiddenException('系统必须至少保留一名启用的根管理员');
     await this.transactionRunner.run(repository => repository.softDelete(id));
     await this.auditService.record({
       actorAdminId: actorId,
@@ -212,9 +212,9 @@ export class AdminService {
     return null;
   }
 
-  /** 创建初始化超级管理员。 */
+  /** 创建初始化根管理员。 */
   createInitialAdmin(input: AdminCreateInput): Promise<AdminRecord> {
-    return this.repository.create({ ...input, isSuperAdmin: true });
+    return this.repository.create({ ...input, isRoot: true });
   }
 
   /** 校验管理员密码。 */
@@ -238,7 +238,7 @@ export class AdminService {
       id: item.id,
       username: item.username,
       isActive: item.isActive,
-      isSuperAdmin: item.isSuperAdmin,
+      isRoot: item.isRoot,
       roleIds: [...roleIds],
       createdAt: item.createdAt,
       updatedAt: item.updatedAt

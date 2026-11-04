@@ -3,8 +3,7 @@ import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiCommonResponses, ApiPageQuery, ApiOkResponseData, ApiOkResponseEmpty } from '#/common/decorators/index.js';
 import { CurrentAdmin } from '../auth/decorators/index.js';
 import type { AdminJwtPayload } from '../auth/tokens/jwt-token.service.js';
-import { RequirePermission, SuperAdminOnly } from '../authorization/decorators/index.js';
-import { PermissionResource } from '../authorization/enums/index.js';
+import { Authenticated, RootOnly } from '../authorization/decorators/index.js';
 import {
   AdminListResponseDto,
   AdminResponseDto,
@@ -40,7 +39,7 @@ export class AdminController {
   @ApiOkResponseData(AdminMeResponseDto, {
     description: '当前管理员信息和授权信息。'
   })
-  @RequirePermission(PermissionResource.ADMIN_SELF)
+  @Authenticated()
   async me(@CurrentAdmin() admin: AdminJwtPayload) {
     const profile = await this.adminService.getMe(admin.sub);
     const authorization = await this.authorizationQueryService.getAuthorization(profile);
@@ -57,8 +56,7 @@ export class AdminController {
   @ApiOkResponseData(AdminListResponseDto, {
     description: '管理员分页列表和分页元数据。'
   })
-  @RequirePermission(PermissionResource.ADMIN)
-  @SuperAdminOnly()
+  @RootOnly()
   async list(@Query() query: AdminListQueryDto = new AdminListQueryDto()) {
     return this.adminService.listAdmins(query);
   }
@@ -67,19 +65,18 @@ export class AdminController {
   @Post('admin/create')
   @ApiOperation({
     summary: '创建管理员',
-    description: '创建管理员账户。创建超级管理员时必须提供当前登录管理员密码。'
+    description: '创建管理员账户。创建根管理员时必须提供当前登录管理员密码。'
   })
   @ApiBody({ type: AdminCreateRequestDto, description: '管理员创建参数。' })
   @ApiOkResponseData(AdminResponseDto, {
     description: '创建成功后的管理员信息。'
   })
-  @RequirePermission(PermissionResource.ADMIN)
-  @SuperAdminOnly()
+  @RootOnly()
   async create(@CurrentAdmin() admin: AdminJwtPayload, @Body() body: AdminCreateRequestDto) {
     return this.adminService.createAdmin(admin.sub, {
       username: body.username,
       password: this.passwordTransportService.decryptPassword(body.password),
-      isSuperAdmin: body.isSuperAdmin,
+      isRoot: body.isRoot,
       currentPassword: this.passwordTransportService.decryptOptionalPassword(body.currentPassword, '当前密码')
     });
   }
@@ -88,7 +85,7 @@ export class AdminController {
   @Post('admin/update')
   @ApiOperation({
     summary: '更新管理员',
-    description: '更新管理员用户名、密码、启用状态或超级管理员状态。敏感变更需要当前密码。'
+    description: '更新管理员用户名、密码、启用状态或根管理员状态。敏感变更需要当前密码。'
   })
   @ApiBody({
     type: AdminUpdateRequestDto,
@@ -97,15 +94,14 @@ export class AdminController {
   @ApiOkResponseData(AdminResponseDto, {
     description: '更新成功后的管理员信息。'
   })
-  @RequirePermission(PermissionResource.ADMIN)
-  @SuperAdminOnly()
+  @RootOnly()
   async update(@CurrentAdmin() admin: AdminJwtPayload, @Body() body: AdminUpdateRequestDto) {
     return this.adminService.updateAdmin(admin.sub, {
       id: body.id,
       username: body.username,
       password: this.passwordTransportService.decryptOptionalPassword(body.password),
       isActive: body.isActive,
-      isSuperAdmin: body.isSuperAdmin,
+      isRoot: body.isRoot,
       currentPassword: this.passwordTransportService.decryptOptionalPassword(body.currentPassword, '当前密码')
     });
   }
@@ -123,8 +119,7 @@ export class AdminController {
   @ApiOkResponseData(AdminResponseDto, {
     description: '密码重置后的管理员信息。'
   })
-  @RequirePermission(PermissionResource.ADMIN)
-  @SuperAdminOnly()
+  @RootOnly()
   async resetPassword(@CurrentAdmin() admin: AdminJwtPayload, @Body() body: AdminResetPasswordRequestDto) {
     return this.adminService.resetAdminPassword(
       admin.sub,
@@ -142,8 +137,7 @@ export class AdminController {
   })
   @ApiBody({ type: AdminSoftDeleteRequestDto, description: '管理员删除参数。' })
   @ApiOkResponseEmpty({ description: '删除成功，data 固定为 null。' })
-  @RequirePermission(PermissionResource.ADMIN)
-  @SuperAdminOnly()
+  @RootOnly()
   async softDelete(@CurrentAdmin() admin: AdminJwtPayload, @Body() body: AdminSoftDeleteRequestDto) {
     return this.adminService.softDeleteAdmin(
       admin.sub,
@@ -163,8 +157,7 @@ export class AdminController {
     description: '管理员和角色 ID。'
   })
   @ApiOkResponseEmpty({ description: '绑定成功，data 固定为 null。' })
-  @RequirePermission(PermissionResource.ADMIN_ROLE)
-  @SuperAdminOnly()
+  @RootOnly()
   async bindRole(@CurrentAdmin() admin: AdminJwtPayload, @Body() body: AdminRoleBindingRequestDto) {
     return this.adminService.bindRole(admin.sub, body.adminId, body.roleId);
   }
@@ -180,8 +173,7 @@ export class AdminController {
     description: '管理员和角色 ID。'
   })
   @ApiOkResponseEmpty({ description: '解绑成功，data 固定为 null。' })
-  @RequirePermission(PermissionResource.ADMIN_ROLE)
-  @SuperAdminOnly()
+  @RootOnly()
   async unbindRole(@CurrentAdmin() admin: AdminJwtPayload, @Body() body: AdminRoleBindingRequestDto) {
     return this.adminService.unbindRole(admin.sub, body.adminId, body.roleId);
   }

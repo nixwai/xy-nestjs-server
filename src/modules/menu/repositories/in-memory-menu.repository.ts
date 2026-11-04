@@ -13,13 +13,15 @@ export class InMemoryMenuRepository implements MenuRepository {
     return item && item.deletedAt === null ? { ...item } : null;
   }
   async create(input: Omit<MenuRecord, 'id' | 'deletedAt'>) {
-    const item = { ...input, id: String(this.nextId++), deletedAt: null };
+    const item = { ...input, isRootOnly: input.isRootOnly ?? false, id: String(this.nextId++), deletedAt: null };
     this.items.set(item.id, item);
     return { ...item };
   }
   async update(
     id: string,
-    input: Partial<Pick<MenuRecord, 'parentId' | 'title' | 'path' | 'icon' | 'order' | 'permissionCode' | 'isActive'>>
+    input: Partial<
+      Pick<MenuRecord, 'parentId' | 'title' | 'path' | 'icon' | 'order' | 'permissionCode' | 'isRootOnly' | 'isActive'>
+    >
   ) {
     const item = await this.findById(id);
     if (!item) throw new DomainNotFoundError('菜单');

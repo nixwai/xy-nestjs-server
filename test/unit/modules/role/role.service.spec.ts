@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import type { PermissionService } from '#/modules/permission/permission.service.js';
 import { RoleService } from '#/modules/role/role.service.js';
@@ -6,7 +6,6 @@ import type { PermissionRecord } from '#/modules/authorization/types/permission.
 import type { RoleRecord } from '#/modules/role/types/role.types.js';
 import type { RoleRepository } from '#/modules/role/repositories/role-repository.port.js';
 import type { AuditService } from '#/modules/audit/audit.service.js';
-import { HttpMethod, PermissionResource } from '#/modules/authorization/enums/index.js';
 
 const role: RoleRecord = {
   id: 'role-1',
@@ -14,14 +13,17 @@ const role: RoleRecord = {
   name: '普通管理员',
   description: null,
   isActive: true,
+  isSystem: false,
+  isProtected: false,
   deletedAt: null,
   permissionIds: []
 };
 const permission: PermissionRecord = {
   id: 'permission-1',
-  code: 'role:get',
-  resource: PermissionResource.ROLE,
-  method: HttpMethod.GET,
+  code: 'role.read',
+  category: '角色',
+  isAssignable: true,
+  isProtected: false,
   name: '查询角色',
   description: null,
   isActive: true
@@ -112,6 +114,18 @@ describe('RoleService', () => {
     });
     await expect(missingPermissionService.bindPermission('admin-1', 'role-1', 'missing')).rejects.toBeInstanceOf(
       NotFoundException
+    );
+  });
+
+  it('拒绝将受保护权限绑定给普通角色', async () => {
+    const { service } = createService({
+      permissionService: {
+        findById: vi.fn().mockResolvedValue({ ...permission, isAssignable: false, isProtected: true })
+      }
+    });
+
+    await expect(service.bindPermission('admin-1', 'role-1', 'permission-1')).rejects.toBeInstanceOf(
+      ForbiddenException
     );
   });
 

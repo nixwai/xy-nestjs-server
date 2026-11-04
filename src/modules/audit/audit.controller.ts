@@ -3,16 +3,15 @@ import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ApiCommonResponses, ApiOkResponseData } from '#/common/decorators/index.js';
 import { CurrentAdmin } from '../auth/decorators/index.js';
 import type { AdminJwtPayload } from '../auth/tokens/jwt-token.service.js';
-import { RequirePermission, SuperAdminOnly } from '../authorization/decorators/index.js';
-import { PermissionResource } from '../authorization/enums/index.js';
+import { RequirePermission } from '../authorization/decorators/index.js';
 import { AuditLogListQueryDto, AuditLogListResponseDto } from './dto/index.js';
+import { PermissionCode } from '../authorization/constants/index.js';
 import { AuditService } from './audit.service.js';
 
 /** 提供管理员变更审计查询接口。 */
 @ApiTags('审计')
 @ApiCommonResponses()
 @Controller('audit')
-@SuperAdminOnly()
 export class AuditController {
   constructor(@Inject(AuditService) private readonly auditService: AuditService) {}
 
@@ -38,7 +37,7 @@ export class AuditController {
   @ApiOkResponseData(AuditLogListResponseDto, {
     description: '审计记录游标分页结果，不返回总数。'
   })
-  @RequirePermission(PermissionResource.AUDIT)
+  @RequirePermission(PermissionCode.AUDIT_READ)
   async list(
     @CurrentAdmin() _admin: AdminJwtPayload,
     @Query() query: AuditLogListQueryDto = new AuditLogListQueryDto()

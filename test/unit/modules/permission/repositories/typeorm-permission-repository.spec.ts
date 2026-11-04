@@ -3,9 +3,10 @@ import { TypeOrmPermissionRepository } from '#/modules/permission/repositories/t
 
 const permission = {
   id: 'permission-1',
-  code: 'role:get',
-  resource: 'role',
-  method: 'GET',
+  code: 'role.read',
+  category: '角色',
+  isAssignable: true,
+  isProtected: false,
   name: '查询角色',
   description: null,
   isActive: true
@@ -46,8 +47,9 @@ describe('TypeOrmPermissionRepository', () => {
 
     const input = {
       code: permission.code,
-      resource: permission.resource as never,
-      method: permission.method as never,
+      category: permission.category,
+      isAssignable: permission.isAssignable,
+      isProtected: permission.isProtected,
       name: permission.name,
       description: permission.description,
       isActive: permission.isActive

@@ -8,6 +8,7 @@ export class MenuResponseDto {
   @ApiProperty({ type: String, nullable: true }) icon!: string | null;
   @ApiProperty({ type: Number }) order!: number;
   @ApiProperty({ type: String, nullable: true }) permissionCode!: string | null;
+  @ApiProperty({ type: Boolean }) isRootOnly!: boolean;
   @ApiProperty({ type: Boolean }) isActive!: boolean;
   @ApiProperty({ type: String, nullable: true, format: 'date-time' }) deletedAt!: Date | null;
 }

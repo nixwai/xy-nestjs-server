@@ -10,6 +10,7 @@ const orderValidation = createValidationMessages('菜单排序');
 const permissionCodeValidation = createValidationMessages('权限编码');
 const idValidation = createValidationMessages('菜单 ID');
 const isActiveValidation = createValidationMessages('启用状态');
+const isRootOnlyValidation = createValidationMessages('根管理员可见标识');
 
 /** 创建菜单请求。 */
 export class MenuCreateRequestDto {
@@ -45,6 +46,11 @@ export class MenuCreateRequestDto {
   @IsOptional()
   @IsString({ message: permissionCodeValidation.isString })
   permissionCode?: string | null;
+
+  @ApiPropertyOptional({ type: Boolean, default: false })
+  @IsOptional()
+  @IsBoolean({ message: isRootOnlyValidation.isBoolean })
+  isRootOnly?: boolean;
 }
 
 /** 更新菜单请求。 */

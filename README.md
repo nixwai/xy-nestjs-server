@@ -109,7 +109,7 @@ pnpm migration:run
 pnpm admin:init
 ```
 
-脚本会交互式读取管理员用户名和密码，并幂等初始化超级管理员、默认角色及权限目录。密码必须为 8-72 位，并同时包含字母和数字。
+脚本会交互式读取管理员用户名和密码，并幂等初始化根管理员、默认角色及权限目录。密码必须为 8-72 位，并同时包含字母和数字。
 
 ### 6. 启动 HTTP 服务
 
@@ -136,9 +136,9 @@ src/
 ├── modules/                # 领域模块
 │   ├── admin/              # 管理员账户和管理员角色关系
 │   ├── auth/               # 管理员登录、Token 和会话
-│   ├── authorization/      # RBAC 授权
+│   ├── authorization/      # 动态权限、登录态和根管理员授权
 │   ├── audit/              # 操作审计
-│   ├── permission/         # 权限目录
+│   ├── permission/         # 动态权限目录
 │   ├── role/               # 角色和角色权限关系
 │   ├── health/             # 存活和就绪检查
 │   ├── site/               # 景区模块边界
@@ -490,7 +490,7 @@ AUTH_RSA_PRIVATE_KEY
 - 所有外部请求参数必须经过 DTO 和全局校验管道验证；
 - 管理员密码使用带随机盐的密码哈希保存，不保存明文密码；
 - Refresh Token 通过会话记录管理，支持轮换和撤销；
-- 管理员、角色和权限接口使用 JWT、RBAC 和超级管理员边界保护；
+- 管理员、角色和权限接口使用 JWT、动态业务权限、RootOnly 边界和操作审计保护；
 - 生产数据库禁止使用 TypeORM `synchronize`；
 - 应用启用 Helmet，并对请求执行进程内 IP 限流；
 - 错误响应不得泄露数据库、密钥或内部异常堆栈信息；
@@ -520,3 +520,14 @@ AUTH_RSA_PRIVATE_KEY
 ## 许可证
 
 本项目当前为内部私有项目，许可证标记为 `UNLICENSED`。
+
+
+## 授权模型
+
+- 权限编码使用 `resource.action` 业务语义，例如 `booking.read`、`booking.cancel`，不再使用 HTTP 方法生成权限；
+- `@Authenticated()` 表示登录即可访问，当前管理员信息接口不属于可分配权限；
+- `@RequirePermission('booking.read')` 表示接口依赖动态业务权限；
+- `@RootOnly()` 表示仅 Root 管理员可访问，不需要再绑定普通权限；
+- 权限目录由代码注册，角色和权限关系由数据库动态维护；
+- `isAssignable` 和 `isProtected` 防止系统管理权限被普通角色绑定；
+- 菜单和前端按钮复用权限编码，但前端隐藏按钮不能替代后端鉴权。

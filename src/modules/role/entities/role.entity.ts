@@ -38,6 +38,14 @@ export class RoleEntity {
   @Column({ type: 'tinyint', unsigned: true, default: 1 })
   isActive!: boolean;
 
+  /** 是否由系统维护。 */
+  @Column({ name: 'is_system', type: 'tinyint', unsigned: true, default: 0 })
+  isSystem!: boolean;
+
+  /** 是否禁止删除和普通权限委派。 */
+  @Column({ name: 'is_protected', type: 'tinyint', unsigned: true, default: 0 })
+  isProtected!: boolean;
+
   /** 软删除时间。 */
   @DeleteDateColumn({ name: 'deleted_at', type: 'datetime', nullable: true })
   deletedAt!: Date | null;

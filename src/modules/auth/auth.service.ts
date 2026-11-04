@@ -69,7 +69,7 @@ export class AuthService {
     await this.sessionRepository.revokeByTokenHash(hashRefreshToken(refreshToken), new Date());
     return null;
   }
-  /** 创建首个超级管理员。 */
+  /** 创建首个根管理员。 */
   async createInitialAdmin(username: string, password: string): Promise<AdminRecord> {
     validatePassword(password);
     const { hash, salt } = await hashPassword(password);
@@ -117,7 +117,7 @@ export class AuthService {
       admin: {
         id: admin.id,
         username: admin.username,
-        isSuperAdmin: admin.isSuperAdmin,
+        isRoot: admin.isRoot,
         role: 'admin'
       }
     };

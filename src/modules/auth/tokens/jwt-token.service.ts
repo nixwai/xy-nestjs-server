@@ -9,7 +9,7 @@ export interface AdminJwtPayload {
   type: 'access';
   iat: number;
   exp: number;
-  isSuperAdmin?: boolean;
+  isRoot?: boolean;
 }
 
 /** 生成和校验管理员访问令牌。 */

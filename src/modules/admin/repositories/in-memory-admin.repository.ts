@@ -46,7 +46,7 @@ export class InMemoryAdminRepository implements AdminRepository {
       username: input.username,
       passwordHash: input.passwordHash,
       passwordSalt: input.passwordSalt,
-      isSuperAdmin: input.isSuperAdmin ?? false,
+      isRoot: input.isRoot ?? false,
       isActive: true,
       deletedAt: null,
       createdAt: now,
@@ -80,9 +80,8 @@ export class InMemoryAdminRepository implements AdminRepository {
     }
   }
 
-  async countActiveSuperAdmins(): Promise<number> {
-    return [...this.admins.values()].filter(item => item.deletedAt === null && item.isActive && item.isSuperAdmin)
-      .length;
+  async countActiveRoots(): Promise<number> {
+    return [...this.admins.values()].filter(item => item.deletedAt === null && item.isActive && item.isRoot).length;
   }
 
   async listRoleIds(adminId: string): Promise<string[]> {

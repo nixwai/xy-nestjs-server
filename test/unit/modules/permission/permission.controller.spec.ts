@@ -7,6 +7,7 @@ const body = {} as never;
 describe('PermissionController', () => {
   const service = {
     listPermissions: vi.fn().mockResolvedValue([{ id: '1' }]),
+    listAssignablePermissions: vi.fn().mockResolvedValue([{ id: '1' }]),
     setActive: vi.fn().mockResolvedValue({ id: '1' })
   };
   const controller = new PermissionController(service as never);

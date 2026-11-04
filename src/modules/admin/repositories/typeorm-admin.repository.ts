@@ -61,7 +61,7 @@ export class TypeOrmAdminRepository implements AdminRepository {
         this.admins.create({
           ...input,
           isActive: true,
-          isSuperAdmin: input.isSuperAdmin ?? false,
+          isRoot: input.isRoot ?? false,
           deletedAt: null
         })
       );
@@ -98,9 +98,9 @@ export class TypeOrmAdminRepository implements AdminRepository {
     );
   }
 
-  async countActiveSuperAdmins(): Promise<number> {
+  async countActiveRoots(): Promise<number> {
     return this.admins.count({
-      where: { isActive: true, isSuperAdmin: true }
+      where: { isActive: true, isRoot: true }
     });
   }
 
@@ -165,7 +165,7 @@ export class TypeOrmAdminRepository implements AdminRepository {
       passwordHash: item.passwordHash,
       passwordSalt: item.passwordSalt,
       isActive: item.isActive,
-      isSuperAdmin: item.isSuperAdmin,
+      isRoot: item.isRoot,
       deletedAt: item.deletedAt,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt

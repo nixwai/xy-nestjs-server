@@ -4,7 +4,7 @@ export interface AdminRecord {
   passwordHash: string;
   passwordSalt: string;
   isActive: boolean;
-  isSuperAdmin: boolean;
+  isRoot: boolean;
   deletedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -13,7 +13,7 @@ export interface AdminPublicRecord {
   id: string;
   username: string;
   isActive: boolean;
-  isSuperAdmin: boolean;
+  isRoot: boolean;
   roleIds: string[];
   createdAt: Date;
   updatedAt: Date;

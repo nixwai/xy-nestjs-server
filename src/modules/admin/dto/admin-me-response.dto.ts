@@ -8,6 +8,8 @@ export class AdminMenuItemResponseDto {
   @ApiProperty({ type: String }) path!: string;
   @ApiProperty({ type: String, required: false }) icon?: string;
   @ApiProperty({ type: Number }) order!: number;
+  @ApiProperty({ type: String, nullable: true, description: '菜单所需权限编码。' })
+  permissionCode!: string | null;
   @ApiProperty({ type: () => [AdminMenuItemResponseDto], required: false })
   children?: AdminMenuItemResponseDto[];
 }

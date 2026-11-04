@@ -36,7 +36,7 @@ export class AuditLogResponseDto {
     additionalProperties: true,
     nullable: true,
     description: '结构化变更摘要。没有摘要时为 null。',
-    example: { isSuperAdmin: false }
+    example: { isRoot: false }
   })
   details!: Record<string, unknown> | null;
 

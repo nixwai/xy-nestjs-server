@@ -7,7 +7,9 @@ export interface MenuRepository {
   create(input: Omit<MenuRecord, 'id' | 'deletedAt'>): Promise<MenuRecord>;
   update(
     id: string,
-    input: Partial<Pick<MenuRecord, 'parentId' | 'title' | 'path' | 'icon' | 'order' | 'permissionCode' | 'isActive'>>
+    input: Partial<
+      Pick<MenuRecord, 'parentId' | 'title' | 'path' | 'icon' | 'order' | 'permissionCode' | 'isRootOnly' | 'isActive'>
+    >
   ): Promise<MenuRecord>;
   softDelete(id: string): Promise<void>;
   upsertSeed(input: Omit<MenuRecord, 'id' | 'deletedAt'>): Promise<MenuRecord>;

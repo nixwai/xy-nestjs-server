@@ -26,7 +26,7 @@ describe('RBAC management API (e2e)', () => {
       username: 'root',
       passwordHash: root.hash,
       passwordSalt: root.salt,
-      isSuperAdmin: true
+      isRoot: true
     });
     const operator = await hashPassword('Operator1234');
     await repository.create({
@@ -45,7 +45,7 @@ describe('RBAC management API (e2e)', () => {
       .expect(200);
     return response.body.data.accessToken as string;
   }
-  it('allows super administrators to access RBAC management and protects account changes with password verification', async () => {
+  it('allows root administrators to access RBAC management and protects account changes with password verification', async () => {
     const token = await login('root', 'Root1234');
     const firstAdminPage = await request(app.getHttpServer())
       .get('/api/admin/list?page=1&pageSize=1')
@@ -133,7 +133,7 @@ describe('RBAC management API (e2e)', () => {
       .send({ id: menuId })
       .expect(200);
   });
-  it('returns super administrator menus and supports password reset', async () => {
+  it('returns root administrator menus and supports password reset', async () => {
     const token = await login('root', 'Root1234');
     const own = await request(app.getHttpServer())
       .get('/api/admin/me')

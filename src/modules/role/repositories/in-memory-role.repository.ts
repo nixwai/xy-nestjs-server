@@ -52,6 +52,8 @@ export class InMemoryRoleRepository implements RoleRepository {
       name: input.name,
       description: input.description ?? null,
       isActive: true,
+      isSystem: false,
+      isProtected: false,
       deletedAt: null,
       permissionIds: []
     };

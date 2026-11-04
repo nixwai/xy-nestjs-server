@@ -12,8 +12,8 @@ export class AdminIdentityResponseDto {
   })
   username!: string;
 
-  @ApiProperty({ type: Boolean, description: '是否为超级管理员。' })
-  isSuperAdmin!: boolean;
+  @ApiProperty({ type: Boolean, description: '是否为根管理员。' })
+  isRoot!: boolean;
 
   @ApiProperty({
     type: String,

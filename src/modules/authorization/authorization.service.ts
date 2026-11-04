@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { DomainNotFoundError } from '#/common/errors/index.js';
-import type { HttpMethod, PermissionResource } from './enums/index.js';
 import { AdminService } from '../admin/admin.service.js';
 import { RoleService } from '../role/role.service.js';
 import { PermissionService } from '../permission/permission.service.js';
@@ -24,13 +23,15 @@ export class AuthorizationService {
     const roleIds = await this.adminService.listAdminRoleIds(adminId);
     const roles = await this.roleService.findByIds(roleIds);
     const permissionIds = [...new Set(roles.flatMap(role => role.permissionIds))];
-    const permissions = await this.permissionService.findByIds(permissionIds);
+    const permissions = (await this.permissionService.findByIds(permissionIds)).filter(
+      permission => admin.isRoot || (permission.isAssignable && !permission.isProtected)
+    );
     return {
       admin: {
         id: admin.id,
         username: admin.username,
         isActive: admin.isActive,
-        isSuperAdmin: admin.isSuperAdmin,
+        isRoot: admin.isRoot,
         roleIds,
         createdAt: admin.createdAt,
         updatedAt: admin.updatedAt
@@ -40,18 +41,16 @@ export class AuthorizationService {
     };
   }
 
-  /** 判断管理员是否拥有指定权限。 */
-  async hasPermission(adminId: string, resource: PermissionResource, method: HttpMethod): Promise<boolean> {
+  /** 判断管理员是否拥有指定的动态权限。 */
+  async hasPermission(adminId: string, permissionCode: string): Promise<boolean> {
     const admin = await this.adminService.findById(adminId);
     if (!admin || !admin.isActive) {
       return false;
     }
-    if (admin.isSuperAdmin) {
+    if (admin.isRoot) {
       return true;
     }
     const authorization = await this.getAuthorization(adminId);
-    return authorization.permissions.some(
-      item => item.isActive && item.resource === resource && item.method === method
-    );
+    return authorization.permissions.some(item => item.isActive && item.code === permissionCode);
   }
 }

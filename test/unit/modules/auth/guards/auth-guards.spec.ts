@@ -68,7 +68,7 @@ describe('JwtAuthGuard', () => {
     } as unknown as ExecutionContext;
 
     await expect(guard.canActivate(context)).resolves.toBe(true);
-    expect(request.user).toMatchObject({ sub: '1', isSuperAdmin: true });
+    expect(request.user).toMatchObject({ sub: '1', isRoot: true });
   });
 });
 

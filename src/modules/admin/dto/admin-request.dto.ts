@@ -10,7 +10,7 @@ const idValidation = createValidationMessages('ID');
 const adminIdValidation = createValidationMessages('管理员 ID');
 const roleIdValidation = createValidationMessages('角色 ID');
 const isActiveValidation = createValidationMessages('启用状态');
-const isSuperAdminValidation = createValidationMessages('超级管理员标识');
+const isRootValidation = createValidationMessages('根管理员标识');
 
 /** 管理员列表分页查询参数。 */
 export class AdminListQueryDto extends PageQueryDto {}
@@ -47,17 +47,17 @@ export class AdminCreateRequestDto {
     type: Boolean,
     default: false,
     example: false,
-    description: '是否创建为超级管理员。'
+    description: '是否创建为根管理员。'
   })
   @IsOptional()
-  @IsBoolean({ message: isSuperAdminValidation.isBoolean })
-  isSuperAdmin?: boolean;
+  @IsBoolean({ message: isRootValidation.isBoolean })
+  isRoot?: boolean;
 
   @ApiPropertyOptional({
     type: String,
     maxLength: 512,
     example: 'Base64-RSA-OAEP-SHA256-ciphertext',
-    description: '创建超级管理员时必填的 Base64 RSA-OAEP-SHA256 当前密码密文。'
+    description: '创建根管理员时必填的 Base64 RSA-OAEP-SHA256 当前密码密文。'
   })
   @IsOptional()
   @IsString({ message: currentPasswordValidation.isString })
@@ -111,17 +111,17 @@ export class AdminUpdateRequestDto {
   @ApiPropertyOptional({
     type: Boolean,
     example: false,
-    description: '是否设置为超级管理员。'
+    description: '是否设置为根管理员。'
   })
   @IsOptional()
-  @IsBoolean({ message: isSuperAdminValidation.isBoolean })
-  isSuperAdmin?: boolean;
+  @IsBoolean({ message: isRootValidation.isBoolean })
+  isRoot?: boolean;
 
   @ApiPropertyOptional({
     type: String,
     maxLength: 512,
     example: 'Base64-RSA-OAEP-SHA256-ciphertext',
-    description: '修改密码或超级管理员状态时必填的 Base64 RSA-OAEP-SHA256 当前密码密文。'
+    description: '修改密码或根管理员状态时必填的 Base64 RSA-OAEP-SHA256 当前密码密文。'
   })
   @IsOptional()
   @IsString({ message: currentPasswordValidation.isString })

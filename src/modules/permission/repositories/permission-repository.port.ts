@@ -8,6 +8,7 @@ export interface PermissionRepository {
   list(): Promise<PermissionRecord[]>;
   findById(id: string): Promise<PermissionRecord | null>;
   findByIds(ids: string[]): Promise<PermissionRecord[]>;
+  findByCode(code: string): Promise<PermissionRecord | null>;
   upsertRegistered(input: RegisteredPermission): Promise<PermissionRecord>;
   setActive(id: string, isActive: boolean): Promise<PermissionRecord>;
 }

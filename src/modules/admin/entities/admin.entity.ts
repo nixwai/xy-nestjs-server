@@ -39,8 +39,8 @@ export class AdminEntity {
   isActive!: boolean;
 
   /** 是否拥有系统全部权限。 */
-  @Column({ type: 'tinyint', unsigned: true, default: 0 })
-  isSuperAdmin!: boolean;
+  @Column({ name: 'is_root', type: 'tinyint', unsigned: true, default: 0 })
+  isRoot!: boolean;
 
   /** 软删除时间。 */
   @DeleteDateColumn({ name: 'deleted_at', type: 'datetime', nullable: true })

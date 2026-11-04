@@ -28,7 +28,7 @@ export class JwtAuthGuard implements CanActivate {
     }
     const payload = this.jwtTokenService.verifyAccessToken(authorization.slice(7).trim());
     const admin = await this.authService.findActiveAdmin(payload.sub);
-    request.user = { ...payload, isSuperAdmin: admin.isSuperAdmin };
+    request.user = { ...payload, isRoot: admin.isRoot };
     return true;
   }
 }

@@ -17,11 +17,13 @@ export class TypeOrmMenuRepository implements MenuRepository {
     return item ? this.toRecord(item) : null;
   }
   async create(input: Omit<MenuRecord, 'id' | 'deletedAt'>) {
-    return this.toRecord(await this.menus.save(this.menus.create(input)));
+    return this.toRecord(await this.menus.save(this.menus.create({ ...input, isRootOnly: input.isRootOnly ?? false })));
   }
   async update(
     id: string,
-    input: Partial<Pick<MenuRecord, 'parentId' | 'title' | 'path' | 'icon' | 'order' | 'permissionCode' | 'isActive'>>
+    input: Partial<
+      Pick<MenuRecord, 'parentId' | 'title' | 'path' | 'icon' | 'order' | 'permissionCode' | 'isRootOnly' | 'isActive'>
+    >
   ) {
     const item = await this.menus.findOne({ where: { id } });
     if (!item) throw new DomainNotFoundError('菜单');
@@ -47,6 +49,7 @@ export class TypeOrmMenuRepository implements MenuRepository {
       icon: item.icon,
       order: item.order,
       permissionCode: item.permissionCode,
+      isRootOnly: item.isRootOnly,
       isActive: item.isActive,
       deletedAt: item.deletedAt
     };

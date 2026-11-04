@@ -1,30 +1,17 @@
 import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import type { HttpMethod, PermissionResource } from '#/modules/authorization/enums/index.js';
 
-/** 代码注册的权限目录。 */
+/** 动态权限目录记录。 */
 @Entity({ name: 'permission' })
 @Index('uk_permission_code', ['code'], { unique: true })
-@Index('idx_permission_resource_method', ['resource', 'method'])
+@Index('idx_permission_category_active', ['category', 'isActive'])
 export class PermissionEntity {
   /** 权限主键。 */
-  @PrimaryGeneratedColumn({
-    type: 'bigint',
-    unsigned: true,
-    primaryKeyConstraintName: 'pk_permission_id'
-  })
+  @PrimaryGeneratedColumn({ type: 'bigint', unsigned: true, primaryKeyConstraintName: 'pk_permission_id' })
   id!: string;
 
-  /** 权限唯一编码。 */
+  /** 业务权限编码。 */
   @Column({ type: 'varchar', length: 128 })
   code!: string;
-
-  /** 资源编码。 */
-  @Column({ type: 'varchar', length: 64 })
-  resource!: PermissionResource;
-
-  /** HTTP 方法。 */
-  @Column({ type: 'varchar', length: 16 })
-  method!: HttpMethod;
 
   /** 权限名称。 */
   @Column({ type: 'varchar', length: 128 })
@@ -33,6 +20,18 @@ export class PermissionEntity {
   /** 权限描述。 */
   @Column({ type: 'varchar', length: 255, nullable: true })
   description!: string | null;
+
+  /** 权限分类。 */
+  @Column({ type: 'varchar', length: 64 })
+  category!: string;
+
+  /** 是否允许绑定给普通角色。 */
+  @Column({ name: 'is_assignable', type: 'tinyint', unsigned: true, default: 1 })
+  isAssignable!: boolean;
+
+  /** 是否属于受保护权限。 */
+  @Column({ name: 'is_protected', type: 'tinyint', unsigned: true, default: 0 })
+  isProtected!: boolean;
 
   /** 是否启用。 */
   @Column({ type: 'tinyint', unsigned: true, default: 1 })

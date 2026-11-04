@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ROLE_REPOSITORY } from './repositories/role-repository.port.js';
 import type { RoleRepository } from './repositories/role-repository.port.js';
 import { PermissionService } from '../permission/permission.service.js';
@@ -82,8 +82,12 @@ export class RoleService {
     if (!(await this.findById(roleId))) {
       throw new NotFoundException('角色不存在');
     }
-    if (!(await this.permissionService.findById(permissionId))) {
+    const permission = await this.permissionService.findById(permissionId);
+    if (!permission) {
       throw new NotFoundException('权限不存在');
+    }
+    if (!permission.isActive || !permission.isAssignable || permission.isProtected) {
+      throw new ForbiddenException('该权限不可绑定给普通角色');
     }
     await this.repository.bindPermission(roleId, permissionId);
     await this.auditService.record({
@@ -100,7 +104,8 @@ export class RoleService {
     if (!(await this.findById(roleId))) {
       throw new NotFoundException('角色不存在');
     }
-    if (!(await this.permissionService.findById(permissionId))) {
+    const permission = await this.permissionService.findById(permissionId);
+    if (!permission) {
       throw new NotFoundException('权限不存在');
     }
     await this.repository.unbindPermission(roleId, permissionId);

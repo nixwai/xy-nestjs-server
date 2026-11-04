@@ -7,12 +7,12 @@ export type AdminCreateInput = {
   username: string;
   passwordHash: string;
   passwordSalt: string;
-  isSuperAdmin?: boolean;
+  isRoot?: boolean;
 };
 
 /** 管理员更新输入。 */
 export type AdminUpdateInput = Partial<
-  Pick<AdminRecord, 'username' | 'isActive' | 'isSuperAdmin' | 'passwordHash' | 'passwordSalt'>
+  Pick<AdminRecord, 'username' | 'isActive' | 'isRoot' | 'passwordHash' | 'passwordSalt'>
 >;
 
 /** 管理员仓储注入令牌。 */
@@ -26,7 +26,7 @@ export interface AdminRepository {
   create(input: AdminCreateInput): Promise<AdminRecord>;
   update(id: string, input: AdminUpdateInput): Promise<AdminRecord>;
   softDelete(id: string): Promise<void>;
-  countActiveSuperAdmins(): Promise<number>;
+  countActiveRoots(): Promise<number>;
   listRoleIds(adminId: string): Promise<string[]>;
   listRoleIdsByAdminIds(adminIds: string[]): Promise<Map<string, string[]>>;
   bindRole(adminId: string, roleId: string): Promise<void>;

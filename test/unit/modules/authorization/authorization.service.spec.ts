@@ -3,14 +3,13 @@ import { AuthorizationService } from '#/modules/authorization/authorization.serv
 import type { AdminService } from '#/modules/admin/admin.service.js';
 import type { RoleService } from '#/modules/role/role.service.js';
 import type { PermissionService } from '#/modules/permission/permission.service.js';
-import { HttpMethod, PermissionResource } from '#/modules/authorization/enums/index.js';
 import { DomainNotFoundError } from '#/common/errors/index.js';
 
 const admin = {
   id: 'admin-1',
   username: 'admin',
   isActive: true,
-  isSuperAdmin: false,
+  isRoot: false,
   roleIds: ['role-1'],
   createdAt: new Date('2026-01-01'),
   updatedAt: new Date('2026-01-01')
@@ -26,9 +25,10 @@ const role = {
 };
 const permission = {
   id: 'permission-1',
-  code: 'role:get',
-  resource: PermissionResource.ROLE,
-  method: HttpMethod.GET,
+  code: 'role.read',
+  category: '角色',
+  isAssignable: true,
+  isProtected: false,
   name: '查询角色',
   description: null,
   isActive: true
@@ -85,27 +85,21 @@ describe('AuthorizationService', () => {
     await expect(service.getAuthorization('missing')).rejects.toBeInstanceOf(DomainNotFoundError);
   });
 
-  it('应处理无效、超级管理员和普通权限判断', async () => {
+  it('应处理无效、根管理员和普通权限判断', async () => {
     const invalid = createService({
       adminService: { findById: vi.fn().mockResolvedValue(null) }
     });
-    await expect(invalid.service.hasPermission('missing', PermissionResource.ROLE, HttpMethod.GET)).resolves.toBe(
-      false
-    );
+    await expect(invalid.service.hasPermission('missing', 'role.read')).resolves.toBe(false);
 
     const superAdmin = createService({
       adminService: {
-        findById: vi.fn().mockResolvedValue({ ...admin, isSuperAdmin: true })
+        findById: vi.fn().mockResolvedValue({ ...admin, isRoot: true })
       }
     });
-    await expect(superAdmin.service.hasPermission('admin-1', PermissionResource.ROLE, HttpMethod.GET)).resolves.toBe(
-      true
-    );
+    await expect(superAdmin.service.hasPermission('admin-1', 'role.read')).resolves.toBe(true);
 
     const normal = createService();
-    await expect(normal.service.hasPermission('admin-1', PermissionResource.ROLE, HttpMethod.GET)).resolves.toBe(true);
-    await expect(normal.service.hasPermission('admin-1', PermissionResource.ADMIN, HttpMethod.POST)).resolves.toBe(
-      false
-    );
+    await expect(normal.service.hasPermission('admin-1', 'role.read')).resolves.toBe(true);
+    await expect(normal.service.hasPermission('admin-1', 'admin.account.create')).resolves.toBe(false);
   });
 });

@@ -28,7 +28,7 @@ export class CreateAdminAuthTables2026103000001 implements MigrationInterface {
           { name: 'password_salt', type: 'varchar', length: '32' },
           { name: 'is_active', type: 'tinyint', unsigned: true, default: '1' },
           {
-            name: 'is_super_admin',
+            name: 'is_root',
             type: 'tinyint',
             unsigned: true,
             default: '0'
@@ -86,6 +86,8 @@ export class CreateAdminAuthTables2026103000001 implements MigrationInterface {
             isNullable: true
           },
           { name: 'is_active', type: 'tinyint', unsigned: true, default: '1' },
+          { name: 'is_system', type: 'tinyint', unsigned: true, default: '0' },
+          { name: 'is_protected', type: 'tinyint', unsigned: true, default: '0' },
           { name: 'deleted_at', type: 'datetime', isNullable: true },
           {
             name: 'gmt_create',
@@ -131,8 +133,9 @@ export class CreateAdminAuthTables2026103000001 implements MigrationInterface {
             primaryKeyConstraintName: 'pk_permission_id'
           },
           { name: 'code', type: 'varchar', length: '128' },
-          { name: 'resource', type: 'varchar', length: '64' },
-          { name: 'method', type: 'varchar', length: '16' },
+          { name: 'category', type: 'varchar', length: '64' },
+          { name: 'is_assignable', type: 'tinyint', unsigned: true, default: '1' },
+          { name: 'is_protected', type: 'tinyint', unsigned: true, default: '0' },
           { name: 'name', type: 'varchar', length: '128' },
           {
             name: 'description',
@@ -166,8 +169,8 @@ export class CreateAdminAuthTables2026103000001 implements MigrationInterface {
     await queryRunner.createIndex(
       'permission',
       new TableIndex({
-        name: 'idx_permission_resource_method',
-        columnNames: ['resource', 'method']
+        name: 'idx_permission_category_active',
+        columnNames: ['category', 'is_active']
       })
     );
 

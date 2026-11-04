@@ -16,7 +16,7 @@ function admin(overrides: Partial<AdminRecord> = {}): AdminRecord {
     passwordHash: 'hash',
     passwordSalt: 'salt',
     isActive: true,
-    isSuperAdmin: true,
+    isRoot: true,
     deletedAt: null,
     createdAt: now,
     updatedAt: now,
@@ -49,7 +49,7 @@ function createService(
     }),
     listRoleIds: vi.fn().mockResolvedValue([]),
     listRoleIdsByAdminIds: vi.fn().mockResolvedValue(new Map([['1', []]])),
-    countActiveSuperAdmins: vi.fn().mockResolvedValue(2),
+    countActiveRoots: vi.fn().mockResolvedValue(2),
     create: vi.fn().mockResolvedValue(admin()),
     update: vi.fn().mockResolvedValue(admin()),
     softDelete: vi.fn().mockResolvedValue(undefined),
@@ -130,7 +130,7 @@ describe('AdminService', () => {
     const created = admin({
       id: '2',
       username: 'operator',
-      isSuperAdmin: false
+      isRoot: false
     });
     const { service, repository, auditService } = createService({
       repository: {
@@ -145,7 +145,7 @@ describe('AdminService', () => {
     const result = await service.createAdmin('1', {
       username: 'operator',
       password: 'Admin1234',
-      isSuperAdmin: false
+      isRoot: false
     });
 
     expect(result).toMatchObject({ id: '2', roleIds: ['role-1'] });
@@ -155,19 +155,19 @@ describe('AdminService', () => {
     );
   });
 
-  it('创建超级管理员缺少当前密码时应拒绝', async () => {
+  it('创建根管理员缺少当前密码时应拒绝', async () => {
     const { service } = createService();
 
     await expect(
       service.createAdmin('1', {
         username: 'root-2',
         password: 'Admin1234',
-        isSuperAdmin: true
+        isRoot: true
       })
     ).rejects.toBeInstanceOf(BadRequestException);
   });
 
-  it('创建超级管理员当前密码错误时应拒绝', async () => {
+  it('创建根管理员当前密码错误时应拒绝', async () => {
     const password = await hashPassword('Admin1234');
     const { service } = createService({
       repository: {
@@ -180,7 +180,7 @@ describe('AdminService', () => {
         username: 'root-2',
         password: 'Admin1234',
         currentPassword: 'Wrong1234',
-        isSuperAdmin: true
+        isRoot: true
       })
     ).rejects.toThrow('当前密码错误');
   });

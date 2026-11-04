@@ -5,16 +5,13 @@ import { AdminEntity } from '../src/modules/admin/entities/admin.entity.js';
 import { AdminRoleAssignmentEntity } from '../src/modules/admin/entities/admin-role-assignment.entity.js';
 import { PermissionEntity } from '../src/modules/permission/entities/permission.entity.js';
 import { RoleEntity } from '../src/modules/role/entities/role.entity.js';
-import { RolePermissionAssignmentEntity } from '../src/modules/role/entities/role-permission-assignment.entity.js';
 import { hashPassword } from '../src/modules/auth/utils/password.util.js';
 import { REGISTERED_PERMISSIONS } from '../src/modules/permission/constants/registered-permissions.constant.js';
-import { createPermissionCode } from '../src/modules/authorization/utils/permission-code.util.js';
-import { HttpMethod, PermissionResource } from '../src/modules/authorization/enums/index.js';
 
 const USERNAME_PATTERN = /^[A-Za-z0-9._-]{3,64}$/;
 const PASSWORD_PATTERN = /^(?=.*[A-Za-z])(?=.*\d).{8,72}$/;
 
-/** 幂等初始化超级管理员、默认角色和权限目录。 */
+/** 幂等初始化根管理员、默认角色和权限目录。 */
 async function main(): Promise<void> {
   const readline = createInterface({ input, output });
   try {
@@ -32,7 +29,7 @@ async function main(): Promise<void> {
     }
     await dataSource.initialize();
     await dataSource.transaction(async manager => {
-      const permissions = await Promise.all(
+      await Promise.all(
         REGISTERED_PERMISSIONS.map(async input => {
           const repository = manager.getRepository(PermissionEntity);
           const existing = await repository.findOne({
@@ -51,30 +48,20 @@ async function main(): Promise<void> {
             code: 'operator',
             name: '普通管理员',
             description: '默认普通管理员角色',
-            isActive: true
+            isActive: true,
+            isSystem: true,
+            isProtected: true
           })
         );
-      }
-      const selfPermission = permissions.find(
-        item => item.code === createPermissionCode(PermissionResource.ADMIN_SELF, HttpMethod.GET)
-      );
-      if (selfPermission) {
-        const relationRepository = manager.getRepository(RolePermissionAssignmentEntity);
-        const exists = await relationRepository.findOne({
-          where: { roleId: role.id, permissionId: selfPermission.id }
-        });
-        if (!exists) {
-          await relationRepository.save(
-            relationRepository.create({
-              roleId: role.id,
-              permissionId: selfPermission.id
-            })
-          );
-        }
+      } else {
+        role.isActive = true;
+        role.isSystem = true;
+        role.isProtected = true;
+        role = await roleRepository.save(role);
       }
       const adminRepository = manager.getRepository(AdminEntity);
       const existingAdmins = await adminRepository.find({
-        where: { isSuperAdmin: false }
+        where: { isRoot: false }
       });
       const adminRoleRepository = manager.getRepository(AdminRoleAssignmentEntity);
       for (const admin of existingAdmins) {
@@ -93,9 +80,9 @@ async function main(): Promise<void> {
         existing.passwordHash = hash;
         existing.passwordSalt = salt;
         existing.isActive = true;
-        existing.isSuperAdmin = true;
+        existing.isRoot = true;
         await adminRepository.save(existing);
-        console.log(`超级管理员 ${username} 已更新`);
+        console.log(`根管理员 ${username} 已更新`);
       } else {
         await adminRepository.save(
           adminRepository.create({
@@ -103,10 +90,10 @@ async function main(): Promise<void> {
             passwordHash: hash,
             passwordSalt: salt,
             isActive: true,
-            isSuperAdmin: true
+            isRoot: true
           })
         );
-        console.log(`超级管理员 ${username} 创建成功`);
+        console.log(`根管理员 ${username} 创建成功`);
       }
     });
   } finally {

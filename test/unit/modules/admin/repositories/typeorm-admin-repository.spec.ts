@@ -8,7 +8,7 @@ function createEntity(overrides: Record<string, unknown> = {}) {
     passwordHash: 'hash',
     passwordSalt: 'salt',
     isActive: true,
-    isSuperAdmin: true,
+    isRoot: true,
     deletedAt: null,
     createdAt: new Date('2026-01-01'),
     updatedAt: new Date('2026-01-01'),
@@ -121,10 +121,10 @@ describe('TypeOrmAdminRepository', () => {
     await expect(repository.findById('missing')).resolves.toBeNull();
   });
 
-  it('应处理超级管理员统计、角色关系和空查询', async () => {
+  it('应处理根管理员统计、角色关系和空查询', async () => {
     const { repository, adminRepository, roleRepository } = createRepository();
 
-    await expect(repository.countActiveSuperAdmins()).resolves.toBe(2);
+    await expect(repository.countActiveRoots()).resolves.toBe(2);
     await expect(repository.listRoleIds('1')).resolves.toEqual(['role-1']);
     await expect(repository.listRoleIdsByAdminIds([])).resolves.toEqual(new Map());
     await expect(repository.listRoleIdsByAdminIds(['1'])).resolves.toEqual(new Map([['1', ['role-1']]]));

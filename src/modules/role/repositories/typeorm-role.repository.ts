@@ -70,6 +70,8 @@ export class TypeOrmRoleRepository implements RoleRepository {
           ...input,
           description: input.description ?? null,
           isActive: true,
+          isSystem: false,
+          isProtected: false,
           deletedAt: null
         })
       );
@@ -153,6 +155,8 @@ export class TypeOrmRoleRepository implements RoleRepository {
       name: item.name,
       description: item.description,
       isActive: item.isActive,
+      isSystem: item.isSystem,
+      isProtected: item.isProtected,
       deletedAt: item.deletedAt,
       permissionIds: [...permissionIds]
     };

@@ -16,7 +16,7 @@ export class AdminResponseDto {
     description: '是否拥有系统全部权限。',
     example: true
   })
-  isSuperAdmin!: boolean;
+  isRoot!: boolean;
 
   @ApiProperty({
     type: [String],

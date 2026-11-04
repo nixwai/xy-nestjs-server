@@ -1,11 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { createPermissionCode } from '#/modules/authorization/utils/permission-code.util.js';
 import { REGISTERED_PERMISSIONS } from '#/modules/permission/constants/registered-permissions.constant.js';
 
+const permissionCodePattern = /^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9-]*)+$/;
+
 describe('REGISTERED_PERMISSIONS', () => {
-  it('uses the canonical permission code for every registered permission', () => {
+  it('uses stable business permission codes and explicit assignment boundaries', () => {
     for (const permission of REGISTERED_PERMISSIONS) {
-      expect(permission.code).toBe(createPermissionCode(permission.resource, permission.method));
+      expect(permission.code).toMatch(permissionCodePattern);
+      expect(permission.category).toBeTruthy();
+      expect(typeof permission.isAssignable).toBe('boolean');
+      expect(typeof permission.isProtected).toBe('boolean');
     }
   });
 });

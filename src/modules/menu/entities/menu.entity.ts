@@ -19,6 +19,10 @@ export class MenuEntity {
   @Column({ type: 'varchar', length: 128, nullable: true }) icon!: string | null;
   @Column({ type: 'int', default: 0 }) order!: number;
   @Column({ name: 'permission_code', type: 'varchar', length: 128, nullable: true }) permissionCode!: string | null;
+
+  /** 是否仅根管理员可见。 */
+  @Column({ name: 'is_root_only', type: 'tinyint', unsigned: true, default: 0 })
+  isRootOnly!: boolean;
   @Column({ name: 'is_active', type: 'tinyint', unsigned: true, default: 1 }) isActive!: boolean;
   @DeleteDateColumn({ name: 'deleted_at', type: 'datetime', nullable: true }) deletedAt!: Date | null;
   @CreateDateColumn({ name: 'gmt_create', type: 'datetime' }) createdAt!: Date;

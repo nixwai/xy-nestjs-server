@@ -4,8 +4,9 @@ import { InMemoryRoleRepository } from '#/modules/role/repositories/in-memory-ro
 
 const permission = {
   code: 'admin:get',
-  resource: 'admin' as never,
-  method: 'GET' as never,
+  category: '管理员',
+  isAssignable: false,
+  isProtected: true,
   name: '读取管理员',
   description: null,
   isActive: true
