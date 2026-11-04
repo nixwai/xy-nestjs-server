@@ -24,7 +24,7 @@ export class AuthorizationService {
     const roles = await this.roleService.findByIds(roleIds);
     const permissionIds = [...new Set(roles.flatMap(role => role.permissionIds))];
     const permissions = (await this.permissionService.findByIds(permissionIds)).filter(
-      permission => admin.isRoot || (permission.isAssignable && !permission.isProtected)
+      permission => permission.isActive && (admin.isRoot || (permission.isAssignable && !permission.isProtected))
     );
     return {
       admin: {

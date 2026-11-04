@@ -22,7 +22,7 @@ function createService() {
     findById: vi.fn().mockResolvedValue(permission),
     findByCode: vi.fn().mockResolvedValue(permission),
     findByIds: vi.fn().mockResolvedValue([permission]),
-    upsertRegistered: vi.fn().mockResolvedValue(permission),
+    ensureRegistered: vi.fn().mockResolvedValue(permission),
     setActive: vi.fn().mockResolvedValue({ ...permission, isActive: false })
   };
   const auditService: Partial<AuditService> = { record: vi.fn().mockResolvedValue(undefined) };
@@ -37,7 +37,7 @@ describe('PermissionService', () => {
   it('应在模块初始化时同步注册权限', async () => {
     const { service, repository } = createService();
     await service.initializeDefaults();
-    expect(repository.upsertRegistered).toHaveBeenCalledTimes(REGISTERED_PERMISSIONS.length);
+    expect(repository.ensureRegistered).toHaveBeenCalledTimes(REGISTERED_PERMISSIONS.length);
   });
 
   it('应透传动态权限查询和注册操作', async () => {
@@ -46,7 +46,7 @@ describe('PermissionService', () => {
     await expect(service.findById('permission-1')).resolves.toEqual(permission);
     await expect(service.findByCode('booking.read')).resolves.toEqual(permission);
     await expect(service.findByIds(['permission-1'])).resolves.toEqual([permission]);
-    await expect(service.upsertRegistered(permission)).resolves.toEqual(permission);
+    await expect(service.ensureRegistered(permission)).resolves.toEqual(permission);
   });
 
   it('修改权限状态时应记录审计', async () => {

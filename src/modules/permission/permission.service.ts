@@ -22,7 +22,7 @@ export class PermissionService implements OnModuleInit {
   /** 同步代码注册的权限。 */
   async initializeDefaults(): Promise<void> {
     for (const permission of REGISTERED_PERMISSIONS) {
-      await this.repository.upsertRegistered(permission);
+      await this.repository.ensureRegistered(permission);
     }
   }
 
@@ -52,9 +52,9 @@ export class PermissionService implements OnModuleInit {
     return this.repository.findByIds(ids);
   }
 
-  /** 写入代码注册权限。 */
-  upsertRegistered(input: RegisteredPermission): Promise<PermissionRecord> {
-    return this.repository.upsertRegistered(input);
+  /** 确保代码注册的权限存在并同步其静态定义。 */
+  ensureRegistered(input: RegisteredPermission): Promise<PermissionRecord> {
+    return this.repository.ensureRegistered(input);
   }
 
   /** 修改权限启用状态。 */

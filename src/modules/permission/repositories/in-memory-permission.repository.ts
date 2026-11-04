@@ -30,10 +30,19 @@ export class InMemoryPermissionRepository implements PermissionRepository {
     return item ? { ...item } : null;
   }
 
-  async upsertRegistered(input: RegisteredPermission): Promise<PermissionRecord> {
+  async ensureRegistered(input: RegisteredPermission): Promise<PermissionRecord> {
     const existing = [...this.permissions.values()].find(item => item.code === input.code);
     if (existing) {
-      const updated = { ...existing, ...input };
+      const updated = {
+        ...existing,
+        code: input.code,
+        name: input.name,
+        description: input.description,
+        category: input.category,
+        isAssignable: input.isAssignable,
+        isProtected: input.isProtected,
+        isActive: existing.isActive
+      };
       this.permissions.set(existing.id, updated);
       return { ...updated };
     }

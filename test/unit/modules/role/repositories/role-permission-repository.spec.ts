@@ -56,10 +56,22 @@ describe('InMemory role and permission repositories', () => {
     expect(result.hasNextPage).toBe(false);
   });
 
+  it('注册已有权限时应保留数据库中的启用状态', async () => {
+    const permissions = new InMemoryPermissionRepository();
+    const storedPermission = await permissions.ensureRegistered(permission);
+
+    await permissions.setActive(storedPermission.id, false);
+
+    await expect(permissions.ensureRegistered(permission)).resolves.toMatchObject({
+      id: storedPermission.id,
+      isActive: false
+    });
+  });
+
   it('finds roles and permissions by IDs without exposing mutable arrays', async () => {
     const roles = new InMemoryRoleRepository();
     const permissions = new InMemoryPermissionRepository();
-    const storedPermission = await permissions.upsertRegistered(permission);
+    const storedPermission = await permissions.ensureRegistered(permission);
     const role = await roles.create({ code: 'operator', name: '普通管理员' });
     await roles.bindPermission(role.id, storedPermission.id);
 

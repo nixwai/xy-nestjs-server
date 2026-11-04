@@ -40,9 +40,21 @@ export class TypeOrmPermissionRepository implements PermissionRepository {
     return item ? this.toRecord(item) : null;
   }
 
-  async upsertRegistered(input: RegisteredPermission): Promise<PermissionRecord> {
+  async ensureRegistered(input: RegisteredPermission): Promise<PermissionRecord> {
     const existing = await this.permissions.findOne({ where: { code: input.code } });
-    const item = existing ? this.permissions.merge(existing, input) : this.permissions.create(input);
+    if (!existing) {
+      return this.toRecord(await this.permissions.save(this.permissions.create(input)));
+    }
+
+    const definition = {
+      code: input.code,
+      name: input.name,
+      description: input.description,
+      category: input.category,
+      isAssignable: input.isAssignable,
+      isProtected: input.isProtected
+    };
+    const item = this.permissions.create({ id: existing.id, ...definition, isActive: existing.isActive });
     return this.toRecord(await this.permissions.save(item));
   }
 

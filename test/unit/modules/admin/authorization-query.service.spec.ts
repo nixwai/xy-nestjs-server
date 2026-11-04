@@ -16,14 +16,14 @@ function createService() {
     findByIds: vi.fn().mockResolvedValue([{ id: 'role-1', isActive: true, permissionIds: ['1'] }])
   };
   const permissions = {
-    findByIds: vi
-      .fn()
-      .mockResolvedValue([{ id: '1', code: 'booking.read', isActive: true, isAssignable: true, isProtected: false }]),
-    listPermissions: vi
-      .fn()
-      .mockResolvedValue([
-        { id: '2', code: 'admin.account.read', isActive: true, isAssignable: false, isProtected: true }
-      ])
+    findByIds: vi.fn().mockResolvedValue([
+      { id: '1', code: 'booking.read', isActive: true, isAssignable: true, isProtected: false },
+      { id: '4', code: 'booking.write', isActive: false, isAssignable: true, isProtected: false }
+    ]),
+    listPermissions: vi.fn().mockResolvedValue([
+      { id: '2', code: 'admin.account.read', isActive: true, isAssignable: false, isProtected: true },
+      { id: '5', code: 'admin.account.write', isActive: false, isAssignable: false, isProtected: true }
+    ])
   };
   const menus = {
     list: vi.fn().mockResolvedValue([

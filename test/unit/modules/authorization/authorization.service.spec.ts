@@ -77,6 +77,37 @@ describe('AuthorizationService', () => {
     });
   });
 
+  it('授权上下文不应包含停用权限', async () => {
+    const { service } = createService({
+      permissionService: {
+        findByIds: vi
+          .fn()
+          .mockResolvedValue([permission, { ...permission, id: 'permission-2', code: 'role.write', isActive: false }])
+      }
+    });
+
+    await expect(service.getAuthorization('admin-1')).resolves.toMatchObject({
+      permissions: [permission]
+    });
+  });
+
+  it('根管理员授权上下文不应包含停用权限', async () => {
+    const { service } = createService({
+      adminService: {
+        findById: vi.fn().mockResolvedValue({ ...admin, isRoot: true })
+      },
+      permissionService: {
+        findByIds: vi
+          .fn()
+          .mockResolvedValue([permission, { ...permission, id: 'permission-2', code: 'role.write', isActive: false }])
+      }
+    });
+
+    await expect(service.getAuthorization('admin-1')).resolves.toMatchObject({
+      permissions: [permission]
+    });
+  });
+
   it('管理员不存在时应抛出领域异常', async () => {
     const { service } = createService({
       adminService: { findById: vi.fn().mockResolvedValue(null) }

@@ -16,36 +16,6 @@ const DEFAULT_MENUS = [
     isRootOnly: false,
     isActive: true
   },
-  {
-    parentId: null,
-    title: '管理员管理',
-    path: '/admin',
-    icon: 'carbon:user-admin',
-    order: 2,
-    permissionCode: null,
-    isRootOnly: true,
-    isActive: true
-  },
-  {
-    parentId: null,
-    title: '权限管理',
-    path: '/permission',
-    icon: 'carbon:security',
-    order: 3,
-    permissionCode: null,
-    isRootOnly: true,
-    isActive: true
-  },
-  {
-    parentId: null,
-    title: '菜单管理',
-    path: '/menu',
-    icon: 'carbon:menu',
-    order: 4,
-    permissionCode: null,
-    isRootOnly: true,
-    isActive: true
-  }
 ] as const;
 @Injectable()
 export class MenuService implements OnModuleInit {
