@@ -34,12 +34,11 @@ export class InMemoryMenuRepository implements MenuRepository {
     if (!item) throw new DomainNotFoundError('菜单');
     this.items.set(id, { ...item, deletedAt: new Date(), isActive: false });
   }
-  async upsertSeed(input: Omit<MenuRecord, 'id' | 'deletedAt'>) {
+  /** 同路径菜单存在时原样返回，包含已软删除记录，避免重建或覆盖。 */
+  async ensureSeed(input: Omit<MenuRecord, 'id' | 'deletedAt'>) {
     const found = [...this.items.values()].find(item => item.path === input.path);
     if (found) {
-      const next = { ...found, ...input };
-      this.items.set(found.id, next);
-      return { ...next };
+      return { ...found };
     }
     return this.create(input);
   }

@@ -1,4 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
+import type { PermissionCode } from '../constants/index.js';
 
 /** 公开路由使用的元数据键。 */
 export const PUBLIC_ROUTE_KEY = 'publicRoute';
@@ -19,7 +20,7 @@ export const Public = () => SetMetadata(PUBLIC_ROUTE_KEY, true);
 export const Authenticated = () => SetMetadata(AUTHENTICATED_ROUTE_KEY, true);
 
 /** 声明路由所需的动态权限编码。 */
-export const RequirePermission = (permissionCode: string) => SetMetadata(PERMISSION_KEY, permissionCode);
+export const RequirePermission = (permissionCode: PermissionCode) => SetMetadata(PERMISSION_KEY, permissionCode);
 
 /** 标记路由仅允许根管理员访问。 */
 export const RootOnly = () => SetMetadata(ROOT_ONLY_KEY, true);

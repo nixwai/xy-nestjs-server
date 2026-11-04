@@ -4,7 +4,7 @@ import { ApiCommonResponses, ApiOkResponseData } from '#/common/decorators/index
 import { CurrentAdmin } from '../auth/decorators/index.js';
 import type { AdminJwtPayload } from '../auth/tokens/jwt-token.service.js';
 import { RootOnly } from '../authorization/decorators/index.js';
-import { PermissionListResponseDto, PermissionResponseDto, PermissionStatusRequestDto } from './dto/index.js';
+import { PermissionGroupListResponseDto, PermissionResponseDto, PermissionStatusRequestDto } from './dto/index.js';
 import { PermissionService } from './permission.service.js';
 
 /** 提供权限目录查询和启停管理接口。 */
@@ -19,26 +19,28 @@ export class PermissionController {
   @Get('list')
   @ApiOperation({
     summary: '查询权限目录',
-    description: '返回完整动态权限目录，包含受保护权限和停用权限。'
+    description: '按分类分组返回完整动态权限目录，包含受保护权限和停用权限。'
   })
-  @ApiOkResponseData(PermissionListResponseDto, {
-    description: '权限列表和总数。'
+  @ApiOkResponseData(PermissionGroupListResponseDto, {
+    description: '按分类分组的权限列表和权限总数。'
   })
   async list() {
-    const items = await this.permissionService.listPermissions();
-    return { items, total: items.length };
+    const groups = await this.permissionService.listPermissionGroups();
+    return { groups, total: countPermissions(groups) };
   }
 
   /** 查询可绑定给普通角色的权限目录。 */
   @Get('assignable-list')
   @ApiOperation({
     summary: '查询可分配权限',
-    description: '返回启用且允许绑定给普通角色的权限，不包含 RootOnly 或受保护权限。'
+    description: '按分类分组返回启用且允许绑定给普通角色的权限，不包含 RootOnly 或受保护权限。'
   })
-  @ApiOkResponseData(PermissionListResponseDto, { description: '可分配权限列表和总数。' })
+  @ApiOkResponseData(PermissionGroupListResponseDto, {
+    description: '按分类分组的可分配权限列表和权限总数。'
+  })
   async listAssignable() {
-    const items = await this.permissionService.listAssignablePermissions();
-    return { items, total: items.length };
+    const groups = await this.permissionService.listAssignablePermissionGroups();
+    return { groups, total: countPermissions(groups) };
   }
 
   /** 启用权限。 */
@@ -68,4 +70,9 @@ export class PermissionController {
   async disable(@CurrentAdmin() admin: AdminJwtPayload, @Body() body: PermissionStatusRequestDto) {
     return this.permissionService.setActive(admin.sub, body.id, false);
   }
+}
+
+/** 统计分组结果中的权限总数。 */
+function countPermissions(groups: { permissions: unknown[] }[]): number {
+  return groups.reduce((total, group) => total + group.permissions.length, 0);
 }

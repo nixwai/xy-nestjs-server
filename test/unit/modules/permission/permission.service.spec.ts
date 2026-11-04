@@ -7,10 +7,10 @@ import type { PermissionRecord } from '#/modules/authorization/types/permission.
 
 const permission: PermissionRecord = {
   id: 'permission-1',
-  code: 'booking.read',
-  name: '查看预约',
+  code: 'system.audit.read',
+  name: '查看审计',
   description: null,
-  category: '预约',
+  category: 'system',
   isAssignable: true,
   isProtected: false,
   isActive: true
@@ -44,9 +44,37 @@ describe('PermissionService', () => {
     const { service } = createService();
     await expect(service.listPermissions()).resolves.toEqual([permission]);
     await expect(service.findById('permission-1')).resolves.toEqual(permission);
-    await expect(service.findByCode('booking.read')).resolves.toEqual(permission);
+    await expect(service.findByCode('system.audit.read')).resolves.toEqual(permission);
     await expect(service.findByIds(['permission-1'])).resolves.toEqual([permission]);
     await expect(service.ensureRegistered(permission)).resolves.toEqual(permission);
+  });
+
+  it('应按分类声明顺序分组返回权限目录', async () => {
+    const { service, repository } = createService();
+    repository.list = vi
+      .fn()
+      .mockResolvedValue([{ ...permission, id: 'permission-9', code: 'legacy.read', category: 'legacy' }, permission]);
+
+    const groups = await service.listPermissionGroups();
+
+    expect(groups.map(group => group.category)).toEqual(['system', 'legacy']);
+    expect(groups[0]).toMatchObject({ categoryName: '系统管理', permissions: [permission] });
+    expect(groups[1]).toMatchObject({ categoryName: 'legacy' });
+  });
+
+  it('分组返回可分配权限时应排除停用和受保护权限', async () => {
+    const { service, repository } = createService();
+    repository.list = vi
+      .fn()
+      .mockResolvedValue([
+        permission,
+        { ...permission, id: 'permission-2', code: 'system.audit.export', isActive: false },
+        { ...permission, id: 'permission-3', code: 'system.audit.manage', isAssignable: false, isProtected: true }
+      ]);
+
+    await expect(service.listAssignablePermissionGroups()).resolves.toEqual([
+      { category: 'system', categoryName: '系统管理', permissions: [permission] }
+    ]);
   });
 
   it('修改权限状态时应记录审计', async () => {

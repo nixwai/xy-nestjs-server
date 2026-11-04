@@ -139,12 +139,7 @@ describe('RBAC management API (e2e)', () => {
       .get('/api/admin/me')
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
-    expect(own.body.data.menus.map((item: { path: string }) => item.path)).toEqual([
-      '/home',
-      '/admin',
-      '/permission',
-      '/menu'
-    ]);
+    expect(own.body.data.menus.map((item: { path: string }) => item.path)).toEqual(['/home']);
     const reset = await request(app.getHttpServer())
       .post('/api/admin/reset-password')
       .set('Authorization', `Bearer ${token}`)

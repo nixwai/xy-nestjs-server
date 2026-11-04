@@ -10,6 +10,7 @@ import {
   ROOT_ONLY_KEY,
   Authenticated
 } from '#/modules/authorization/decorators/index.js';
+import { PermissionCode } from '#/modules/authorization/constants/index.js';
 
 class TestController {}
 const publicRoute = (): void => undefined;
@@ -20,7 +21,7 @@ Object.defineProperty(TestController.prototype, 'authenticatedRoute', { value: a
 Object.defineProperty(TestController.prototype, 'protectedRoute', { value: protectedRoute });
 Public()(TestController.prototype, 'publicRoute', { value: publicRoute });
 Authenticated()(TestController.prototype, 'authenticatedRoute', { value: authenticatedRoute });
-RequirePermission('booking.read')(TestController.prototype, 'protectedRoute', { value: protectedRoute });
+RequirePermission(PermissionCode.AUDIT_READ)(TestController.prototype, 'protectedRoute', { value: protectedRoute });
 RootOnly()(TestController);
 
 describe('authorization decorators', () => {
@@ -28,7 +29,7 @@ describe('authorization decorators', () => {
     const reflector = new Reflector();
     expect(reflector.get(PUBLIC_ROUTE_KEY, publicRoute)).toBe(true);
     expect(reflector.get(AUTHENTICATED_ROUTE_KEY, authenticatedRoute)).toBe(true);
-    expect(reflector.get(PERMISSION_KEY, protectedRoute)).toBe('booking.read');
+    expect(reflector.get(PERMISSION_KEY, protectedRoute)).toBe(PermissionCode.AUDIT_READ);
   });
 
   it('stores the root administrator constraint on the controller', () => {

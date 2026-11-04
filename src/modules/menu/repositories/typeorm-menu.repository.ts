@@ -35,10 +35,13 @@ export class TypeOrmMenuRepository implements MenuRepository {
     if (!item) throw new DomainNotFoundError('菜单');
     await this.menus.softRemove(item);
   }
-  async upsertSeed(input: Omit<MenuRecord, 'id' | 'deletedAt'>) {
-    const found = await this.menus.findOne({ where: { path: input.path } });
-    const item = found ? this.menus.merge(found, input) : this.menus.create(input);
-    return this.toRecord(await this.menus.save(item));
+  /** 同路径菜单存在时原样返回，包含已软删除记录，避免重建或覆盖。 */
+  async ensureSeed(input: Omit<MenuRecord, 'id' | 'deletedAt'>) {
+    const found = await this.menus.findOne({ where: { path: input.path }, withDeleted: true });
+    if (found) {
+      return this.toRecord(found);
+    }
+    return this.create(input);
   }
   private toRecord(item: MenuEntity): MenuRecord {
     return {

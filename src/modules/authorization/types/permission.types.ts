@@ -12,3 +12,13 @@ export interface PermissionRecord {
 
 /** 代码注册的权限记录。 */
 export type RegisteredPermission = Omit<PermissionRecord, 'id'>;
+
+/** 按分类分组的权限目录。 */
+export interface PermissionGroup {
+  /** 权限分类标识。 */
+  category: string;
+  /** 权限分类展示名称。 */
+  categoryName: string;
+  /** 该分类下的权限记录。 */
+  permissions: PermissionRecord[];
+}

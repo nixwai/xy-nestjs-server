@@ -4,6 +4,7 @@ import dataSource from '../src/data-source.js';
 import { AdminEntity } from '../src/modules/admin/entities/admin.entity.js';
 import { AdminRoleAssignmentEntity } from '../src/modules/admin/entities/admin-role-assignment.entity.js';
 import { PermissionEntity } from '../src/modules/permission/entities/permission.entity.js';
+import { TypeOrmPermissionRepository } from '../src/modules/permission/repositories/typeorm-permission.repository.js';
 import { RoleEntity } from '../src/modules/role/entities/role.entity.js';
 import { hashPassword } from '../src/modules/auth/utils/password.util.js';
 import { REGISTERED_PERMISSIONS } from '../src/modules/permission/constants/registered-permissions.constant.js';
@@ -29,15 +30,8 @@ async function main(): Promise<void> {
     }
     await dataSource.initialize();
     await dataSource.transaction(async manager => {
-      await Promise.all(
-        REGISTERED_PERMISSIONS.map(async input => {
-          const repository = manager.getRepository(PermissionEntity);
-          const existing = await repository.findOne({
-            where: { code: input.code }
-          });
-          return repository.save(existing ? repository.merge(existing, input) : repository.create(input));
-        })
-      );
+      const permissionRepository = new TypeOrmPermissionRepository(manager.getRepository(PermissionEntity));
+      await Promise.all(REGISTERED_PERMISSIONS.map(input => permissionRepository.ensureRegistered(input)));
       const roleRepository = manager.getRepository(RoleEntity);
       let role = await roleRepository.findOne({
         where: { code: 'operator' }

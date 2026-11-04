@@ -1,1 +1,1 @@
-export type { PermissionRecord, RegisteredPermission } from './permission.types.js';
+export type { PermissionGroup, PermissionRecord, RegisteredPermission } from './permission.types.js';

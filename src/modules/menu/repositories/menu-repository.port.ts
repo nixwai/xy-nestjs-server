@@ -12,5 +12,6 @@ export interface MenuRepository {
     >
   ): Promise<MenuRecord>;
   softDelete(id: string): Promise<void>;
-  upsertSeed(input: Omit<MenuRecord, 'id' | 'deletedAt'>): Promise<MenuRecord>;
+  /** 确保种子菜单存在，已存在时不覆盖数据库内容。 */
+  ensureSeed(input: Omit<MenuRecord, 'id' | 'deletedAt'>): Promise<MenuRecord>;
 }

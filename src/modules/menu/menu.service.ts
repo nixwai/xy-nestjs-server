@@ -15,7 +15,7 @@ const DEFAULT_MENUS = [
     permissionCode: null,
     isRootOnly: false,
     isActive: true
-  },
+  }
 ] as const;
 @Injectable()
 export class MenuService implements OnModuleInit {
@@ -26,7 +26,7 @@ export class MenuService implements OnModuleInit {
   ) {}
   async onModuleInit() {
     try {
-      for (const menu of DEFAULT_MENUS) await this.repo.upsertSeed(menu);
+      for (const menu of DEFAULT_MENUS) await this.repo.ensureSeed(menu);
     } catch (error) {
       if (!isMissingMenuTable(error)) throw error;
     }
