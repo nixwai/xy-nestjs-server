@@ -13,6 +13,7 @@ description: 设计和实现本项目未来的 TypeORM Entity、请求 DTO、响
 - 表名使用 snake_case 单数形式；属性使用 camelCase，由 `SnakeNamingStrategy` 映射数据库字段。
 - 主键统一使用 `@PrimaryGeneratedColumn({ type: 'bigint', unsigned: true })`。
 - 创建和更新时间使用 `@CreateDateColumn({ type: 'datetime' })` 与 `@UpdateDateColumn({ type: 'datetime' })`。
+- 布尔语义列声明 `@Column({ type: 'boolean', unsigned: true, default: 0 })` 并使用 TypeScript `boolean`，禁止声明 `type: 'tinyint'`：驱动只对 `boolean` 做布尔水合，裸 `tinyint` 会把值读成 `0/1` 数字，与注册表和领域记录的布尔类型不一致。两种声明生成的 DDL 都是 `tinyint UNSIGNED NOT NULL DEFAULT '0'`，改声明不需要变更表结构。确需存储非布尔小整数时必须显式提供 transformer，并同步更新 `test/unit/shared/database/entity-boolean-column.spec.ts`。
 - TypeORM 填充的属性使用 `!`；列定义显式声明与业务和数据库约束有关的选项。
 - 对实际查询、排序、唯一性或关联约束建立命名索引或唯一约束。
 - 多对多关系使用独立关系 Entity，不使用 `@ManyToMany` 与 `@JoinTable` 隐式生成中间表。

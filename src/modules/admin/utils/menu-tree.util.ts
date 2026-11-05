@@ -12,6 +12,7 @@ import type { MenuTreeItem } from '../types/authorization.types.js';
 export function buildMenuTree(items: MenuListItem[], isRoot: boolean, permissions: Set<string>): MenuTreeItem[] {
   const byParent = new Map<string | null, MenuListItem[]>();
   items.forEach(item => byParent.set(item.parentKey, [...(byParent.get(item.parentKey) ?? []), item]));
+  const directoryKeys = new Set(items.flatMap(item => (item.parentKey === null ? [] : [item.parentKey])));
 
   const build = (parentKey: string | null): MenuTreeItem[] => {
     return (byParent.get(parentKey) ?? [])
@@ -19,8 +20,7 @@ export function buildMenuTree(items: MenuListItem[], isRoot: boolean, permission
       .sort((left, right) => left.order - right.order || Number(left.id) - Number(right.id))
       .flatMap(item => {
         const children = build(item.menuKey);
-        const isDirectory = item.permissionCode === null && item.menuKey !== 'home';
-        if (isDirectory && children.length === 0) return [];
+        if (directoryKeys.has(item.menuKey) && children.length === 0) return [];
         return [
           {
             id: item.id,

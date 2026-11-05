@@ -51,7 +51,15 @@ describe('flattenRegisteredMenus', () => {
     ]);
   });
 
-  it('默认注册表展开后应只包含工作台根菜单', () => {
-    expect(flattenRegisteredMenus()).toEqual([expect.objectContaining({ menuKey: 'home', parentKey: null })]);
+  it('默认注册表应按深度优先展开系统管理菜单', () => {
+    expect(flattenRegisteredMenus().map(entry => [entry.menuKey, entry.parentKey])).toEqual([
+      ['home', null],
+      ['system', null],
+      ['system-admin', 'system'],
+      ['system-role', 'system'],
+      ['system-audit', 'system'],
+      ['system-menu', 'system'],
+      ['system-permission', 'system']
+    ]);
   });
 });

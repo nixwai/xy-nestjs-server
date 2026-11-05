@@ -26,15 +26,15 @@ export class PermissionEntity {
   category!: string;
 
   /** 是否允许绑定给普通角色。 */
-  @Column({ name: 'is_assignable', type: 'tinyint', unsigned: true, default: 1 })
+  @Column({ name: 'is_assignable', type: 'boolean', unsigned: true, default: 1 })
   isAssignable!: boolean;
 
   /** 是否属于受保护权限。 */
-  @Column({ name: 'is_protected', type: 'tinyint', unsigned: true, default: 0 })
+  @Column({ name: 'is_protected', type: 'boolean', unsigned: true, default: 0 })
   isProtected!: boolean;
 
   /** 是否启用。 */
-  @Column({ type: 'tinyint', unsigned: true, default: 1 })
+  @Column({ type: 'boolean', unsigned: true, default: 1 })
   isActive!: boolean;
 
   /** 创建时间。 */

@@ -35,15 +35,15 @@ export class RoleEntity {
   description!: string | null;
 
   /** 是否启用。 */
-  @Column({ type: 'tinyint', unsigned: true, default: 1 })
+  @Column({ type: 'boolean', unsigned: true, default: 1 })
   isActive!: boolean;
 
   /** 是否由系统维护。 */
-  @Column({ name: 'is_system', type: 'tinyint', unsigned: true, default: 0 })
+  @Column({ name: 'is_system', type: 'boolean', unsigned: true, default: 0 })
   isSystem!: boolean;
 
   /** 是否禁止删除和普通权限委派。 */
-  @Column({ name: 'is_protected', type: 'tinyint', unsigned: true, default: 0 })
+  @Column({ name: 'is_protected', type: 'boolean', unsigned: true, default: 0 })
   isProtected!: boolean;
 
   /** 软删除时间。 */

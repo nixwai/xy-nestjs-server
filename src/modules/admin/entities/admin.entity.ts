@@ -35,11 +35,11 @@ export class AdminEntity {
   passwordSalt!: string;
 
   /** 是否允许登录。 */
-  @Column({ type: 'tinyint', unsigned: true, default: 1 })
+  @Column({ type: 'boolean', unsigned: true, default: 1 })
   isActive!: boolean;
 
   /** 是否拥有系统全部权限。 */
-  @Column({ name: 'is_root', type: 'tinyint', unsigned: true, default: 0 })
+  @Column({ name: 'is_root', type: 'boolean', unsigned: true, default: 0 })
   isRoot!: boolean;
 
   /** 软删除时间。 */

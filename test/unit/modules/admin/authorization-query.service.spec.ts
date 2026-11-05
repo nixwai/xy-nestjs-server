@@ -62,6 +62,42 @@ function createService() {
         isRootOnly: true,
         isActive: true,
         permissionAvailable: true
+      },
+      {
+        id: '4',
+        menuKey: 'system-admin',
+        parentKey: 'system',
+        title: '系统管理员',
+        path: '/system/admin',
+        order: 1,
+        permissionCode: null,
+        isRootOnly: true,
+        isActive: true,
+        permissionAvailable: true
+      },
+      {
+        id: '5',
+        menuKey: 'report',
+        parentKey: null,
+        title: '报表',
+        path: '/report',
+        order: 4,
+        permissionCode: null,
+        isRootOnly: false,
+        isActive: true,
+        permissionAvailable: true
+      },
+      {
+        id: '6',
+        menuKey: 'report-daily',
+        parentKey: 'report',
+        title: '日报',
+        path: '/report/daily',
+        order: 1,
+        permissionCode: 'report.read',
+        isRootOnly: false,
+        isActive: true,
+        permissionAvailable: false
       }
     ])
   };
@@ -82,6 +118,7 @@ describe('AdminAuthorizationQueryService', () => {
     const root = await service.getAuthorization({ ...admin, isRoot: true });
     expect(permissions.listPermissions).toHaveBeenCalled();
     expect(root.permissions).toEqual(['admin.account.read']);
-    expect(root.menus.map(item => item.path)).toEqual(['/home']);
+    expect(root.menus.map(item => item.path)).toEqual(['/home', '/system']);
+    expect(root.menus[1].children?.map(item => item.path)).toEqual(['/system/admin']);
   });
 });

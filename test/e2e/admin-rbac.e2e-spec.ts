@@ -5,6 +5,7 @@ import { createTestModule } from './create-test-module.js';
 import { ADMIN_REPOSITORY } from '#/modules/admin/repositories/admin-repository.port.js';
 import type { AdminRepository } from '#/modules/admin/repositories/admin-repository.port.js';
 import { hashPassword } from '#/modules/auth/utils/password.util.js';
+import { flattenRegisteredMenus } from '#/modules/menu/utils/registered-menu.util.js';
 import { createStrictValidationPipe } from '#/common/pipes/index.js';
 import { encryptPassword } from './password-transport.js';
 
@@ -113,10 +114,11 @@ describe('RBAC management API (e2e)', () => {
       .get('/api/menu/list')
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
-    expect(listed.body.data.items).toEqual([
-      expect.objectContaining({ menuKey: 'home', path: '/home', permissionAvailable: true })
-    ]);
-    const menuId = listed.body.data.items[0].id as string;
+    const items: Array<Record<string, unknown>> = listed.body.data.items;
+    expect(items).toHaveLength(flattenRegisteredMenus().length);
+    const home = items.find(item => item.menuKey === 'home');
+    expect(home).toMatchObject({ path: '/home', permissionAvailable: true, isActive: true, isRootOnly: false });
+    const menuId = home?.id as string;
     const updated = await request(app.getHttpServer())
       .post('/api/menu/update')
       .set('Authorization', `Bearer ${token}`)
@@ -148,7 +150,15 @@ describe('RBAC management API (e2e)', () => {
       .get('/api/admin/me')
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
-    expect(own.body.data.menus.map((item: { path: string }) => item.path)).toEqual(['/home']);
+    expect(own.body.data.menus.map((item: { path: string }) => item.path)).toEqual(['/home', '/system-management']);
+    const systemMenu = own.body.data.menus.find((item: { menuKey: string }) => item.menuKey === 'system');
+    expect(systemMenu.children.map((child: { path: string }) => child.path)).toEqual([
+      '/system-management/admin',
+      '/system-management/role',
+      '/system-management/audit',
+      '/system-management/menu',
+      '/system-management/permission'
+    ]);
     const reset = await request(app.getHttpServer())
       .post('/api/admin/reset-password')
       .set('Authorization', `Bearer ${token}`)

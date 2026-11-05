@@ -41,7 +41,7 @@ export class AuditLogEntity {
   details!: Record<string, unknown> | null;
 
   /** 是否成功。 */
-  @Column({ type: 'tinyint', unsigned: true, default: 1 })
+  @Column({ type: 'boolean', unsigned: true, default: 1 })
   succeeded!: boolean;
 
   /** 创建时间。 */
