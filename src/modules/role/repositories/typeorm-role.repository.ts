@@ -7,7 +7,7 @@ import { AdminRoleAssignmentEntity } from '#/modules/admin/entities/admin-role-a
 import { RoleEntity } from '../entities/role.entity.js';
 import { PageQueryDto } from '#/common/dto/index.js';
 import type { PageResult } from '#/common/types/index.js';
-import type { RoleRecord } from '../types/role.types.js';
+import type { RoleCreateInput, RoleRecord, RoleUpdateInput } from '../types/role.types.js';
 import type { RoleRepository } from './role-repository.port.js';
 
 /** 使用 TypeORM 保存角色及其权限关系。 */
@@ -63,7 +63,7 @@ export class TypeOrmRoleRepository implements RoleRepository {
     return item ? (await this.toRecords([item]))[0] : null;
   }
 
-  async create(input: { code: string; name: string; description?: string }): Promise<RoleRecord> {
+  async create(input: RoleCreateInput): Promise<RoleRecord> {
     try {
       const item = await this.roles.save(
         this.roles.create({
@@ -84,7 +84,7 @@ export class TypeOrmRoleRepository implements RoleRepository {
     }
   }
 
-  async update(id: string, input: Partial<Pick<RoleRecord, 'name' | 'description' | 'isActive'>>): Promise<RoleRecord> {
+  async update(id: string, input: RoleUpdateInput): Promise<RoleRecord> {
     const item = await this.findEntityOrThrow(id);
     this.roles.merge(item, input);
     return this.toRecord(await this.roles.save(item));

@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
 import { DomainNotFoundError } from '#/common/errors/index.js';
 import { MenuEntity } from '../entities/menu.entity.js';
-import type { MenuRecord } from '../types/menu.types.js';
+import type { MenuCreateInput, MenuRecord, MenuUpdateInput } from '../types/menu.types.js';
 import type { MenuRepository } from './menu-repository.port.js';
 
 @Injectable()
@@ -24,11 +24,11 @@ export class TypeOrmMenuRepository implements MenuRepository {
     return item ? this.toRecord(item) : null;
   }
 
-  async create(input: Omit<MenuRecord, 'id'>) {
+  async create(input: MenuCreateInput) {
     return this.toRecord(await this.menus.save(this.menus.create(input)));
   }
 
-  async update(id: string, input: Partial<Pick<MenuRecord, 'title' | 'order' | 'isActive'>>) {
+  async update(id: string, input: MenuUpdateInput) {
     const item = await this.menus.findOne({ where: { id } });
     if (!item) throw new DomainNotFoundError('菜单');
     this.menus.merge(item, input);

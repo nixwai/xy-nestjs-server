@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
 import { AdminSessionEntity } from '#/modules/admin/entities/admin-session.entity.js';
 import type { AuthSessionRepository } from './auth-session-repository.port.js';
-import type { AdminSessionRecord, SessionRotationResult } from '../types/session.types.js';
+import type { AdminSessionRecord, AuthSessionInput, SessionRotationResult } from '../types/session.types.js';
 
 /** 使用 TypeORM 保存刷新会话。 */
 @Injectable()
@@ -18,7 +18,7 @@ export class TypeOrmAuthSessionRepository implements AuthSessionRepository {
     return item ? this.toRecord(item) : null;
   }
 
-  async create(input: { adminId: string; tokenHash: string; expiresAt: Date }): Promise<AdminSessionRecord> {
+  async create(input: AuthSessionInput): Promise<AdminSessionRecord> {
     const item = await this.sessions.save(
       this.sessions.create({
         ...input,
@@ -30,11 +30,7 @@ export class TypeOrmAuthSessionRepository implements AuthSessionRepository {
     return this.toRecord(item);
   }
 
-  async rotate(
-    sessionId: string,
-    replacement: { adminId: string; tokenHash: string; expiresAt: Date },
-    now: Date
-  ): Promise<SessionRotationResult> {
+  async rotate(sessionId: string, replacement: AuthSessionInput, now: Date): Promise<SessionRotationResult> {
     return this.sessions.manager.transaction(async manager => {
       const repository = manager.getRepository(AdminSessionEntity);
       const current = await repository

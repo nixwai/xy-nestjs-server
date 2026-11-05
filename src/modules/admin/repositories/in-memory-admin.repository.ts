@@ -1,8 +1,8 @@
 import { DomainConflictError, DomainNotFoundError } from '#/common/errors/index.js';
-import type { AdminCreateInput, AdminRepository, AdminUpdateInput } from './admin-repository.port.js';
+import type { AdminRepository } from './admin-repository.port.js';
 import { PageQueryDto } from '#/common/dto/index.js';
 import type { PageResult } from '#/common/types/index.js';
-import type { AdminRecord } from '../types/admin.types.js';
+import type { AdminCreateInput, AdminRecord, AdminUpdateInput } from '../types/admin.types.js';
 
 /** 在单元测试中保存管理员账户和角色关系。 */
 export class InMemoryAdminRepository implements AdminRepository {

@@ -1,8 +1,9 @@
 import { Body, Controller, Get, Inject, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiCommonResponses, ApiOkResponseData } from '#/common/decorators/index.js';
+import { omitUndefined } from '#/common/utils/index.js';
 import { CurrentAdmin } from '../auth/decorators/index.js';
-import type { AdminJwtPayload } from '../auth/tokens/jwt-token.service.js';
+import type { AdminJwtPayload } from '../auth/types/jwt.types.js';
 import { RootOnly } from '../authorization/decorators/index.js';
 import { MenuListResponseDto, MenuResponseDto, MenuStatusRequestDto, MenuUpdateRequestDto } from './dto/index.js';
 import { MenuService } from './menu.service.js';
@@ -27,11 +28,11 @@ export class MenuController {
   @ApiBody({ type: MenuUpdateRequestDto })
   @ApiOkResponseData(MenuResponseDto)
   async update(@CurrentAdmin() admin: AdminJwtPayload, @Body() body: MenuUpdateRequestDto) {
-    return this.service.update(admin.sub, body.id, {
-      ...(body.title === undefined ? {} : { title: body.title }),
-      ...(body.order === undefined ? {} : { order: body.order }),
-      ...(body.isActive === undefined ? {} : { isActive: body.isActive })
-    });
+    return this.service.update(
+      admin.sub,
+      body.id,
+      omitUndefined({ title: body.title, order: body.order, isActive: body.isActive })
+    );
   }
 
   @Post('enable')

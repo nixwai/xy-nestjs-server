@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import { decodeCursor, encodeCursor } from '#/common/utils/index.js';
 import type { CursorPageResult } from '#/common/types/index.js';
 import { CursorPageQueryDto } from '#/common/dto/index.js';
+import type { AuditLogCursor, AuditRecordInput } from './types/audit.types.js';
 import type { AuditLogListQueryDto } from './dto/index.js';
 import { AuditLogEntity } from './entities/audit-log.entity.js';
 
@@ -14,14 +15,7 @@ export class AuditService {
   constructor(@Optional() @Inject(DataSource) private readonly dataSource?: DataSource) {}
 
   /** 写入不包含敏感字段的审计记录。 */
-  async record(input: {
-    actorAdminId: string | null;
-    action: string;
-    resourceType: string;
-    targetId?: string;
-    details?: Record<string, unknown>;
-    succeeded?: boolean;
-  }): Promise<void> {
+  async record(input: AuditRecordInput): Promise<void> {
     const payload = {
       actorAdminId: input.actorAdminId,
       action: input.action,
@@ -70,7 +64,7 @@ export class AuditService {
     return this.toCursorResult(records, query.limit);
   }
 
-  private parseCursor(value: string): { createdAt: Date; id: string } {
+  private parseCursor(value: string): AuditLogCursor {
     const payload = decodeCursor(value);
     const createdAt = payload?.createdAt ? new Date(payload.createdAt) : null;
     const id = payload?.id;
@@ -80,7 +74,7 @@ export class AuditService {
     return { createdAt, id };
   }
 
-  private isAfterCursor(item: AuditLogEntity, cursor: { createdAt: Date; id: string } | null): boolean {
+  private isAfterCursor(item: AuditLogEntity, cursor: AuditLogCursor | null): boolean {
     if (!cursor) {
       return true;
     }

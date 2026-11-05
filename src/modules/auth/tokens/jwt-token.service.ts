@@ -1,16 +1,8 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createHmac, timingSafeEqual } from 'node:crypto';
-
-/** 已签发访问令牌中的管理员身份。 */
-export interface AdminJwtPayload {
-  sub: string;
-  role: 'admin';
-  type: 'access';
-  iat: number;
-  exp: number;
-  isRoot?: boolean;
-}
+import type { AdminJwtPayload } from '../types/jwt.types.js';
+import { decodeJson, encodeJson, isFiniteNumber, parseDuration } from '../utils/jwt.util.js';
 
 /** 生成和校验管理员访问令牌。 */
 @Injectable()
@@ -64,29 +56,4 @@ export class JwtTokenService {
       throw new UnauthorizedException('登录状态无效');
     return payload as unknown as AdminJwtPayload;
   }
-}
-/** 解析 JWT 有效期配置。 */
-export function parseDuration(value: string): number {
-  const match = /^(\d+)(s|m|h|d)$/.exec(value.trim());
-  if (!match) {
-    throw new Error('JWT 有效期配置无效');
-  }
-  return Number(match[1]) * ({ s: 1, m: 60, h: 3600, d: 86400 } as Record<string, number>)[match[2]];
-}
-function encodeJson(value: object): string {
-  return Buffer.from(JSON.stringify(value)).toString('base64url');
-}
-function decodeJson(value: string): Record<string, unknown> {
-  try {
-    const decoded: unknown = JSON.parse(Buffer.from(value, 'base64url').toString('utf8'));
-    if (!decoded || typeof decoded !== 'object' || Array.isArray(decoded)) {
-      throw new Error('invalid payload');
-    }
-    return decoded as Record<string, unknown>;
-  } catch {
-    throw new UnauthorizedException('登录状态无效');
-  }
-}
-function isFiniteNumber(value: unknown): value is number {
-  return typeof value === 'number' && Number.isFinite(value);
 }

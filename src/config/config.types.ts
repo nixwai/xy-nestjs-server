@@ -135,3 +135,15 @@ export interface ApplicationConfig {
   /** 请求限流配置。 */
   throttler: ThrottlerConfig;
 }
+
+/** 环境文件加载选项。 */
+export interface EnvironmentLoaderOptions {
+  /** 环境文件所在目录。 */
+  cwd?: string;
+
+  /** 要加载的应用环境。 */
+  environment?: AppEnvironment;
+
+  /** 用于覆盖环境文件值的运行时环境变量。 */
+  runtimeEnvironment?: NodeJS.ProcessEnv;
+}

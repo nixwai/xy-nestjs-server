@@ -2,11 +2,10 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { constants, createPrivateKey, createPublicKey, privateDecrypt } from 'node:crypto';
 import type { KeyObject } from 'node:crypto';
+import { validatePassword } from '../utils/index.js';
 
 const RSA_MODULUS_LENGTH = 2048;
 const RSA_CIPHERTEXT_BYTES = RSA_MODULUS_LENGTH / 8;
-const PASSWORD_MIN_LENGTH = 8;
-const PASSWORD_MAX_LENGTH = 72;
 const BASE64_CIPHERTEXT_PATTERN = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
 
 /** 提供管理员密码传输层的 RSA-OAEP-SHA256 解密能力。 */
@@ -81,19 +80,13 @@ export class PasswordTransportService {
   }
 }
 
-/** 校验解密后的管理员密码规则。 */
-export function validatePassword(password: string, label = '密码'): void {
-  if (password.length < PASSWORD_MIN_LENGTH) {
-    throw new BadRequestException(`${label}长度不能少于${PASSWORD_MIN_LENGTH}个字符`);
-  }
-  if (password.length > PASSWORD_MAX_LENGTH) {
-    throw new BadRequestException(`${label}长度不能超过${PASSWORD_MAX_LENGTH}个字符`);
-  }
-  if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) {
-    throw new BadRequestException(`${label}必须同时包含字母和数字`);
-  }
-}
-
+/**
+ * 解析 Base64 编码的 PKCS#8 RSA 私钥，并校验密钥类型和长度。
+ *
+ * @param encodedPrivateKey - Base64 编码的私钥内容。
+ * @returns 可用于解密的 RSA 私钥对象。
+ * @throws 编码格式、密钥类型或密钥长度不符合要求时抛出 Error。
+ */
 function parsePrivateKey(encodedPrivateKey: string): KeyObject {
   try {
     if (!BASE64_CIPHERTEXT_PATTERN.test(encodedPrivateKey)) {

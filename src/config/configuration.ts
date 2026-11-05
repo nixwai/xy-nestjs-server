@@ -1,4 +1,6 @@
-import { loadBaseConfig, mergeConfig, type ConfigRecord } from '../common/utils/config.util.js';
+import type { ConfigRecord } from '../common/types/index.js';
+import { loadBaseConfig, mergeConfig } from '../common/utils/config.util.js';
+import { isRecord } from '../common/utils/type-guard.util.js';
 import { loadEnvironment } from './environment.js';
 import { createApplicationConfigSchema, validateEnvironment } from './config.validation.js';
 import type { ApplicationConfig } from './config.types.js';
@@ -153,11 +155,6 @@ function readOrigins(value: string | undefined, fallback: unknown): string[] | s
     .split(',')
     .map(origin => origin.trim())
     .filter(Boolean);
-}
-
-/** 判断值是否为非数组对象。 */
-function isRecord(value: unknown): value is ConfigRecord {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 /** 默认的应用配置构建函数。 */

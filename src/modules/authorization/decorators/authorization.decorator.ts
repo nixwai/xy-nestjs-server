@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import type { PermissionCode } from '../constants/index.js';
+import type { PermissionCode } from '../types/index.js';
 
 /** 公开路由使用的元数据键。 */
 export const PUBLIC_ROUTE_KEY = 'publicRoute';

@@ -1,9 +1,8 @@
 import type { CanActivate, ExecutionContext } from '@nestjs/common';
 import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import type { Request } from 'express';
 import { ADMIN_ROLE_KEY } from '../decorators/admin-only.decorator.js';
-import type { AdminJwtPayload } from '../tokens/jwt-token.service.js';
+import type { AuthenticatedRequest } from '../types/jwt.types.js';
 
 /** 校验当前请求是否携带管理员身份。 */
 @Injectable()
@@ -19,7 +18,7 @@ export class AdminRoleGuard implements CanActivate {
     if (!required) {
       return true;
     }
-    const request = context.switchToHttp().getRequest<Request & { user?: AdminJwtPayload }>();
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     if (!request.user?.sub) {
       throw new ForbiddenException('无权访问');
     }

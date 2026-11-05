@@ -1,7 +1,7 @@
 import type { BadRequestException } from '@nestjs/common';
 import { describe, expect, it } from 'vitest';
 import type { PermissionRecord, RegisteredPermission } from '#/modules/authorization/types/permission.types.js';
-import type { RegisteredPermissionGroup } from '#/modules/permission/constants/registered-permissions.constant.js';
+import type { RegisteredPermissionGroup } from '#/modules/permission/types/registered-permission.types.js';
 import { REGISTERED_PERMISSION_GROUPS } from '#/modules/permission/constants/registered-permissions.constant.js';
 import {
   collectDefinitionChanges,

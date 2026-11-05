@@ -1,19 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import dotenv from 'dotenv';
-import type { AppEnvironment } from './config.types.js';
-
-/** 环境文件加载选项。 */
-export interface EnvironmentLoaderOptions {
-  /** 环境文件所在目录。 */
-  cwd?: string;
-
-  /** 要加载的应用环境。 */
-  environment?: AppEnvironment;
-
-  /** 用于覆盖环境文件值的运行时环境变量。 */
-  runtimeEnvironment?: NodeJS.ProcessEnv;
-}
+import type { AppEnvironment, EnvironmentLoaderOptions } from './config.types.js';
 
 const APP_ENVIRONMENTS: readonly AppEnvironment[] = ['development', 'test', 'production'];
 

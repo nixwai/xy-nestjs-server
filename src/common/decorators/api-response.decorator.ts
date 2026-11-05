@@ -1,10 +1,7 @@
 import { applyDecorators, type Type } from '@nestjs/common';
 import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import { ApiErrorResponseDto } from '../dto/api-error-response.dto.js';
-
-interface ApiResponseDataOptions {
-  description?: string;
-}
+import type { ApiResponseDataOptions } from '../types/index.js';
 
 const responseProperties = {
   code: {

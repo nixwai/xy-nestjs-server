@@ -1,9 +1,9 @@
 import type { CanActivate, ExecutionContext } from '@nestjs/common';
 import { UnauthorizedException, Injectable, Inject } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import type { Request } from 'express';
 import { AuthService } from '../auth.service.js';
-import { JwtTokenService, type AdminJwtPayload } from '../tokens/jwt-token.service.js';
+import { JwtTokenService } from '../tokens/jwt-token.service.js';
+import type { AuthenticatedRequest } from '../types/jwt.types.js';
 import { PUBLIC_ROUTE_KEY } from '#/modules/authorization/decorators/index.js';
 
 /** 校验访问令牌并将当前管理员身份写入请求。 */
@@ -21,7 +21,7 @@ export class JwtAuthGuard implements CanActivate {
       this.reflector?.getAllAndOverride<boolean>(PUBLIC_ROUTE_KEY, [context.getHandler(), context.getClass()])
     )
       return true;
-    const request = context.switchToHttp().getRequest<Request & { user?: AdminJwtPayload }>();
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const authorization = request.header('authorization');
     if (!authorization?.startsWith('Bearer ')) {
       throw new UnauthorizedException('请先登录');

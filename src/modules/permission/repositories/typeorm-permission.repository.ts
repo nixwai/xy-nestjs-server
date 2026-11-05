@@ -3,7 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
 import { DomainNotFoundError } from '#/common/errors/index.js';
 import { PermissionEntity } from '../entities/permission.entity.js';
-import type { PermissionDefinitionPatch, PermissionRecord } from '#/modules/authorization/types/permission.types.js';
+import type {
+  PermissionCreateInput,
+  PermissionDefinitionPatch,
+  PermissionRecord
+} from '#/modules/authorization/types/permission.types.js';
 import type { PermissionRepository } from './permission-repository.port.js';
 
 /** 使用 TypeORM 保存动态权限目录。 */
@@ -40,7 +44,7 @@ export class TypeOrmPermissionRepository implements PermissionRepository {
     return item ? this.toRecord(item) : null;
   }
 
-  async create(input: Omit<PermissionRecord, 'id'>): Promise<PermissionRecord> {
+  async create(input: PermissionCreateInput): Promise<PermissionRecord> {
     return this.toRecord(await this.permissions.save(this.permissions.create(input)));
   }
 

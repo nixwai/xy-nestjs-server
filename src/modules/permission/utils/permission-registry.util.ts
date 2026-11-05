@@ -1,14 +1,14 @@
-import { BadRequestException } from '@nestjs/common';
+import { createRegistryValidationError } from '#/common/utils/index.js';
 import { PermissionCode } from '#/modules/authorization/constants/index.js';
 import type {
   PermissionDefinitionPatch,
   PermissionRecord,
   RegisteredPermission
 } from '#/modules/authorization/types/permission.types.js';
-import type {
-  RegisteredPermissionEntry,
-  RegisteredPermissionGroup
-} from '../constants/registered-permissions.constant.js';
+import type { RegisteredPermissionEntry, RegisteredPermissionGroup } from '../types/registered-permission.types.js';
+
+/** 权限注册表在错误消息中的作用域名称。 */
+const REGISTRY_SCOPE = '权限';
 
 /** 权限编码格式：小写分类、资源和动作分段，段内允许中划线。 */
 const PERMISSION_CODE_PATTERN = /^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9-]*)+$/;
@@ -120,7 +120,7 @@ function validateDeclaredPermissionCodes(codes: Set<string>): void {
 }
 
 /**
- * 构造注册表校验失败异常。
+ * 构造权限注册表校验失败异常。
  *
  * @param target - 出错的分类标识或权限编码。
  * @param field - 出错字段。
@@ -130,8 +130,5 @@ function validateDeclaredPermissionCodes(codes: Set<string>): void {
  * @returns 携带定位信息的 BadRequestException。
  */
 function registryError(target: string, field: string, actual: unknown, expected: unknown, resolution: string) {
-  return new BadRequestException({
-    message: `权限注册校验失败: ${target}.${field}`,
-    data: { target, field, actual, expected, resolution }
-  });
+  return createRegistryValidationError({ scope: REGISTRY_SCOPE, target, field, actual, expected, resolution });
 }

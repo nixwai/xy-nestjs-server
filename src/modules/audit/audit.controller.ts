@@ -2,7 +2,7 @@ import { Controller, Get, Inject, Query } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ApiCommonResponses, ApiOkResponseData } from '#/common/decorators/index.js';
 import { CurrentAdmin } from '../auth/decorators/index.js';
-import type { AdminJwtPayload } from '../auth/tokens/jwt-token.service.js';
+import type { AdminJwtPayload } from '../auth/types/jwt.types.js';
 import { RequirePermission } from '../authorization/decorators/index.js';
 import { AuditLogListQueryDto, AuditLogListResponseDto } from './dto/index.js';
 import { PermissionCode } from '../authorization/constants/index.js';

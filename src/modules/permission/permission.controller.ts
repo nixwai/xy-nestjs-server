@@ -2,9 +2,10 @@ import { Body, Controller, Get, Inject, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiCommonResponses, ApiOkResponseData } from '#/common/decorators/index.js';
 import { CurrentAdmin } from '../auth/decorators/index.js';
-import type { AdminJwtPayload } from '../auth/tokens/jwt-token.service.js';
+import type { AdminJwtPayload } from '../auth/types/jwt.types.js';
 import { RootOnly } from '../authorization/decorators/index.js';
 import { PermissionGroupListResponseDto, PermissionResponseDto, PermissionStatusRequestDto } from './dto/index.js';
+import { countPermissions } from './utils/permission-group.util.js';
 import { PermissionService } from './permission.service.js';
 
 /** 提供权限目录查询和启停管理接口。 */
@@ -70,9 +71,4 @@ export class PermissionController {
   async disable(@CurrentAdmin() admin: AdminJwtPayload, @Body() body: PermissionStatusRequestDto) {
     return this.permissionService.setActive(admin.sub, body.id, false);
   }
-}
-
-/** 统计分组结果中的权限总数。 */
-function countPermissions(groups: { permissions: unknown[] }[]): number {
-  return groups.reduce((total, group) => total + group.permissions.length, 0);
 }

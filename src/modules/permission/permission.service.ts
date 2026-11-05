@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger, NotFoundException, type OnModuleInit } from
 import { PERMISSION_REPOSITORY } from './repositories/permission-repository.port.js';
 import type { PermissionRepository } from './repositories/permission-repository.port.js';
 import type { PermissionGroup, PermissionRecord } from '../authorization/types/permission.types.js';
-import { getPermissionCategoryName, getPermissionCategoryOrder } from './utils/permission-category.util.js';
+import { buildPermissionGroups } from './utils/permission-group.util.js';
 import { collectDefinitionChanges, validatePermissionRegistry } from './utils/permission-registry.util.js';
 import { REGISTERED_PERMISSIONS, REGISTERED_PERMISSION_GROUPS } from './constants/registered-permissions.constant.js';
 import { AuditService } from '../audit/audit.service.js';
@@ -112,22 +112,4 @@ export class PermissionService implements OnModuleInit {
     if (unregisteredCodes.length === 0) return;
     this.logger.warn(`注册表之外的历史权限: ${unregisteredCodes.join(', ')}，启动同步不会删除，需通过 Migration 清理`);
   }
-}
-
-/** 按分类声明顺序将权限记录分组，未声明的分类排在最后。 */
-function buildPermissionGroups(permissions: PermissionRecord[]): PermissionGroup[] {
-  const byCategory = new Map<string, PermissionRecord[]>();
-  permissions.forEach(permission =>
-    byCategory.set(permission.category, [...(byCategory.get(permission.category) ?? []), permission])
-  );
-  return [...byCategory.entries()]
-    .sort(
-      ([left], [right]) =>
-        getPermissionCategoryOrder(left) - getPermissionCategoryOrder(right) || left.localeCompare(right)
-    )
-    .map(([category, items]) => ({
-      category,
-      categoryName: getPermissionCategoryName(category),
-      permissions: items
-    }));
 }

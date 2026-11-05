@@ -1,14 +1,9 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { omitUndefined, validatePassword } from '#/common/utils/index.js';
 import { hashPassword, verifyPassword } from '../auth/utils/password.util.js';
-import { validatePassword } from '#/common/security/index.js';
-import type {
-  AdminCreateInput,
-  AdminRepository,
-  AdminTransactionRunner,
-  AdminUpdateInput
-} from './repositories/admin-repository.port.js';
+import type { AdminRepository, AdminTransactionRunner } from './repositories/admin-repository.port.js';
 import { ADMIN_REPOSITORY, ADMIN_TRANSACTION_RUNNER } from './repositories/admin-repository.port.js';
-import type { AdminRecord, AdminPublicRecord } from './types/admin.types.js';
+import type { AdminCreateInput, AdminRecord, AdminPublicRecord, AdminUpdateInput } from './types/admin.types.js';
 import { RoleService } from '../role/role.service.js';
 import { AuditService } from '../audit/audit.service.js';
 import type { AdminCreateRequestDto, AdminUpdateRequestDto } from './dto/index.js';
@@ -114,7 +109,7 @@ export class AdminService {
       input.passwordHash = password.hash;
       input.passwordSalt = password.salt;
     }
-    const item = await this.repository.update(body.id, removeUndefined(input));
+    const item = await this.repository.update(body.id, omitUndefined(input));
     await this.auditService.record({
       actorAdminId: actorId,
       action: 'admin.update',
@@ -244,8 +239,4 @@ export class AdminService {
       updatedAt: item.updatedAt
     };
   }
-}
-
-function removeUndefined<T extends object>(value: T): T {
-  return Object.fromEntries(Object.entries(value).filter(([, item]) => item !== undefined)) as T;
 }

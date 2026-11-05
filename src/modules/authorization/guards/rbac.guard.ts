@@ -1,8 +1,7 @@
 import type { CanActivate, ExecutionContext } from '@nestjs/common';
 import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import type { Request } from 'express';
-import type { AdminJwtPayload } from '#/modules/auth/tokens/jwt-token.service.js';
+import type { AuthenticatedRequest } from '#/modules/auth/types/jwt.types.js';
 import { AuthorizationService } from '../authorization.service.js';
 import { AUTHENTICATED_ROUTE_KEY, PERMISSION_KEY, PUBLIC_ROUTE_KEY, ROOT_ONLY_KEY } from '../decorators/index.js';
 
@@ -22,7 +21,7 @@ export class RbacGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest<Request & { user?: AdminJwtPayload }>();
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const user = request.user;
     if (!user?.sub) {
       throw new ForbiddenException('无权访问');

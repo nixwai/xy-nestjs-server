@@ -1,4 +1,5 @@
 import { randomBytes, scrypt as nodeScrypt, timingSafeEqual } from 'node:crypto';
+import type { PasswordHash } from '../types/password.types.js';
 
 const KEY_LENGTH = 64;
 const SALT_BYTES = 16;
@@ -10,7 +11,7 @@ const SCRYPT_OPTIONS = {
 } as const;
 
 /** 生成管理员密码的随机盐和 scrypt 哈希。 */
-export async function hashPassword(password: string): Promise<{ hash: string; salt: string }> {
+export async function hashPassword(password: string): Promise<PasswordHash> {
   const salt = randomBytes(SALT_BYTES);
   const derivedKey = await deriveKey(password, salt);
   return { hash: derivedKey.toString('hex'), salt: salt.toString('hex') };

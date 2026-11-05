@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { flattenRegisteredMenus, type RegisteredMenu } from '#/modules/menu/constants/registered-menus.constant.js';
+import type { RegisteredMenu } from '#/modules/menu/types/registered-menu.types.js';
+import { flattenRegisteredMenus } from '#/modules/menu/utils/registered-menu.util.js';
 
 const nested: readonly RegisteredMenu[] = [
   {

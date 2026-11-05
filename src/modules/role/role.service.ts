@@ -5,7 +5,7 @@ import { PermissionService } from '../permission/permission.service.js';
 import { AuditService } from '../audit/audit.service.js';
 import { PageQueryDto } from '#/common/dto/index.js';
 import type { PageResult } from '#/common/types/index.js';
-import type { RoleRecord } from './types/role.types.js';
+import type { RoleCreateInput, RoleRecord, RoleUpdateInput } from './types/role.types.js';
 
 /** 角色及角色授权关系应用服务。 */
 @Injectable()
@@ -37,7 +37,7 @@ export class RoleService {
   }
 
   /** 创建角色。 */
-  async createRole(actorId: string, input: { code: string; name: string; description?: string }): Promise<RoleRecord> {
+  async createRole(actorId: string, input: RoleCreateInput): Promise<RoleRecord> {
     const item = await this.repository.create(input);
     await this.auditService.record({
       actorAdminId: actorId,
@@ -50,11 +50,7 @@ export class RoleService {
   }
 
   /** 更新角色。 */
-  async updateRole(
-    actorId: string,
-    id: string,
-    input: Partial<Pick<RoleRecord, 'name' | 'description' | 'isActive'>>
-  ): Promise<RoleRecord> {
+  async updateRole(actorId: string, id: string, input: RoleUpdateInput): Promise<RoleRecord> {
     const item = await this.repository.update(id, input);
     await this.auditService.record({
       actorAdminId: actorId,

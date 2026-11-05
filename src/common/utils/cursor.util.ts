@@ -1,5 +1,5 @@
-/** 可编码到游标中的字符串字段。 */
-export type CursorPayload = Record<string, string>;
+import type { CursorPayload } from '../types/index.js';
+import { isRecord } from './type-guard.util.js';
 
 /** 将游标载荷编码为不透明的 Base64URL 字符串。 */
 export function encodeCursor(payload: CursorPayload): string {
@@ -20,5 +20,5 @@ export function decodeCursor(value: string): CursorPayload | null {
 }
 
 function isCursorPayload(value: unknown): value is CursorPayload {
-  return typeof value === 'object' && value !== null && Object.values(value).every(item => typeof item === 'string');
+  return isRecord(value) && Object.values(value).every(item => typeof item === 'string');
 }

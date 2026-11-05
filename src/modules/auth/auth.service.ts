@@ -1,13 +1,12 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createHash, randomBytes } from 'node:crypto';
+import { addSeconds, validatePassword } from '#/common/utils/index.js';
 import { hashPassword, verifyPassword } from './utils/password.util.js';
-import { validatePassword } from '#/common/security/index.js';
+import { parseDuration } from './utils/jwt.util.js';
+import { createRefreshToken, hashRefreshToken } from './utils/refresh-token.util.js';
 import { JwtTokenService } from './tokens/jwt-token.service.js';
-import { parseDuration } from './tokens/jwt-token.service.js';
 import type { AdminRecord } from '../admin/types/admin.types.js';
 import { AdminService } from '../admin/admin.service.js';
-
 import type { AuthSessionRepository } from './repositories/auth-session-repository.port.js';
 import type { AuthTokenResponseDto } from './dto/index.js';
 
@@ -128,15 +127,4 @@ export class AuthService {
   private get refreshTokenExpiresIn(): number {
     return parseDuration(this.configService.getOrThrow<string>('jwt.refreshTokenExpiresIn'));
   }
-}
-/** 创建不可预测的 Refresh Token。 */
-export function createRefreshToken(): string {
-  return randomBytes(48).toString('base64url');
-}
-/** 计算 Refresh Token 的不可逆存储摘要。 */
-export function hashRefreshToken(value: string): string {
-  return createHash('sha256').update(value).digest('hex');
-}
-function addSeconds(date: Date, seconds: number): Date {
-  return new Date(date.getTime() + seconds * 1000);
 }

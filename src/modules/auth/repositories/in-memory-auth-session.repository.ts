@@ -1,5 +1,5 @@
 import type { AuthSessionRepository } from './auth-session-repository.port.js';
-import type { AdminSessionRecord, SessionRotationResult } from '../types/session.types.js';
+import type { AdminSessionRecord, AuthSessionInput, SessionRotationResult } from '../types/session.types.js';
 
 /** 在无数据库测试环境中保存刷新会话。 */
 export class InMemoryAuthSessionRepository implements AuthSessionRepository {
@@ -10,7 +10,7 @@ export class InMemoryAuthSessionRepository implements AuthSessionRepository {
     return [...this.sessions.values()].find(item => item.tokenHash === tokenHash) ?? null;
   }
 
-  async create(input: { adminId: string; tokenHash: string; expiresAt: Date }): Promise<AdminSessionRecord> {
+  async create(input: AuthSessionInput): Promise<AdminSessionRecord> {
     const item: AdminSessionRecord = {
       id: String(this.nextId++),
       ...input,
@@ -23,11 +23,7 @@ export class InMemoryAuthSessionRepository implements AuthSessionRepository {
     return item;
   }
 
-  async rotate(
-    sessionId: string,
-    replacement: { adminId: string; tokenHash: string; expiresAt: Date },
-    now: Date
-  ): Promise<SessionRotationResult> {
+  async rotate(sessionId: string, replacement: AuthSessionInput, now: Date): Promise<SessionRotationResult> {
     const current = this.sessions.get(sessionId);
     if (!current) {
       return { status: 'missing' };

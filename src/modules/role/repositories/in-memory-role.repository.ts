@@ -1,7 +1,7 @@
 import { DomainConflictError, DomainNotFoundError } from '#/common/errors/index.js';
 import { PageQueryDto } from '#/common/dto/index.js';
 import type { PageResult } from '#/common/types/index.js';
-import type { RoleRecord } from '../types/role.types.js';
+import type { RoleCreateInput, RoleRecord, RoleUpdateInput } from '../types/role.types.js';
 import type { RoleRepository } from './role-repository.port.js';
 
 /** 在单元测试中保存角色及其权限关系。 */
@@ -42,7 +42,7 @@ export class InMemoryRoleRepository implements RoleRepository {
     return item ? this.copy(item) : null;
   }
 
-  async create(input: { code: string; name: string; description?: string }): Promise<RoleRecord> {
+  async create(input: RoleCreateInput): Promise<RoleRecord> {
     if (await this.findByCode(input.code)) {
       throw new DomainConflictError('角色编码');
     }
@@ -62,7 +62,7 @@ export class InMemoryRoleRepository implements RoleRepository {
     return this.copy(item);
   }
 
-  async update(id: string, input: Partial<Pick<RoleRecord, 'name' | 'description' | 'isActive'>>): Promise<RoleRecord> {
+  async update(id: string, input: RoleUpdateInput): Promise<RoleRecord> {
     const item = await this.findByIdOrThrow(id);
     const updated = { ...item, ...input };
     this.roles.set(id, updated);

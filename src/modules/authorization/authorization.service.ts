@@ -3,7 +3,7 @@ import { DomainNotFoundError } from '#/common/errors/index.js';
 import { AdminService } from '../admin/admin.service.js';
 import { RoleService } from '../role/role.service.js';
 import { PermissionService } from '../permission/permission.service.js';
-import type { AdminAuthorization } from '../admin/types/admin.types.js';
+import type { AdminAuthorization } from '../admin/types/authorization.types.js';
 
 /** 运行时授权判断服务。 */
 @Injectable()

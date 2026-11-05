@@ -1,5 +1,12 @@
-/** 根据字段中文名称生成统一的请求参数校验消息。 */
-export function createValidationMessages(label: string) {
+import type { ValidationMessages } from '../types/index.js';
+
+/**
+ * 根据字段中文名称生成统一的请求参数校验消息。
+ *
+ * @param label - 字段中文名称。
+ * @returns 该字段全部校验场景使用的消息集合。
+ */
+export function createValidationMessages(label: string): ValidationMessages {
   return {
     isNotEmpty: `${label}不能为空`,
     isString: `${label}必须是字符串`,
@@ -15,5 +22,3 @@ export function createValidationMessages(label: string) {
     maxLength: (value: number) => `${label}长度不能超过${value}个字符`
   };
 }
-
-export type ValidationMessages = ReturnType<typeof createValidationMessages>;

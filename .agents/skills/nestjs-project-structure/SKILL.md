@@ -51,13 +51,21 @@ test/{unit,e2e}
 - 文件名统一使用 kebab-case。
 - 使用约定后缀：`.module.ts`、`.controller.ts`、`.service.ts`、`.entity.ts`、`.dto.ts`、`.enum.ts`、`.util.ts`、`.filter.ts`、`.guard.ts`、`.interceptor.ts`。
 - `index.ts` 仅用于稳定的公共导出；新增导出必须避免循环依赖。
-- 领域常量使用 `<name>.constant.ts`，领域枚举使用 `<name>.enum.ts`，领域工具使用 `<name>.util.ts`。
-- 未来完整业务模块可按以下形式组织：
+- 领域常量使用 `<name>.constant.ts`，领域枚举使用 `<name>.enum.ts`，领域工具使用 `<name>.util.ts`，领域类型使用 `<name>.types.ts`。
+- 模块内可复用的已导出业务类型放在 `<feature>/types/`，领域纯函数放在 `<feature>/utils/`。
+- 跨模块复用的非业务类型放在 `src/common/types/`，非业务纯函数放在 `src/common/utils/`。
+- 仓储 Port 文件只声明注入令牌和契约接口，输入输出记录类型归属模块 `types`。
+- 只被单个文件使用且不导出的辅助类型和辅助函数留在该文件内，不为它们新建文件。
+- 完整业务模块按以下形式组织：
 
 ```text
 <feature>/
+  constants/
   dto/
   entities/
+  repositories/
+  types/
+  utils/
   <feature>.controller.ts
   <feature>.module.ts
   <feature>.service.ts

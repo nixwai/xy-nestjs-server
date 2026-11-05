@@ -16,6 +16,9 @@ export type RegisteredPermission = Omit<PermissionRecord, 'id' | 'isActive'>;
 /** 启动同步可对齐的代码维护字段，权限编码是身份标识不参与修改。 */
 export type PermissionDefinitionPatch = Partial<Omit<RegisteredPermission, 'code'>>;
 
+/** 权限创建输入，编码和分类等代码维护字段由权限注册表提供。 */
+export type PermissionCreateInput = Omit<PermissionRecord, 'id'>;
+
 /** 按分类分组的权限目录。 */
 export interface PermissionGroup {
   /** 权限分类标识。 */

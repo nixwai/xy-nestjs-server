@@ -1,19 +1,6 @@
 import type { PageQueryDto } from '#/common/dto/index.js';
 import type { PageResult } from '#/common/types/index.js';
-import type { AdminRecord } from '../types/admin.types.js';
-
-/** 管理员创建输入。 */
-export type AdminCreateInput = {
-  username: string;
-  passwordHash: string;
-  passwordSalt: string;
-  isRoot?: boolean;
-};
-
-/** 管理员更新输入。 */
-export type AdminUpdateInput = Partial<
-  Pick<AdminRecord, 'username' | 'isActive' | 'isRoot' | 'passwordHash' | 'passwordSalt'>
->;
+import type { AdminCreateInput, AdminRecord, AdminUpdateInput } from '../types/admin.types.js';
 
 /** 管理员仓储注入令牌。 */
 export const ADMIN_REPOSITORY = Symbol('ADMIN_REPOSITORY');

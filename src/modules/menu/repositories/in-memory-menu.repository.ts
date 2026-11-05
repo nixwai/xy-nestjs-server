@@ -1,5 +1,5 @@
 import { DomainNotFoundError } from '#/common/errors/index.js';
-import type { MenuRecord } from '../types/menu.types.js';
+import type { MenuCreateInput, MenuRecord, MenuUpdateInput } from '../types/menu.types.js';
 import type { MenuRepository } from './menu-repository.port.js';
 
 export class InMemoryMenuRepository implements MenuRepository {
@@ -20,13 +20,13 @@ export class InMemoryMenuRepository implements MenuRepository {
     return item ? { ...item } : null;
   }
 
-  async create(input: Omit<MenuRecord, 'id'>) {
+  async create(input: MenuCreateInput) {
     const item = { ...input, id: String(this.nextId++) };
     this.items.set(item.id, item);
     return { ...item };
   }
 
-  async update(id: string, input: Partial<Pick<MenuRecord, 'title' | 'order' | 'isActive'>>) {
+  async update(id: string, input: MenuUpdateInput) {
     const item = await this.findById(id);
     if (!item) throw new DomainNotFoundError('菜单');
     const next = { ...item, ...input };
