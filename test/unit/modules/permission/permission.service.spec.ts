@@ -2,7 +2,6 @@ import { describe, expect, it, vi } from 'vitest';
 import { PermissionService } from '#/modules/permission/permission.service.js';
 import type { PermissionRepository } from '#/modules/permission/repositories/permission-repository.port.js';
 import type { AuditService } from '#/modules/audit/audit.service.js';
-import { REGISTERED_PERMISSIONS } from '#/modules/permission/constants/registered-permissions.constant.js';
 import type { PermissionRecord } from '#/modules/authorization/types/permission.types.js';
 
 const permission: PermissionRecord = {
@@ -22,7 +21,6 @@ function createService() {
     findById: vi.fn().mockResolvedValue(permission),
     findByCode: vi.fn().mockResolvedValue(permission),
     findByIds: vi.fn().mockResolvedValue([permission]),
-    ensureRegistered: vi.fn().mockResolvedValue(permission),
     setActive: vi.fn().mockResolvedValue({ ...permission, isActive: false })
   };
   const auditService: Partial<AuditService> = { record: vi.fn().mockResolvedValue(undefined) };
@@ -34,19 +32,13 @@ function createService() {
 }
 
 describe('PermissionService', () => {
-  it('应在模块初始化时同步注册权限', async () => {
-    const { service, repository } = createService();
-    await service.initializeDefaults();
-    expect(repository.ensureRegistered).toHaveBeenCalledTimes(REGISTERED_PERMISSIONS.length);
-  });
-
-  it('应透传动态权限查询和注册操作', async () => {
+  it('应透传动态权限查询操作', async () => {
     const { service } = createService();
+
     await expect(service.listPermissions()).resolves.toEqual([permission]);
     await expect(service.findById('permission-1')).resolves.toEqual(permission);
     await expect(service.findByCode('system.audit.read')).resolves.toEqual(permission);
     await expect(service.findByIds(['permission-1'])).resolves.toEqual([permission]);
-    await expect(service.ensureRegistered(permission)).resolves.toEqual(permission);
   });
 
   it('应按分类声明顺序分组返回权限目录', async () => {
@@ -79,6 +71,7 @@ describe('PermissionService', () => {
 
   it('修改权限状态时应记录审计', async () => {
     const { service, auditService } = createService();
+
     await expect(service.setActive('admin-1', 'permission-1', false)).resolves.toMatchObject({ isActive: false });
     expect(auditService.record).toHaveBeenCalledWith({
       actorAdminId: 'admin-1',

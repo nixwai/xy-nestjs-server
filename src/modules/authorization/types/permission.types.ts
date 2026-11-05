@@ -10,7 +10,7 @@ export interface PermissionRecord {
   isActive: boolean;
 }
 
-/** 代码注册的权限记录。 */
+/** 权限数据迁移使用的权限定义。 */
 export type RegisteredPermission = Omit<PermissionRecord, 'id'>;
 
 /** 按分类分组的权限目录。 */

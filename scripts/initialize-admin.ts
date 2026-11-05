@@ -3,16 +3,13 @@ import { stdin as input, stdout as output } from 'node:process';
 import dataSource from '../src/data-source.js';
 import { AdminEntity } from '../src/modules/admin/entities/admin.entity.js';
 import { AdminRoleAssignmentEntity } from '../src/modules/admin/entities/admin-role-assignment.entity.js';
-import { PermissionEntity } from '../src/modules/permission/entities/permission.entity.js';
-import { TypeOrmPermissionRepository } from '../src/modules/permission/repositories/typeorm-permission.repository.js';
 import { RoleEntity } from '../src/modules/role/entities/role.entity.js';
 import { hashPassword } from '../src/modules/auth/utils/password.util.js';
-import { REGISTERED_PERMISSIONS } from '../src/modules/permission/constants/registered-permissions.constant.js';
 
 const USERNAME_PATTERN = /^[A-Za-z0-9._-]{3,64}$/;
 const PASSWORD_PATTERN = /^(?=.*[A-Za-z])(?=.*\d).{8,72}$/;
 
-/** 幂等初始化根管理员、默认角色和权限目录。 */
+/** 幂等初始化根管理员、默认角色和管理员绑定。 */
 async function main(): Promise<void> {
   const readline = createInterface({ input, output });
   try {
@@ -30,8 +27,6 @@ async function main(): Promise<void> {
     }
     await dataSource.initialize();
     await dataSource.transaction(async manager => {
-      const permissionRepository = new TypeOrmPermissionRepository(manager.getRepository(PermissionEntity));
-      await Promise.all(REGISTERED_PERMISSIONS.map(input => permissionRepository.ensureRegistered(input)));
       const roleRepository = manager.getRepository(RoleEntity);
       let role = await roleRepository.findOne({
         where: { code: 'operator' }

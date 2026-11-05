@@ -41,38 +41,4 @@ describe('TypeOrmPermissionRepository', () => {
     await expect(repository.findByIds([])).resolves.toEqual([]);
   });
 
-  it('应创建或更新注册权限并保留已有启用状态', async () => {
-    const { repository, permissions } = createRepository();
-
-    const input = {
-      code: permission.code,
-      category: '更新分类',
-      isAssignable: false,
-      isProtected: true,
-      name: '更新后的查询角色',
-      description: '更新后的描述',
-      isActive: permission.isActive
-    };
-    permissions.findOne.mockResolvedValueOnce({ ...permission, isActive: false });
-    await expect(repository.ensureRegistered(input)).resolves.toMatchObject({
-      isActive: false,
-      category: '更新分类',
-      isAssignable: false,
-      isProtected: true,
-      name: '更新后的查询角色',
-      description: '更新后的描述'
-    });
-    expect(permissions.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        code: permission.code,
-        isActive: false
-      })
-    );
-
-    permissions.findOne.mockResolvedValueOnce(null);
-    await expect(repository.ensureRegistered(input)).resolves.toMatchObject({
-      isActive: permission.isActive
-    });
-    await expect(repository.setActive('permission-1', false)).resolves.toMatchObject({ isActive: false });
-  });
 });

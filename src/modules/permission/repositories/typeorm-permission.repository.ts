@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
 import { DomainNotFoundError } from '#/common/errors/index.js';
 import { PermissionEntity } from '../entities/permission.entity.js';
-import type { PermissionRecord, RegisteredPermission } from '#/modules/authorization/types/permission.types.js';
+import type { PermissionRecord } from '#/modules/authorization/types/permission.types.js';
 import type { PermissionRepository } from './permission-repository.port.js';
 
 /** 使用 TypeORM 保存动态权限目录。 */
@@ -38,24 +38,6 @@ export class TypeOrmPermissionRepository implements PermissionRepository {
   async findByCode(code: string): Promise<PermissionRecord | null> {
     const item = await this.permissions.findOne({ where: { code } });
     return item ? this.toRecord(item) : null;
-  }
-
-  async ensureRegistered(input: RegisteredPermission): Promise<PermissionRecord> {
-    const existing = await this.permissions.findOne({ where: { code: input.code } });
-    if (!existing) {
-      return this.toRecord(await this.permissions.save(this.permissions.create(input)));
-    }
-
-    const definition = {
-      code: input.code,
-      name: input.name,
-      description: input.description,
-      category: input.category,
-      isAssignable: input.isAssignable,
-      isProtected: input.isProtected
-    };
-    const item = this.permissions.create({ id: existing.id, ...definition, isActive: existing.isActive });
-    return this.toRecord(await this.permissions.save(item));
   }
 
   async setActive(id: string, isActive: boolean): Promise<PermissionRecord> {

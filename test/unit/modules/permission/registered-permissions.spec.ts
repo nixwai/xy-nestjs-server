@@ -1,10 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { PermissionCode } from '#/modules/authorization/constants/index.js';
 import {
-  PERMISSION_CATEGORIES,
   getPermissionCategoryName,
   getPermissionCategoryOrder
-} from '#/modules/permission/constants/permission-category.constant.js';
+} from '#/modules/permission/utils/permission-category.util.js';
 import {
   REGISTERED_PERMISSIONS,
   REGISTERED_PERMISSION_GROUPS
@@ -12,15 +11,15 @@ import {
 
 const permissionCodePattern = /^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9-]*)+$/;
 const declaredCodes = Object.values(PermissionCode);
-const declaredCategories = PERMISSION_CATEGORIES.map(item => item.value);
 
 describe('REGISTERED_PERMISSION_GROUPS', () => {
-  it('分组分类必须已声明且不重复', () => {
+  it('分组分类必须唯一且具备展示名称', () => {
     const categories = REGISTERED_PERMISSION_GROUPS.map(group => group.category);
 
     expect(new Set(categories).size).toBe(categories.length);
-    for (const category of categories) {
-      expect(declaredCategories).toContain(category);
+    for (const group of REGISTERED_PERMISSION_GROUPS) {
+      expect(group.name).not.toBe('');
+      expect(group.name).not.toBe(group.category);
     }
   });
 
@@ -75,17 +74,10 @@ describe('REGISTERED_PERMISSIONS', () => {
   });
 });
 
-describe('权限分类元数据', () => {
-  it('未声明的分类回退为标识本身并排在已声明分类之后', () => {
+describe('权限分类工具', () => {
+  it('未注册的分类回退为标识本身并排在已注册分类之后', () => {
     expect(getPermissionCategoryName('system')).toBe('系统管理');
     expect(getPermissionCategoryName('legacy')).toBe('legacy');
     expect(getPermissionCategoryOrder('legacy')).toBeGreaterThan(getPermissionCategoryOrder('system'));
-  });
-
-  it('每个已声明分类必须具备展示名称', () => {
-    for (const category of PERMISSION_CATEGORIES) {
-      expect(category.name).not.toBe('');
-      expect(category.name).not.toBe(category.value);
-    }
   });
 });

@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { InMemoryPermissionRepository } from '#/modules/permission/repositories/in-memory-permission.repository.js';
 import { InMemoryRoleRepository } from '#/modules/role/repositories/in-memory-role.repository.js';
 
 const permission = {
@@ -56,33 +55,18 @@ describe('InMemory role and permission repositories', () => {
     expect(result.hasNextPage).toBe(false);
   });
 
-  it('注册已有权限时应保留数据库中的启用状态', async () => {
-    const permissions = new InMemoryPermissionRepository();
-    const storedPermission = await permissions.ensureRegistered(permission);
-
-    await permissions.setActive(storedPermission.id, false);
-
-    await expect(permissions.ensureRegistered(permission)).resolves.toMatchObject({
-      id: storedPermission.id,
-      isActive: false
-    });
-  });
-
   it('finds roles and permissions by IDs without exposing mutable arrays', async () => {
     const roles = new InMemoryRoleRepository();
-    const permissions = new InMemoryPermissionRepository();
-    const storedPermission = await permissions.ensureRegistered(permission);
+    const storedPermission = { id: 'permission-1', ...permission };
     const role = await roles.create({ code: 'operator', name: '普通管理员' });
     await roles.bindPermission(role.id, storedPermission.id);
 
     const foundRoles = await roles.findByIds([role.id]);
-    const foundPermissions = await permissions.findByIds([storedPermission.id]);
     foundRoles[0].permissionIds.push('unexpected');
 
     expect(foundRoles[0].permissionIds).toEqual([storedPermission.id, 'unexpected']);
     await expect(roles.findById(role.id)).resolves.toMatchObject({
       permissionIds: [storedPermission.id]
     });
-    expect(foundPermissions).toEqual([storedPermission]);
   });
 });

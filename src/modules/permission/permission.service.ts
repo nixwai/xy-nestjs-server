@@ -1,35 +1,17 @@
-import type { OnModuleInit } from '@nestjs/common';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PERMISSION_REPOSITORY } from './repositories/permission-repository.port.js';
 import type { PermissionRepository } from './repositories/permission-repository.port.js';
-import type {
-  PermissionGroup,
-  PermissionRecord,
-  RegisteredPermission
-} from '../authorization/types/permission.types.js';
-import { REGISTERED_PERMISSIONS } from './constants/registered-permissions.constant.js';
-import { getPermissionCategoryName, getPermissionCategoryOrder } from './constants/permission-category.constant.js';
+import type { PermissionGroup, PermissionRecord } from '../authorization/types/permission.types.js';
+import { getPermissionCategoryName, getPermissionCategoryOrder } from './utils/permission-category.util.js';
 import { AuditService } from '../audit/audit.service.js';
 
 /** 权限目录应用服务。 */
 @Injectable()
-export class PermissionService implements OnModuleInit {
+export class PermissionService {
   constructor(
     @Inject(PERMISSION_REPOSITORY) private readonly repository: PermissionRepository,
     @Inject(AuditService) private readonly auditService: AuditService
   ) {}
-
-  /** 初始化代码注册的权限目录。 */
-  async onModuleInit(): Promise<void> {
-    await this.initializeDefaults();
-  }
-
-  /** 同步代码注册的权限。 */
-  async initializeDefaults(): Promise<void> {
-    for (const permission of REGISTERED_PERMISSIONS) {
-      await this.repository.ensureRegistered(permission);
-    }
-  }
 
   /** 查询权限目录。 */
   listPermissions(): Promise<PermissionRecord[]> {
@@ -65,11 +47,6 @@ export class PermissionService implements OnModuleInit {
   /** 批量查询权限。 */
   findByIds(ids: string[]): Promise<PermissionRecord[]> {
     return this.repository.findByIds(ids);
-  }
-
-  /** 确保代码注册的权限存在并同步其静态定义。 */
-  ensureRegistered(input: RegisteredPermission): Promise<PermissionRecord> {
-    return this.repository.ensureRegistered(input);
   }
 
   /** 修改权限启用状态。 */
