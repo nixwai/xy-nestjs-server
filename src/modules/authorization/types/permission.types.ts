@@ -10,8 +10,11 @@ export interface PermissionRecord {
   isActive: boolean;
 }
 
-/** 权限数据迁移使用的权限定义。 */
-export type RegisteredPermission = Omit<PermissionRecord, 'id'>;
+/** 权限注册表维护的权限定义，不包含数据库保存的启用状态。 */
+export type RegisteredPermission = Omit<PermissionRecord, 'id' | 'isActive'>;
+
+/** 启动同步可对齐的代码维护字段，权限编码是身份标识不参与修改。 */
+export type PermissionDefinitionPatch = Partial<Omit<RegisteredPermission, 'code'>>;
 
 /** 按分类分组的权限目录。 */
 export interface PermissionGroup {

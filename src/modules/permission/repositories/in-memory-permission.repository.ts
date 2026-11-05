@@ -1,5 +1,5 @@
 import { DomainNotFoundError } from '#/common/errors/index.js';
-import type { PermissionRecord } from '#/modules/authorization/types/permission.types.js';
+import type { PermissionDefinitionPatch, PermissionRecord } from '#/modules/authorization/types/permission.types.js';
 import type { PermissionRepository } from './permission-repository.port.js';
 
 /** 在单元测试中保存动态权限目录。 */
@@ -28,6 +28,20 @@ export class InMemoryPermissionRepository implements PermissionRepository {
   async findByCode(code: string): Promise<PermissionRecord | null> {
     const item = [...this.permissions.values()].find(permission => permission.code === code);
     return item ? { ...item } : null;
+  }
+
+  async create(input: Omit<PermissionRecord, 'id'>): Promise<PermissionRecord> {
+    const item: PermissionRecord = { ...input, id: String(this.nextId++) };
+    this.permissions.set(item.id, item);
+    return { ...item };
+  }
+
+  async updateDefinition(id: string, patch: PermissionDefinitionPatch): Promise<PermissionRecord> {
+    const item = this.permissions.get(id);
+    if (!item) throw new DomainNotFoundError('权限');
+    const updated = { ...item, ...patch };
+    this.permissions.set(id, updated);
+    return { ...updated };
   }
 
   async setActive(id: string, isActive: boolean): Promise<PermissionRecord> {

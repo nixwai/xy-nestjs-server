@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
 import { DomainNotFoundError } from '#/common/errors/index.js';
 import { PermissionEntity } from '../entities/permission.entity.js';
-import type { PermissionRecord } from '#/modules/authorization/types/permission.types.js';
+import type { PermissionDefinitionPatch, PermissionRecord } from '#/modules/authorization/types/permission.types.js';
 import type { PermissionRepository } from './permission-repository.port.js';
 
 /** 使用 TypeORM 保存动态权限目录。 */
@@ -38,6 +38,17 @@ export class TypeOrmPermissionRepository implements PermissionRepository {
   async findByCode(code: string): Promise<PermissionRecord | null> {
     const item = await this.permissions.findOne({ where: { code } });
     return item ? this.toRecord(item) : null;
+  }
+
+  async create(input: Omit<PermissionRecord, 'id'>): Promise<PermissionRecord> {
+    return this.toRecord(await this.permissions.save(this.permissions.create(input)));
+  }
+
+  async updateDefinition(id: string, patch: PermissionDefinitionPatch): Promise<PermissionRecord> {
+    const item = await this.permissions.findOne({ where: { id } });
+    if (!item) throw new DomainNotFoundError('权限');
+    this.permissions.merge(item, patch);
+    return this.toRecord(await this.permissions.save(item));
   }
 
   async setActive(id: string, isActive: boolean): Promise<PermissionRecord> {

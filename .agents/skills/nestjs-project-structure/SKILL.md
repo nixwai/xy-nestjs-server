@@ -12,8 +12,8 @@ src/
   common/{constants,decorators,dto,enums,filters,guards,interceptors,pipes,types,utils}
   config/
   database/migrations/
-  modules/{admin,attraction,audit,auth,booking,guide,guide-session,health,media,notification,site,storage,task,user}
-  shared/database/
+  modules/{admin,attraction,audit,auth,authorization,booking,guide,guide-session,health,media,menu,notification,permission,role,site,storage,task,user}
+  shared/{database,persistence.module.ts}
 config/
 scripts/
 test/{unit,e2e}
@@ -23,12 +23,12 @@ test/{unit,e2e}
 - `src/common` 保存跨模块的框架级横切能力。
 - `src/config` 保存配置类型、常量、环境加载、配置构建和校验。
 - `src/database/migrations` 保存 TypeORM Migration。
-- `src/shared/database` 保存全局数据库基础设施；`SharedModule` 根据配置决定是否加载数据库模块。
+- `src/shared/database` 保存全局数据库基础设施；`src/shared/persistence.module.ts` 是仓储实现的唯一装配点，`SharedModule` 根据配置决定是否加载数据库模块。
 - `config/config.yaml` 是仓库内唯一 YAML 配置模板。
 - `scripts` 保存 OpenAPI 等开发工具脚本。
 - `test/unit` 保存单元测试，`test/e2e` 保存端到端测试，`test/setup.ts` 保存测试初始化。
 
-当前领域模块中只有 `health` 包含 Controller、Service 和实际接口；其他模块是模块边界占位。不得将占位模块描述或扩展为已存在的业务能力。
+当前已实现 Controller、Service 和实际接口的领域模块是 `admin`、`audit`、`auth`、`health`、`menu`、`permission`、`role`；`authorization` 只提供 Guard 和授权查询，不暴露接口。其余模块是模块边界占位，不得将占位模块描述或扩展为已存在的业务能力。
 
 ## 模块职责
 
@@ -82,6 +82,26 @@ test/{unit,e2e}
 - 新模块必须在 `src/app.module.ts` 中注册。
 - 全局 Provider 使用 `APP_GUARD`、`APP_INTERCEPTOR` 或 `APP_FILTER` 注册；当前全局能力包括进程内限流守卫、成功响应拦截器和异常过滤器。
 - 需要数据库的模块使用 TypeORM 模块集成方式，并遵守数据库开关和 Migration 约束。
+
+## 持久化装配与种子数据边界
+
+### 仓储装配
+
+- Repository Port 令牌只在 `src/shared/persistence.module.ts` 装配一次，由该文件按数据库开关选择 TypeORM 实现或内存实现，并统一声明 `TypeOrmModule.forFeature` 和 `databaseEntities`。
+- 领域模块只声明 Controller、Service 和领域 Provider，通过 Port 令牌注入仓储。
+- 禁止在领域模块内重复 `provide` 已由全局持久化模块导出的令牌，禁止重复注册 `TypeOrmModule.forFeature`，也禁止在领域模块内读取 `shouldLoadDatabaseModule()` 做装配分支。同一令牌存在两个 Provider 时，后注册者覆盖全局实现，数据库开关和测试 `overrideProvider` 行为都会失真。
+- 新增仓储按顺序改三处：领域模块 `repositories/<name>-repository.port.ts` 定义令牌和契约，TypeORM 实现与内存实现分别落在同目录，最后在 `src/shared/persistence.module.ts` 注册 Provider、导出令牌并把 Entity 加入 `databaseEntities`。
+- 领域模块的 `@Module` 声明应与 `PermissionModule`、`MenuModule` 保持同一形态：`imports` 只列协作模块，`providers` 只列本模块的 Service。
+
+### 注册表种子数据
+
+- 权限和菜单的基础数据由代码注册表在启动同步时创建和对齐，Migration 不重复声明这些字面量。
+- Migration 只负责表结构、索引和不可由代码推导的数据变更（历史数据回填、废弃数据清理）。可由注册表推导的种子数据写入 Migration 会形成第二份事实来源，并在应用先于 `migration:run` 启动时与启动同步争抢唯一键。
+- 新增权限或菜单只修改注册表，不新增数据 Migration；下线权限或菜单时从注册表移除定义，并通过显式 Migration 清理数据库记录。
+- 注册表驱动的字段必须区分作者：只有代码作者的字段（权限的名称、描述、分类、分配边界；菜单的路径、父级、权限编码、根管理员边界）由启动同步创建和对齐，数据库作者的字段（权限 `isActive`；菜单标题、排序、`isActive`）启动同步不得写入。
+- 注册表自身矛盾属于代码缺陷，启动校验必须抛错阻止启动；数据库落后于注册表属于正常发布过程，直接对齐而不是阻止启动。数据库同时保存人工编辑字段且代码无法判断预期结果时（如菜单结构漂移），改为抛错阻止启动并要求通过 Migration 发布。
+- 注册表之外的孤儿数据按运行时影响分级处理：不影响运行时结构的只输出 warn 日志列出标识并提示通过 Migration 清理，不阻止启动（如历史权限编码，没有任何路由再声明它，持有者拿不到能力）；会被运行时消费的必须抛错阻止启动（如未知 `menuKey` 仍会渲染进管理端导航树）。告警和同步结果都通过 `Logger` 输出，只在实际发生写入或发现孤儿数据时打印。
+- 启动同步在 `onModuleInit` 中执行，写入数据库时输出一行汇总日志；被其他模块启动校验依赖的注册表同步必须在依赖方之前完成，模块 `imports` 顺序即初始化顺序。
 
 ## API 形态
 

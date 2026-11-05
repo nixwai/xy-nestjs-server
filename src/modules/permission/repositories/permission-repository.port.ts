@@ -1,4 +1,4 @@
-import type { PermissionRecord } from '#/modules/authorization/types/permission.types.js';
+import type { PermissionDefinitionPatch, PermissionRecord } from '#/modules/authorization/types/permission.types.js';
 
 /** 权限仓储注入令牌。 */
 export const PERMISSION_REPOSITORY = Symbol('PERMISSION_REPOSITORY');
@@ -9,5 +9,7 @@ export interface PermissionRepository {
   findById(id: string): Promise<PermissionRecord | null>;
   findByIds(ids: string[]): Promise<PermissionRecord[]>;
   findByCode(code: string): Promise<PermissionRecord | null>;
+  create(input: Omit<PermissionRecord, 'id'>): Promise<PermissionRecord>;
+  updateDefinition(id: string, patch: PermissionDefinitionPatch): Promise<PermissionRecord>;
   setActive(id: string, isActive: boolean): Promise<PermissionRecord>;
 }
