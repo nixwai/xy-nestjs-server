@@ -1,12 +1,15 @@
 export interface MenuRecord {
   id: string;
-  parentId: string | null;
+  menuKey: string;
+  parentKey: string | null;
   title: string;
   path: string;
-  icon: string | null;
   order: number;
   permissionCode: string | null;
   isRootOnly: boolean;
   isActive: boolean;
-  deletedAt: Date | null;
+}
+
+export interface MenuListItem extends MenuRecord {
+  permissionAvailable: boolean;
 }

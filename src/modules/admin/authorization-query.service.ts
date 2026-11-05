@@ -30,34 +30,46 @@ export class AdminAuthorizationQueryService {
 
 export type MenuTreeItem = {
   id: string;
+  menuKey: string;
   title: string;
   path: string;
-  icon?: string;
   order: number;
   permissionCode: string | null;
   children?: MenuTreeItem[];
 };
 
-function buildMenuTree(items: MenuRecord[], isRoot: boolean, permissions: Set<string>) {
-  const available = items.filter(
-    item =>
-      item.isActive &&
-      (!item.isRootOnly || isRoot) &&
-      (!item.permissionCode || isRoot || permissions.has(item.permissionCode))
-  );
-  const byParent = new Map<string | null, MenuRecord[]>();
-  available.forEach(item => byParent.set(item.parentId, [...(byParent.get(item.parentId) ?? []), item]));
-  const build = (parentId: string | null): MenuTreeItem[] =>
-    (byParent.get(parentId) ?? [])
-      .sort((a, b) => a.order - b.order || Number(a.id) - Number(b.id))
-      .map(item => ({
-        id: item.id,
-        title: item.title,
-        path: item.path,
-        ...(item.icon ? { icon: item.icon } : {}),
-        order: item.order,
-        permissionCode: item.permissionCode,
-        ...(byParent.has(item.id) ? { children: build(item.id) } : {})
-      }));
+type MenuListItem = MenuRecord & { permissionAvailable: boolean };
+
+function buildMenuTree(items: MenuListItem[], isRoot: boolean, permissions: Set<string>): MenuTreeItem[] {
+  const byParent = new Map<string | null, MenuListItem[]>();
+  items.forEach(item => byParent.set(item.parentKey, [...(byParent.get(item.parentKey) ?? []), item]));
+
+  const build = (parentKey: string | null): MenuTreeItem[] => {
+    return (byParent.get(parentKey) ?? [])
+      .filter(item => item.isActive && (!item.isRootOnly || isRoot) && isPermissionAvailable(item, permissions))
+      .sort((left, right) => left.order - right.order || Number(left.id) - Number(right.id))
+      .flatMap(item => {
+        const children = build(item.menuKey);
+        const isDirectory = item.permissionCode === null && item.menuKey !== 'home';
+        if (isDirectory && children.length === 0) return [];
+        return [
+          {
+            id: item.id,
+            menuKey: item.menuKey,
+            title: item.title,
+            path: item.path,
+            order: item.order,
+            permissionCode: item.permissionCode,
+            ...(children.length > 0 ? { children } : {})
+          }
+        ];
+      });
+  };
+
   return build(null);
+}
+
+function isPermissionAvailable(item: MenuListItem, permissions: Set<string>): boolean {
+  if (!item.permissionCode) return true;
+  return item.permissionAvailable && permissions.has(item.permissionCode);
 }

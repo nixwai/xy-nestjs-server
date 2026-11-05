@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { MenuResponseDto } from './menu-response.dto.js';
 
-/** 菜单完整列表响应数据。 */
+/** 菜单管理列表响应数据。 */
 export class MenuListResponseDto {
   @ApiProperty({ type: () => [MenuResponseDto], description: '菜单列表。' })
   items!: MenuResponseDto[];

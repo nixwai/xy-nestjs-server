@@ -3,15 +3,14 @@ import { TypeOrmMenuRepository } from '#/modules/menu/repositories/typeorm-menu.
 
 const menu = {
   id: '1',
-  parentId: null,
+  menuKey: 'home',
+  parentKey: null,
   title: '工作台',
   path: '/home',
-  icon: 'carbon:dashboard',
   order: 1,
   permissionCode: null,
   isRootOnly: false,
-  isActive: false,
-  deletedAt: null
+  isActive: false
 };
 
 describe('TypeOrmMenuRepository', () => {
@@ -20,30 +19,24 @@ describe('TypeOrmMenuRepository', () => {
       find: vi.fn().mockResolvedValue([menu]),
       findOne: vi.fn().mockResolvedValue(menu),
       create: vi.fn().mockImplementation(item => item),
-      merge: vi.fn(),
-      save: vi.fn().mockImplementation(async item => item),
-      softRemove: vi.fn().mockResolvedValue(undefined)
+      merge: vi.fn((item, input) => Object.assign(item, input)),
+      save: vi.fn().mockImplementation(async item => ({ ...menu, ...item }))
     };
     return { repository: new TypeOrmMenuRepository(menus as never), menus };
   }
 
-  it('种子菜单已存在时应原样返回且不写入数据库', async () => {
+  it('应按 menuKey 查询菜单并映射公开字段', async () => {
     const { repository, menus } = createRepository();
-
-    await expect(repository.ensureSeed(menu)).resolves.toMatchObject({ id: '1', isActive: false });
-
-    expect(menus.findOne).toHaveBeenCalledWith({ where: { path: '/home' }, withDeleted: true });
-    expect(menus.merge).not.toHaveBeenCalled();
-    expect(menus.save).not.toHaveBeenCalled();
+    await expect(repository.findByMenuKey('home')).resolves.toEqual(menu);
+    expect(menus.findOne).toHaveBeenCalledWith({ where: { menuKey: 'home' } });
   });
 
-  it('种子菜单不存在时应创建', async () => {
+  it('应只更新标题、排序和启用状态', async () => {
     const { repository, menus } = createRepository();
-    menus.findOne.mockResolvedValueOnce(null);
-
-    await expect(repository.ensureSeed(menu)).resolves.toMatchObject({ path: '/home' });
-
-    expect(menus.create).toHaveBeenCalled();
+    await expect(repository.update('1', { title: '首页', order: 2, isActive: true })).resolves.toMatchObject({
+      title: '首页'
+    });
+    expect(menus.merge).toHaveBeenCalledWith(menu, { title: '首页', order: 2, isActive: true });
     expect(menus.save).toHaveBeenCalled();
   });
 });

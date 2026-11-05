@@ -29,39 +29,39 @@ function createService() {
     list: vi.fn().mockResolvedValue([
       {
         id: '1',
-        parentId: null,
+        menuKey: 'home',
+        parentKey: null,
         title: '工作台',
         path: '/home',
-        icon: null,
         order: 1,
         permissionCode: null,
         isRootOnly: false,
         isActive: true,
-        deletedAt: null
+        permissionAvailable: true
       },
       {
         id: '2',
-        parentId: null,
+        menuKey: 'booking',
+        parentKey: null,
         title: '预约',
         path: '/booking',
-        icon: null,
         order: 2,
         permissionCode: 'booking.read',
         isRootOnly: false,
         isActive: true,
-        deletedAt: null
+        permissionAvailable: true
       },
       {
         id: '3',
-        parentId: null,
+        menuKey: 'system',
+        parentKey: null,
         title: '系统',
         path: '/system',
-        icon: null,
         order: 3,
         permissionCode: null,
         isRootOnly: true,
         isActive: true,
-        deletedAt: null
+        permissionAvailable: true
       }
     ])
   };
@@ -82,6 +82,6 @@ describe('AdminAuthorizationQueryService', () => {
     const root = await service.getAuthorization({ ...admin, isRoot: true });
     expect(permissions.listPermissions).toHaveBeenCalled();
     expect(root.permissions).toEqual(['admin.account.read']);
-    expect(root.menus.map(item => item.path)).toEqual(['/home', '/booking', '/system']);
+    expect(root.menus.map(item => item.path)).toEqual(['/home']);
   });
 });

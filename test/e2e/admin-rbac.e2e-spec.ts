@@ -107,31 +107,40 @@ describe('RBAC management API (e2e)', () => {
     }
   });
 
-  it('supports menu management and returns menus from persistence', async () => {
+  it('supports menu display configuration management', async () => {
     const token = await login('root', 'Root1234');
-    const created = await request(app.getHttpServer())
-      .post('/api/menu/create')
-      .set('Authorization', `Bearer ${token}`)
-      .send({
-        title: '测试菜单',
-        path: '/test-menu',
-        icon: 'carbon:test',
-        order: 99,
-        permissionCode: null
-      })
-      .expect(200);
-    expect(created.body.code).toBe(0);
-    const menuId = created.body.data.id as string;
     const listed = await request(app.getHttpServer())
       .get('/api/menu/list')
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
-    expect(listed.body.data.items.some((item: { id: string }) => item.id === menuId)).toBe(true);
-    await request(app.getHttpServer())
+    expect(listed.body.data.items).toEqual([
+      expect.objectContaining({ menuKey: 'home', path: '/home', permissionAvailable: true })
+    ]);
+    const menuId = listed.body.data.items[0].id as string;
+    const updated = await request(app.getHttpServer())
+      .post('/api/menu/update')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ id: menuId, title: '首页', order: 2, isActive: false })
+      .expect(200);
+    expect(updated.body.data).toMatchObject({ menuKey: 'home', title: '首页', order: 2, isActive: false });
+    const rejected = await request(app.getHttpServer())
+      .post('/api/menu/update')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ id: menuId, path: '/changed' })
+      .expect(200);
+    expect(rejected.body.code).not.toBe(0);
+    const create = await request(app.getHttpServer())
+      .post('/api/menu/create')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ title: '测试菜单', path: '/test-menu' })
+      .expect(200);
+    expect(create.body.code).toBe(40400);
+    const remove = await request(app.getHttpServer())
       .post('/api/menu/soft-delete')
       .set('Authorization', `Bearer ${token}`)
       .send({ id: menuId })
       .expect(200);
+    expect(remove.body.code).toBe(40400);
   });
   it('returns root administrator menus and supports password reset', async () => {
     const token = await login('root', 'Root1234');

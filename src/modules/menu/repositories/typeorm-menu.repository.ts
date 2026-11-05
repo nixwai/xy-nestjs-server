@@ -9,52 +9,43 @@ import type { MenuRepository } from './menu-repository.port.js';
 @Injectable()
 export class TypeOrmMenuRepository implements MenuRepository {
   constructor(@InjectRepository(MenuEntity) private readonly menus: Repository<MenuEntity>) {}
+
   async list() {
     return (await this.menus.find({ order: { order: 'ASC', id: 'ASC' } })).map(item => this.toRecord(item));
   }
+
   async findById(id: string) {
     const item = await this.menus.findOne({ where: { id } });
     return item ? this.toRecord(item) : null;
   }
-  async create(input: Omit<MenuRecord, 'id' | 'deletedAt'>) {
-    return this.toRecord(await this.menus.save(this.menus.create({ ...input, isRootOnly: input.isRootOnly ?? false })));
+
+  async findByMenuKey(menuKey: string) {
+    const item = await this.menus.findOne({ where: { menuKey } });
+    return item ? this.toRecord(item) : null;
   }
-  async update(
-    id: string,
-    input: Partial<
-      Pick<MenuRecord, 'parentId' | 'title' | 'path' | 'icon' | 'order' | 'permissionCode' | 'isRootOnly' | 'isActive'>
-    >
-  ) {
+
+  async create(input: Omit<MenuRecord, 'id'>) {
+    return this.toRecord(await this.menus.save(this.menus.create(input)));
+  }
+
+  async update(id: string, input: Partial<Pick<MenuRecord, 'title' | 'order' | 'isActive'>>) {
     const item = await this.menus.findOne({ where: { id } });
     if (!item) throw new DomainNotFoundError('菜单');
     this.menus.merge(item, input);
     return this.toRecord(await this.menus.save(item));
   }
-  async softDelete(id: string) {
-    const item = await this.menus.findOne({ where: { id } });
-    if (!item) throw new DomainNotFoundError('菜单');
-    await this.menus.softRemove(item);
-  }
-  /** 同路径菜单存在时原样返回，包含已软删除记录，避免重建或覆盖。 */
-  async ensureSeed(input: Omit<MenuRecord, 'id' | 'deletedAt'>) {
-    const found = await this.menus.findOne({ where: { path: input.path }, withDeleted: true });
-    if (found) {
-      return this.toRecord(found);
-    }
-    return this.create(input);
-  }
+
   private toRecord(item: MenuEntity): MenuRecord {
     return {
       id: String(item.id),
-      parentId: item.parentId,
+      menuKey: item.menuKey,
+      parentKey: item.parentKey,
       title: item.title,
       path: item.path,
-      icon: item.icon,
       order: item.order,
       permissionCode: item.permissionCode,
       isRootOnly: item.isRootOnly,
-      isActive: item.isActive,
-      deletedAt: item.deletedAt
+      isActive: item.isActive
     };
   }
 }
