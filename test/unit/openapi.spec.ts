@@ -16,11 +16,25 @@ describe('OpenAPI 文档', () => {
           path,
           method,
           operation: operation as {
+            /** 摘要。 */
             summary?: string;
+            /** 资源描述。 */
             description?: string;
+            /** 请求体参数。 */
             requestBody?: unknown;
-            parameters?: Array<{ name?: string }>;
-            responses?: Record<string, { content?: unknown }>;
+            /** 请求参数。 */
+            parameters?: Array<{
+              /** 名称。 */
+              name?: string;
+            }>;
+            /** 响应定义。 */
+            responses?: Record<
+              string,
+              {
+                /** 响应内容。 */
+                content?: unknown;
+              }
+            >;
           }
         }))
     );

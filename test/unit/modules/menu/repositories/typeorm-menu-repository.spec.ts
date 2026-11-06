@@ -14,6 +14,7 @@ const menu = {
 };
 
 describe('TypeOrmMenuRepository', () => {
+  /** 构造测试仓储 */
   function createRepository() {
     const menus = {
       find: vi.fn().mockResolvedValue([menu]),

@@ -9,7 +9,7 @@ import { AuthService } from '#/modules/auth/auth.service.js';
 import { InMemoryAuthSessionRepository } from '#/modules/auth/repositories/in-memory-auth-session.repository.js';
 import { JwtTokenService } from '#/modules/auth/tokens/jwt-token.service.js';
 import type { RoleService } from '#/modules/role/role.service.js';
-
+/** 构造createConfig。 */
 function createConfig(): ConfigService {
   return new ConfigService({
     jwt: {

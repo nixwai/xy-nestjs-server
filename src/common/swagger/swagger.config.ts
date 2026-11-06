@@ -1,5 +1,4 @@
 import { DocumentBuilder } from '@nestjs/swagger';
-
 /** 创建当前服务使用的 OpenAPI 基础配置。 */
 export function createSwaggerConfig(globalPrefix = 'api') {
   return new DocumentBuilder()

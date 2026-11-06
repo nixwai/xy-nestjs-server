@@ -1,14 +1,19 @@
 import { QueryFailedError } from 'typeorm';
 import { describe, expect, it } from 'vitest';
 import { getMysqlDuplicateKey } from '#/common/utils/typeorm-error.util.js';
-
+/** 定义 MysqlErrorOptions 数据契约。 */
 interface MysqlErrorOptions {
+  /** 业务编码。 */
   code?: string;
+  /** 数据库错误编号。 */
   errno?: number;
+  /** 响应消息。 */
   message?: string;
+  /** 数据库错误消息。 */
   sqlMessage?: string;
 }
 
+/** 构造数据库查询异常 */
 function createQueryFailedError(options: MysqlErrorOptions): QueryFailedError {
   const driverError = Object.assign(new Error(options.message ?? 'Duplicate entry'), options);
   return new QueryFailedError('INSERT INTO secret_table', [], driverError);

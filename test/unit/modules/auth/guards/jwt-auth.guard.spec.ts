@@ -11,7 +11,7 @@ import { InMemoryAuthSessionRepository } from '#/modules/auth/repositories/in-me
 import { JwtAuthGuard } from '#/modules/auth/guards/jwt-auth.guard.js';
 import { JwtTokenService } from '#/modules/auth/tokens/jwt-token.service.js';
 import type { RoleService } from '#/modules/role/role.service.js';
-
+/** 构造守卫测试上下文 */
 function contextFor(authorization?: string): ExecutionContext {
   const request = { header: () => authorization };
   return {
@@ -19,6 +19,7 @@ function contextFor(authorization?: string): ExecutionContext {
   } as unknown as ExecutionContext;
 }
 
+/** 构造认证服务 */
 function createAuthService(config: ConfigService): AuthService {
   const repository = new InMemoryAdminRepository();
   const adminService = new AdminService(

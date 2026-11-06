@@ -1,11 +1,8 @@
 import { BadRequestException } from '@nestjs/common';
-
 /** 管理员密码最小长度。 */
 const PASSWORD_MIN_LENGTH = 8;
-
 /** 管理员密码最大长度。 */
 const PASSWORD_MAX_LENGTH = 72;
-
 /**
  * 校验解密后的管理员密码规则。
  *

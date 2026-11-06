@@ -11,10 +11,13 @@ import {
   Authenticated
 } from '#/modules/authorization/decorators/index.js';
 import { PermissionCode } from '#/modules/authorization/constants/index.js';
-
+/** 定义 TestController。 */
 class TestController {}
+/** publicRoute。 */
 const publicRoute = (): void => undefined;
+/** authenticatedRoute。 */
 const authenticatedRoute = (): void => undefined;
+/** protectedRoute。 */
 const protectedRoute = (): void => undefined;
 Object.defineProperty(TestController.prototype, 'publicRoute', { value: publicRoute });
 Object.defineProperty(TestController.prototype, 'authenticatedRoute', { value: authenticatedRoute });

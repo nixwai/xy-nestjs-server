@@ -14,13 +14,13 @@ import {
 } from './dto/index.js';
 import { PageQueryDto } from '#/common/dto/index.js';
 import { RoleService } from './role.service.js';
-
 /** 提供角色和角色权限关系管理接口。 */
 @ApiTags('角色管理')
 @ApiCommonResponses()
 @Controller('role')
 @RootOnly()
 export class RoleController {
+  /** 创建当前实例。 */
   constructor(@Inject(RoleService) private readonly roleService: RoleService) {}
 
   /** 查询未软删除的角色列表。 */

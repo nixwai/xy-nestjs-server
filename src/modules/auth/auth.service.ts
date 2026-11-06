@@ -9,10 +9,10 @@ import type { AdminRecord } from '../admin/types/admin.types.js';
 import { AdminService } from '../admin/admin.service.js';
 import type { AuthSessionRepository } from './repositories/auth-session-repository.port.js';
 import type { AuthTokenResponseDto } from './dto/index.js';
-
 /** 管理员认证业务服务。 */
 @Injectable()
 export class AuthService {
+  /** 创建当前实例。 */
   constructor(
     @Inject(AdminService) private readonly adminService: AdminService,
     private readonly sessionRepository: AuthSessionRepository,
@@ -91,12 +91,15 @@ export class AuthService {
     const admin = await this.findAdminById(adminId);
     return Boolean(admin && (await verifyPassword(password, admin.passwordHash, admin.passwordSalt)));
   }
+  /** findAdminByUsername。 */
   private async findAdminByUsername(username: string): Promise<AdminRecord | null> {
     return this.adminService.findByUsername(username);
   }
+  /** findAdminById。 */
   private async findAdminById(id: string): Promise<AdminRecord | null> {
     return this.adminService.findById(id);
   }
+  /** issueTokens。 */
   private async issueTokens(admin: AdminRecord): Promise<AuthTokenResponseDto> {
     const refreshToken = createRefreshToken();
     await this.sessionRepository.create({
@@ -106,6 +109,7 @@ export class AuthService {
     });
     return this.buildTokenResponse(admin, refreshToken);
   }
+  /** buildTokenResponse。 */
   private buildTokenResponse(admin: AdminRecord, refreshToken: string): AuthTokenResponseDto {
     return {
       accessToken: this.jwtTokenService.signAccessToken(admin.id),
@@ -121,9 +125,11 @@ export class AuthService {
       }
     };
   }
+  /** 获取accessTokenExpiresIn。 */
   private get accessTokenExpiresIn(): number {
     return parseDuration(this.configService.getOrThrow<string>('jwt.accessTokenExpiresIn'));
   }
+  /** 获取refreshTokenExpiresIn。 */
   private get refreshTokenExpiresIn(): number {
     return parseDuration(this.configService.getOrThrow<string>('jwt.refreshTokenExpiresIn'));
   }

@@ -7,14 +7,16 @@ import type { AdminJwtPayload } from '../auth/types/jwt.types.js';
 import { RootOnly } from '../authorization/decorators/index.js';
 import { MenuListResponseDto, MenuResponseDto, MenuStatusRequestDto, MenuUpdateRequestDto } from './dto/index.js';
 import { MenuService } from './menu.service.js';
-
+/** 定义 MenuController。 */
 @ApiTags('菜单管理')
 @ApiCommonResponses()
 @Controller('menu')
 @RootOnly()
 export class MenuController {
+  /** 创建当前实例。 */
   constructor(@Inject(MenuService) private readonly service: MenuService) {}
 
+  /** 查询记录列表 */
   @Get('list')
   @ApiOperation({ summary: '查询菜单列表', description: '返回全部菜单及权限可用状态。' })
   @ApiOkResponseData(MenuListResponseDto)
@@ -23,6 +25,7 @@ export class MenuController {
     return { items, total: items.length };
   }
 
+  /** 更新记录 */
   @Post('update')
   @ApiOperation({ summary: '更新菜单展示配置' })
   @ApiBody({ type: MenuUpdateRequestDto })
@@ -35,6 +38,7 @@ export class MenuController {
     );
   }
 
+  /** enable。 */
   @Post('enable')
   @ApiOperation({ summary: '启用菜单' })
   @ApiBody({ type: MenuStatusRequestDto })
@@ -43,6 +47,7 @@ export class MenuController {
     return this.service.setActive(admin.sub, body.id, true);
   }
 
+  /** disable。 */
   @Post('disable')
   @ApiOperation({ summary: '停用菜单' })
   @ApiBody({ type: MenuStatusRequestDto })

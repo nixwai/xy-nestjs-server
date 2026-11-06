@@ -3,10 +3,10 @@ import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ADMIN_ROLE_KEY } from '../decorators/admin-only.decorator.js';
 import type { AuthenticatedRequest } from '../types/jwt.types.js';
-
 /** 校验当前请求是否携带管理员身份。 */
 @Injectable()
 export class AdminRoleGuard implements CanActivate {
+  /** 创建当前实例。 */
   constructor(@Inject(Reflector) private readonly reflector: Reflector) {}
 
   /** 拒绝非管理员身份访问管理员路由。 */

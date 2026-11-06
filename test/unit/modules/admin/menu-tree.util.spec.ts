@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildMenuTree } from '#/modules/admin/utils/menu-tree.util.js';
 import type { MenuListItem } from '#/modules/menu/types/menu.types.js';
-
 /** 构造菜单列表项，默认字段覆盖注册表中的常见形态。 */
 function menuItem(overrides: Partial<MenuListItem> & Pick<MenuListItem, 'id' | 'menuKey' | 'path'>): MenuListItem {
   return {

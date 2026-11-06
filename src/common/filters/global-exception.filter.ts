@@ -5,7 +5,7 @@ import { HttpCode } from '../enums/index.js';
 import { DomainConflictError, DomainNotFoundError } from '../errors/index.js';
 import { getMysqlDuplicateKey } from '../utils/index.js';
 import type { ApiErrorResponse } from '../types/index.js';
-
+/** 定义 ErrorResponseBody 数据结构。 */
 type ErrorResponseBody = Record<string, unknown>;
 
 const HTTP_STATUS_TO_BUSINESS_CODE: Readonly<Record<number, HttpCode>> = Object.freeze({
@@ -49,13 +49,11 @@ const DEFAULT_ENGLISH_MESSAGES: Readonly<Record<string, string>> = Object.freeze
   'too many requests': '请求过于频繁，请稍后重试',
   'unsupported media type': '请求格式不受支持'
 });
-
 /** 将异常转换为项目统一的 API 错误响应。 */
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter<unknown> {
   /** 记录未预期的服务端异常。 */
   private readonly logger = new Logger(GlobalExceptionFilter.name);
-
   /**
    * 捕获请求处理期间的异常，并按项目约定返回统一错误结构。
    *

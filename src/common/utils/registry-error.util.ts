@@ -1,6 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
 import type { RegistryValidationErrorDetail } from '../types/index.js';
-
 /**
  * 构造代码注册表校验失败异常，错误数据只包含定位信息，不包含堆栈。
  *

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { TypeOrmAdminRepository } from '#/modules/admin/repositories/typeorm-admin.repository.js';
-
+/** 构造测试实体 */
 function createEntity(overrides: Record<string, unknown> = {}) {
   return {
     id: '1',
@@ -17,6 +17,7 @@ function createEntity(overrides: Record<string, unknown> = {}) {
 }
 
 describe('TypeOrmAdminRepository', () => {
+  /** 构造测试仓储 */
   function createRepository() {
     const entity = createEntity();
     const adminRepository = {

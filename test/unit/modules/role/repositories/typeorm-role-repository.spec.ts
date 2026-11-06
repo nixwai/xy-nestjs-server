@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { TypeOrmRoleRepository } from '#/modules/role/repositories/typeorm-role.repository.js';
-
+/** entity。 */
 function entity(overrides: Record<string, unknown> = {}) {
   return {
     id: 'role-1',
@@ -15,6 +15,7 @@ function entity(overrides: Record<string, unknown> = {}) {
 }
 
 describe('TypeOrmRoleRepository', () => {
+  /** 构造测试仓储 */
   function createRepository() {
     const roleEntity = entity();
     const roles = {

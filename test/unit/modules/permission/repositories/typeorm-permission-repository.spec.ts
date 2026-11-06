@@ -24,6 +24,7 @@ const definition = {
 };
 
 describe('TypeOrmPermissionRepository', () => {
+  /** 构造测试仓储 */
   function createRepository() {
     const permissions = {
       find: vi.fn().mockResolvedValue([permission]),

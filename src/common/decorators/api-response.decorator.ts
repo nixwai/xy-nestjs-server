@@ -13,7 +13,7 @@ const responseProperties = {
     description: '面向客户端的响应消息。'
   }
 };
-
+/** 构造createBusinessResponseSchema。 */
 function createBusinessResponseSchema(data: Record<string, unknown>) {
   return {
     oneOf: [
@@ -62,7 +62,6 @@ export const ApiOkResponseData = (model: Type<unknown>, options?: ApiResponseDat
       }
     })
   );
-
 /** 描述 data 为业务对象数组的统一响应。 */
 export const ApiOkResponseList = (model: Type<unknown>, options?: ApiResponseDataOptions) =>
   applyDecorators(
@@ -80,7 +79,6 @@ export const ApiOkResponseList = (model: Type<unknown>, options?: ApiResponseDat
       }
     })
   );
-
 /** 描述 data 为 null 的统一响应。 */
 export const ApiOkResponseEmpty = (options?: ApiResponseDataOptions) =>
   applyDecorators(

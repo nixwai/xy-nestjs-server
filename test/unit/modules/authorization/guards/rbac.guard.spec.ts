@@ -1,8 +1,9 @@
 import { ForbiddenException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import { RbacGuard } from '#/modules/authorization/guards/rbac.guard.js';
-
-function contextFor(user?: { sub?: string; isRoot?: boolean }) {
+/** 构造守卫测试上下文 */
+function contextFor(user?: { /** 当前用户标识。 */ sub?: string; /** 是否为根管理员。 */ isRoot?: boolean }) {
+  /** handler。 */
   const handler = () => undefined;
   const controller = class TestController {};
   return {
@@ -12,6 +13,7 @@ function contextFor(user?: { sub?: string; isRoot?: boolean }) {
   } as never;
 }
 
+/** 构造createGuard。 */
 function createGuard(metadata: Record<string, unknown>, hasPermission = true) {
   const reflector = {
     getAllAndOverride: vi.fn((key: string) => metadata[key])

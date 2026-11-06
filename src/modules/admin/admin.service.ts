@@ -9,10 +9,10 @@ import { AuditService } from '../audit/audit.service.js';
 import type { AdminCreateRequestDto, AdminUpdateRequestDto } from './dto/index.js';
 import { AdminListQueryDto } from './dto/index.js';
 import type { PageResult } from '#/common/types/index.js';
-
 /** 管理员账户应用服务。 */
 @Injectable()
 export class AdminService {
+  /** 创建当前实例。 */
   constructor(
     @Inject(ADMIN_REPOSITORY) private readonly repository: AdminRepository,
     @Inject(RoleService) private readonly roleService: RoleService,
@@ -228,6 +228,7 @@ export class AdminService {
     return this.repository.listRoleIdsByAdminIds(adminIds);
   }
 
+  /** toPublic。 */
   private toPublic(item: AdminRecord, roleIds: string[]): AdminPublicRecord {
     return {
       id: item.id,

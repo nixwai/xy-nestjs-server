@@ -1,15 +1,17 @@
 import type { AuthSessionRepository } from './auth-session-repository.port.js';
 import type { AdminSessionRecord, AuthSessionInput, SessionRotationResult } from '../types/session.types.js';
-
 /** 在无数据库测试环境中保存刷新会话。 */
 export class InMemoryAuthSessionRepository implements AuthSessionRepository {
+  /** 内存中的认证会话。 */
   private readonly sessions = new Map<string, AdminSessionRecord>();
+  /** 下一个可分配的内存记录标识。 */
   private nextId = 1;
-
+  /** findByTokenHash。 */
   async findByTokenHash(tokenHash: string): Promise<AdminSessionRecord | null> {
     return [...this.sessions.values()].find(item => item.tokenHash === tokenHash) ?? null;
   }
 
+  /** 创建记录 */
   async create(input: AuthSessionInput): Promise<AdminSessionRecord> {
     const item: AdminSessionRecord = {
       id: String(this.nextId++),
@@ -23,6 +25,7 @@ export class InMemoryAuthSessionRepository implements AuthSessionRepository {
     return item;
   }
 
+  /** rotate。 */
   async rotate(sessionId: string, replacement: AuthSessionInput, now: Date): Promise<SessionRotationResult> {
     const current = this.sessions.get(sessionId);
     if (!current) {
@@ -49,6 +52,7 @@ export class InMemoryAuthSessionRepository implements AuthSessionRepository {
     return { status: 'rotated', session: next };
   }
 
+  /** revokeByTokenHash。 */
   async revokeByTokenHash(tokenHash: string, now: Date): Promise<boolean> {
     const item = await this.findByTokenHash(tokenHash);
     if (!item) {
@@ -61,6 +65,7 @@ export class InMemoryAuthSessionRepository implements AuthSessionRepository {
     return true;
   }
 
+  /** revokeChain。 */
   async revokeChain(sessionId: string, now: Date): Promise<void> {
     let item = this.sessions.get(sessionId);
     while (item) {

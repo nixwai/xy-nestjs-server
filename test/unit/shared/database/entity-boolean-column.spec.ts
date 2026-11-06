@@ -6,7 +6,6 @@ import { MenuEntity } from '#/modules/menu/entities/menu.entity.js';
 import { PermissionEntity } from '#/modules/permission/entities/permission.entity.js';
 import { RoleEntity } from '#/modules/role/entities/role.entity.js';
 import '#/shared/persistence.module.js';
-
 /** 具备布尔语义的实体列，列类型必须能被 MySQL 驱动水合为真布尔值。 */
 const BOOLEAN_COLUMNS = [
   { entity: AdminEntity, propertyNames: ['isActive', 'isRoot'] },
@@ -15,13 +14,10 @@ const BOOLEAN_COLUMNS = [
   { entity: PermissionEntity, propertyNames: ['isAssignable', 'isProtected', 'isActive'] },
   { entity: RoleEntity, propertyNames: ['isActive', 'isSystem', 'isProtected'] }
 ] as const;
-
 /** 布尔语义实体列的类型联合，用于按实体定位元数据。 */
 type EntityClass = (typeof BOOLEAN_COLUMNS)[number]['entity'];
-
 /** 已加载实体的列元数据，导入 persistence 模块即完成注册。 */
 const registeredColumns = getMetadataArgsStorage().columns;
-
 /** 读取实体某个属性声明的列类型。 */
 function declaredColumnType(entity: EntityClass, propertyName: string): unknown {
   return registeredColumns.find(column => column.target === entity && column.propertyName === propertyName)?.options
@@ -30,7 +26,14 @@ function declaredColumnType(entity: EntityClass, propertyName: string): unknown 
 
 /** 描述列所属实体，兼容元数据中以字符串登记的目标。 */
 function describeColumnTarget(target: unknown): string {
-  return typeof target === 'string' ? target : ((target as { name?: string })?.name ?? 'unknown');
+  return typeof target === 'string'
+    ? target
+    : ((
+        target as {
+          /** 名称。 */
+          name?: string;
+        }
+      )?.name ?? 'unknown');
 }
 
 describe('实体布尔列类型', () => {

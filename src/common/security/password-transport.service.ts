@@ -7,13 +7,14 @@ import { validatePassword } from '../utils/index.js';
 const RSA_MODULUS_LENGTH = 2048;
 const RSA_CIPHERTEXT_BYTES = RSA_MODULUS_LENGTH / 8;
 const BASE64_CIPHERTEXT_PATTERN = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
-
 /** 提供管理员密码传输层的 RSA-OAEP-SHA256 解密能力。 */
 @Injectable()
 export class PasswordTransportService {
+  /** 用于解密密码的 RSA 私钥。 */
   private readonly privateKey: KeyObject;
+  /** 提供给客户端的 RSA 公钥。 */
   private readonly publicKeyPem: string;
-
+  /** 创建当前实例。 */
   constructor(@Inject(ConfigService) private readonly configService: ConfigService) {
     const encodedPrivateKey = this.configService.getOrThrow<string>('auth.rsaPrivateKey');
     const privateKey = parsePrivateKey(encodedPrivateKey);
@@ -33,14 +34,14 @@ export class PasswordTransportService {
     return this.publicKeyPem;
   }
 
-  /** 解密并校验一个管理员密码字段。 */
+  /** 解密并校验一个管理员密码。 */
   decryptPassword(ciphertext: string, label = '密码'): string {
     const plaintext = this.decryptTransport(ciphertext);
     validatePassword(plaintext, label);
     return plaintext;
   }
 
-  /** 解密并校验可选的管理员密码字段。 */
+  /** 解密并校验可选的管理员密码。 */
   decryptOptionalPassword(ciphertext: string | undefined, label = '密码'): string | undefined {
     if (ciphertext === undefined) {
       return undefined;
@@ -49,6 +50,7 @@ export class PasswordTransportService {
     return this.decryptPassword(ciphertext, label);
   }
 
+  /** decryptTransport。 */
   private decryptTransport(ciphertext: string): string {
     try {
       if (!BASE64_CIPHERTEXT_PATTERN.test(ciphertext)) {

@@ -2,12 +2,10 @@ import type { CanActivate, ExecutionContext } from '@nestjs/common';
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { Request } from 'express';
-
 /** 单个客户端的限流计数记录。 */
 interface RateLimitEntry {
   /** 当前时间窗口内的请求数。 */
   count: number;
-
   /** 当前时间窗口的到期时间戳。 */
   expiresAt: number;
 }
@@ -19,10 +17,9 @@ export class RateLimitGuard implements CanActivate {
   private readonly entries = new Map<string, RateLimitEntry>();
   /** 上一次清理过期记录的时间戳。 */
   private lastCleanupAt = 0;
-
   /** 清理过期记录的最短间隔。 */
   private readonly cleanupIntervalMs = 60_000;
-
+  /** 创建当前实例。 */
   constructor(
     /** 读取限流窗口和请求上限配置。 */
     @Inject(ConfigService) private readonly configService: ConfigService

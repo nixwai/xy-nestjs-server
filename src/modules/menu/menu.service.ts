@@ -7,10 +7,10 @@ import type { MenuListItem, MenuRecord, MenuUpdateInput } from './types/menu.typ
 import type { RegisteredMenuEntry } from './types/registered-menu.types.js';
 import { menuRegistryError, validateMenuStructureMatch } from './utils/menu-registry.util.js';
 import { flattenRegisteredMenus } from './utils/registered-menu.util.js';
-
 /** 菜单目录应用服务，启动时按注册表校验并对齐数据库菜单。 */
 @Injectable()
 export class MenuService implements OnModuleInit {
+  /** 创建当前实例。 */
   constructor(
     @Inject(MENU_REPOSITORY) private readonly repo: MenuRepository,
     @Inject(AuditService) private readonly audit: AuditService,
@@ -19,7 +19,7 @@ export class MenuService implements OnModuleInit {
 
   /** 注册表扁平化后的菜单定义，启动校验和补齐均以此为唯一依据。 */
   private readonly registry: RegisteredMenuEntry[] = flattenRegisteredMenus();
-
+  /** 模块初始化时同步注册数据 */
   async onModuleInit(): Promise<void> {
     await this.validateRegistry();
     await this.synchronizeMissingMenus();
@@ -32,7 +32,7 @@ export class MenuService implements OnModuleInit {
     return Promise.all(items.map(item => this.toListItem(item)));
   }
 
-  /** 更新数据库作者维护的菜单展示字段。 */
+  /** 更新数据库作者维护的菜单展示属性。 */
   async update(actorId: string, id: string, input: MenuUpdateInput): Promise<MenuListItem> {
     const current = await this.repo.findById(id);
     if (!current) throw new NotFoundException('菜单不存在');

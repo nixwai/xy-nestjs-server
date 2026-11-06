@@ -6,10 +6,10 @@ import { AuditService } from '../audit/audit.service.js';
 import { PageQueryDto } from '#/common/dto/index.js';
 import type { PageResult } from '#/common/types/index.js';
 import type { RoleCreateInput, RoleRecord, RoleUpdateInput } from './types/role.types.js';
-
 /** 角色及角色授权关系应用服务。 */
 @Injectable()
 export class RoleService {
+  /** 创建当前实例。 */
   constructor(
     @Inject(ROLE_REPOSITORY) private readonly repository: RoleRepository,
     @Inject(PermissionService) private readonly permissionService: PermissionService,

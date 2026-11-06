@@ -3,7 +3,6 @@ import { join } from 'node:path';
 import * as yaml from 'js-yaml';
 import type { ConfigRecord } from '../types/index.js';
 import { isRecord } from './type-guard.util.js';
-
 /**
  * 递归合并配置对象，数组和标量值由后者覆盖。
  *

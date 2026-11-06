@@ -10,10 +10,10 @@ import type { AdminRepository } from './admin-repository.port.js';
 import { PageQueryDto } from '#/common/dto/index.js';
 import type { PageResult } from '#/common/types/index.js';
 import type { AdminCreateInput, AdminRecord, AdminUpdateInput } from '../types/admin.types.js';
-
 /** 使用 TypeORM 保存管理员账户和角色关系。 */
 @Injectable()
 export class TypeOrmAdminRepository implements AdminRepository {
+  /** 创建当前实例。 */
   constructor(
     @InjectRepository(AdminEntity)
     private readonly admins: Repository<AdminEntity>,
@@ -23,6 +23,7 @@ export class TypeOrmAdminRepository implements AdminRepository {
     private readonly adminSessions: Repository<AdminSessionEntity>
   ) {}
 
+  /** 按用户名查询记录 */
   async findByUsername(username: string): Promise<AdminRecord | null> {
     const item = await this.admins.findOne({
       where: { username }
@@ -30,6 +31,7 @@ export class TypeOrmAdminRepository implements AdminRepository {
     return item ? this.toRecord(item) : null;
   }
 
+  /** 按标识查询记录 */
   async findById(id: string): Promise<AdminRecord | null> {
     const item = await this.admins.findOne({
       where: { id }
@@ -37,6 +39,7 @@ export class TypeOrmAdminRepository implements AdminRepository {
     return item ? this.toRecord(item) : null;
   }
 
+  /** 查询记录列表 */
   async list(query: PageQueryDto = new PageQueryDto()): Promise<PageResult<AdminRecord>> {
     const [items, total] = await this.admins.findAndCount({
       order: { createdAt: 'DESC', id: 'DESC' },
@@ -55,6 +58,7 @@ export class TypeOrmAdminRepository implements AdminRepository {
     };
   }
 
+  /** 创建记录 */
   async create(input: AdminCreateInput): Promise<AdminRecord> {
     try {
       const item = await this.admins.save(
@@ -74,6 +78,7 @@ export class TypeOrmAdminRepository implements AdminRepository {
     }
   }
 
+  /** 更新记录 */
   async update(id: string, input: AdminUpdateInput): Promise<AdminRecord> {
     const item = await this.findEntityOrThrow(id);
     this.admins.merge(item, input);
@@ -87,6 +92,7 @@ export class TypeOrmAdminRepository implements AdminRepository {
     }
   }
 
+  /** 软删除记录 */
   async softDelete(id: string): Promise<void> {
     const item = await this.findEntityOrThrow(id);
     const deletedAt = new Date();
@@ -98,18 +104,21 @@ export class TypeOrmAdminRepository implements AdminRepository {
     );
   }
 
+  /** countActiveRoots。 */
   async countActiveRoots(): Promise<number> {
     return this.admins.count({
       where: { isActive: true, isRoot: true }
     });
   }
 
+  /** listRoleIds。 */
   async listRoleIds(adminId: string): Promise<string[]> {
     await this.findEntityOrThrow(adminId);
     const items = await this.adminRoles.find({ where: { adminId } });
     return items.map(item => String(item.roleId));
   }
 
+  /** listRoleIdsByAdminIds。 */
   async listRoleIdsByAdminIds(adminIds: string[]): Promise<Map<string, string[]>> {
     const result = new Map<string, string[]>(adminIds.map(id => [id, []]));
     if (adminIds.length === 0) {
@@ -128,6 +137,7 @@ export class TypeOrmAdminRepository implements AdminRepository {
     return result;
   }
 
+  /** 为管理员绑定角色 */
   async bindRole(adminId: string, roleId: string): Promise<void> {
     await this.findEntityOrThrow(adminId);
     if (await this.adminRoles.findOne({ where: { adminId, roleId } })) {
@@ -143,11 +153,13 @@ export class TypeOrmAdminRepository implements AdminRepository {
     }
   }
 
+  /** 解除管理员角色绑定 */
   async unbindRole(adminId: string, roleId: string): Promise<void> {
     await this.findEntityOrThrow(adminId);
     await this.adminRoles.delete({ adminId, roleId });
   }
 
+  /** findEntityOrThrow。 */
   private async findEntityOrThrow(id: string): Promise<AdminEntity> {
     const item = await this.admins.findOne({
       where: { id }
@@ -158,6 +170,7 @@ export class TypeOrmAdminRepository implements AdminRepository {
     return item;
   }
 
+  /** 将实体转换为领域记录 */
   private toRecord(item: AdminEntity): AdminRecord {
     return {
       id: String(item.id),
@@ -172,6 +185,7 @@ export class TypeOrmAdminRepository implements AdminRepository {
     };
   }
 
+  /** isDuplicate。 */
   private isDuplicate(error: unknown): boolean {
     return typeof error === 'object' && error !== null && 'code' in error && error.code === 'ER_DUP_ENTRY';
   }

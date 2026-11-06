@@ -9,10 +9,10 @@ import { PageQueryDto } from '#/common/dto/index.js';
 import type { PageResult } from '#/common/types/index.js';
 import type { RoleCreateInput, RoleRecord, RoleUpdateInput } from '../types/role.types.js';
 import type { RoleRepository } from './role-repository.port.js';
-
 /** 使用 TypeORM 保存角色及其权限关系。 */
 @Injectable()
 export class TypeOrmRoleRepository implements RoleRepository {
+  /** 创建当前实例。 */
   constructor(
     @InjectRepository(RoleEntity)
     private readonly roles: Repository<RoleEntity>,
@@ -22,6 +22,7 @@ export class TypeOrmRoleRepository implements RoleRepository {
     private readonly adminRoles: Repository<AdminRoleAssignmentEntity>
   ) {}
 
+  /** 查询记录列表 */
   async list(query: PageQueryDto = new PageQueryDto()): Promise<PageResult<RoleRecord>> {
     const [items, total] = await this.roles.findAndCount({
       order: { createdAt: 'DESC', id: 'DESC' },
@@ -41,11 +42,13 @@ export class TypeOrmRoleRepository implements RoleRepository {
     };
   }
 
+  /** 按标识查询记录 */
   async findById(id: string): Promise<RoleRecord | null> {
     const item = await this.roles.findOne({ where: { id } });
     return item ? (await this.toRecords([item]))[0] : null;
   }
 
+  /** 按标识批量查询记录 */
   async findByIds(ids: string[]): Promise<RoleRecord[]> {
     if (ids.length === 0) {
       return [];
@@ -58,11 +61,13 @@ export class TypeOrmRoleRepository implements RoleRepository {
     });
   }
 
+  /** 按编码查询记录 */
   async findByCode(code: string): Promise<RoleRecord | null> {
     const item = await this.roles.findOne({ where: { code } });
     return item ? (await this.toRecords([item]))[0] : null;
   }
 
+  /** 创建记录 */
   async create(input: RoleCreateInput): Promise<RoleRecord> {
     try {
       const item = await this.roles.save(
@@ -84,12 +89,14 @@ export class TypeOrmRoleRepository implements RoleRepository {
     }
   }
 
+  /** 更新记录 */
   async update(id: string, input: RoleUpdateInput): Promise<RoleRecord> {
     const item = await this.findEntityOrThrow(id);
     this.roles.merge(item, input);
     return this.toRecord(await this.roles.save(item));
   }
 
+  /** 软删除记录 */
   async softDelete(id: string): Promise<void> {
     await this.roles.manager.transaction(async manager => {
       const roles = manager.getRepository(RoleEntity);
@@ -105,6 +112,7 @@ export class TypeOrmRoleRepository implements RoleRepository {
     });
   }
 
+  /** 为角色绑定权限 */
   async bindPermission(roleId: string, permissionId: string): Promise<void> {
     await this.findEntityOrThrow(roleId);
     if (await this.rolePermissions.findOne({ where: { roleId, permissionId } })) {
@@ -120,11 +128,13 @@ export class TypeOrmRoleRepository implements RoleRepository {
     }
   }
 
+  /** 解除角色权限绑定 */
   async unbindPermission(roleId: string, permissionId: string): Promise<void> {
     await this.findEntityOrThrow(roleId);
     await this.rolePermissions.delete({ roleId, permissionId });
   }
 
+  /** findEntityOrThrow。 */
   private async findEntityOrThrow(id: string): Promise<RoleEntity> {
     const item = await this.roles.findOne({ where: { id } });
     if (!item) {
@@ -133,6 +143,7 @@ export class TypeOrmRoleRepository implements RoleRepository {
     return item;
   }
 
+  /** toRecords。 */
   private async toRecords(items: RoleEntity[]): Promise<RoleRecord[]> {
     if (items.length === 0) {
       return [];
@@ -148,6 +159,7 @@ export class TypeOrmRoleRepository implements RoleRepository {
     return items.map(item => this.toRecord(item, permissionIds.get(String(item.id)) ?? []));
   }
 
+  /** 将实体转换为领域记录 */
   private toRecord(item: RoleEntity, permissionIds: string[] = []): RoleRecord {
     return {
       id: String(item.id),
@@ -162,6 +174,7 @@ export class TypeOrmRoleRepository implements RoleRepository {
     };
   }
 
+  /** isDuplicate。 */
   private isDuplicate(error: unknown): boolean {
     return typeof error === 'object' && error !== null && 'code' in error && error.code === 'ER_DUP_ENTRY';
   }

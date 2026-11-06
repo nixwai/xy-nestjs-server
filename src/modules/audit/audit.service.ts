@@ -6,12 +6,12 @@ import { CursorPageQueryDto } from '#/common/dto/index.js';
 import type { AuditLogCursor, AuditRecordInput } from './types/audit.types.js';
 import type { AuditLogListQueryDto } from './dto/index.js';
 import { AuditLogEntity } from './entities/audit-log.entity.js';
-
 /** 记录和查询管理员操作审计。 */
 @Injectable()
 export class AuditService {
+  /** 内存中的审计记录。 */
   private readonly memory: AuditLogEntity[] = [];
-
+  /** 创建当前实例。 */
   constructor(@Optional() @Inject(DataSource) private readonly dataSource?: DataSource) {}
 
   /** 写入不包含敏感字段的审计记录。 */
@@ -64,6 +64,7 @@ export class AuditService {
     return this.toCursorResult(records, query.limit);
   }
 
+  /** parseCursor。 */
   private parseCursor(value: string): AuditLogCursor {
     const payload = decodeCursor(value);
     const createdAt = payload?.createdAt ? new Date(payload.createdAt) : null;
@@ -74,6 +75,7 @@ export class AuditService {
     return { createdAt, id };
   }
 
+  /** isAfterCursor。 */
   private isAfterCursor(item: AuditLogEntity, cursor: AuditLogCursor | null): boolean {
     if (!cursor) {
       return true;
@@ -84,6 +86,7 @@ export class AuditService {
     );
   }
 
+  /** toCursorResult。 */
   private toCursorResult(records: AuditLogEntity[], limit: number): CursorPageResult<AuditLogEntity> {
     const hasMore = records.length > limit;
     const items = records.slice(0, limit).map(item => Object.assign(new AuditLogEntity(), item));

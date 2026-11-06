@@ -1,6 +1,5 @@
 import type { CursorPayload } from '../types/index.js';
 import { isRecord } from './type-guard.util.js';
-
 /** 将游标载荷编码为不透明的 Base64URL 字符串。 */
 export function encodeCursor(payload: CursorPayload): string {
   return Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');
@@ -19,6 +18,7 @@ export function decodeCursor(value: string): CursorPayload | null {
   }
 }
 
+/** 校验游标载荷结构 */
 function isCursorPayload(value: unknown): value is CursorPayload {
   return isRecord(value) && Object.values(value).every(item => typeof item === 'string');
 }

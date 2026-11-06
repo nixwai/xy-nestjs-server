@@ -19,7 +19,7 @@ const config = new ConfigService({
     refreshTokenExpiresIn: '7d'
   }
 });
-
+/** 构造守卫测试上下文 */
 function contextFor(authorization?: string, user?: object): ExecutionContext {
   const request = {
     user,
@@ -32,6 +32,7 @@ function contextFor(authorization?: string, user?: object): ExecutionContext {
   } as unknown as ExecutionContext;
 }
 
+/** 构造认证服务 */
 function createAuthService(): AuthService {
   const repository = new InMemoryAdminRepository();
   const adminService = new AdminService(
@@ -62,7 +63,10 @@ describe('JwtAuthGuard', () => {
     const tokenService = new JwtTokenService(config);
     const token = tokenService.signAccessToken('1');
     const guard = new JwtAuthGuard(authService, tokenService);
-    const request = { header: () => `Bearer ${token}` } as { user?: object };
+    const request = { header: () => `Bearer ${token}` } as {
+      /** 当前用户。 */
+      user?: object;
+    };
     const context = {
       switchToHttp: () => ({ getRequest: () => request })
     } as unknown as ExecutionContext;

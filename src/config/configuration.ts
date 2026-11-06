@@ -4,7 +4,6 @@ import { isRecord } from '../common/utils/type-guard.util.js';
 import { loadEnvironment } from './environment.js';
 import { createApplicationConfigSchema, validateEnvironment } from './config.validation.js';
 import type { ApplicationConfig } from './config.types.js';
-
 /**
  * 构建并校验最终应用配置。
  *

@@ -39,6 +39,7 @@ describe('RBAC management API (e2e)', () => {
   afterEach(async () => {
     await app.close();
   });
+  /** 登录并获取访问令牌 */
   async function login(username: string, password: string): Promise<string> {
     const response = await request(app.getHttpServer())
       .post('/api/auth/admin/login')
@@ -150,9 +151,14 @@ describe('RBAC management API (e2e)', () => {
       .get('/api/admin/me')
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
-    expect(own.body.data.menus.map((item: { path: string }) => item.path)).toEqual(['/home', '/system-management']);
-    const systemMenu = own.body.data.menus.find((item: { menuKey: string }) => item.menuKey === 'system');
-    expect(systemMenu.children.map((child: { path: string }) => child.path)).toEqual([
+    expect(own.body.data.menus.map((item: { /** 请求路径。 */ path: string }) => item.path)).toEqual([
+      '/home',
+      '/system-management'
+    ]);
+    const systemMenu = own.body.data.menus.find(
+      (item: { /** 菜单稳定标识。 */ menuKey: string }) => item.menuKey === 'system'
+    );
+    expect(systemMenu.children.map((child: { /** 请求路径。 */ path: string }) => child.path)).toEqual([
       '/system-management/admin',
       '/system-management/role',
       '/system-management/audit',
@@ -180,7 +186,7 @@ describe('RBAC management API (e2e)', () => {
       .expect(200);
     expect(own.body.data.username).toBe('operator');
     expect(own.body.data.permissions).toEqual([]);
-    expect(own.body.data.menus.map((item: { path: string }) => item.path)).toEqual(['/home']);
+    expect(own.body.data.menus.map((item: { /** 请求路径。 */ path: string }) => item.path)).toEqual(['/home']);
     const denied = await request(app.getHttpServer())
       .get('/api/admin/list')
       .set('Authorization', `Bearer ${token}`)

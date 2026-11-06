@@ -28,17 +28,24 @@ const permission: PermissionRecord = {
   description: null,
   isActive: true
 };
-
+/** 构造测试服务及其依赖 */
 function createService(
   options: {
+    /** 数据仓储。 */
     repository?: Partial<RoleRepository>;
+    /** 权限服务。 */
     permissionService?: Partial<PermissionService>;
+    /** 审计服务。 */
     auditService?: Partial<AuditService>;
   } = {}
 ): {
+  /** 业务服务。 */
   service: RoleService;
+  /** 数据仓储。 */
   repository: Partial<RoleRepository>;
+  /** 权限服务。 */
   permissionService: Partial<PermissionService>;
+  /** 审计服务。 */
   auditService: Partial<AuditService>;
 } {
   const repository: Partial<RoleRepository> = {

@@ -4,10 +4,10 @@ import { Reflector } from '@nestjs/core';
 import type { AuthenticatedRequest } from '#/modules/auth/types/jwt.types.js';
 import { AuthorizationService } from '../authorization.service.js';
 import { AUTHENTICATED_ROUTE_KEY, PERMISSION_KEY, PUBLIC_ROUTE_KEY, ROOT_ONLY_KEY } from '../decorators/index.js';
-
 /** 对业务路由执行统一授权判断。 */
 @Injectable()
 export class RbacGuard implements CanActivate {
+  /** 创建当前实例。 */
   constructor(
     @Inject(Reflector) private readonly reflector: Reflector,
     @Inject(AuthorizationService) private readonly authorizationService: AuthorizationService

@@ -7,12 +7,12 @@ import { RequirePermission } from '../authorization/decorators/index.js';
 import { AuditLogListQueryDto, AuditLogListResponseDto } from './dto/index.js';
 import { PermissionCode } from '../authorization/constants/index.js';
 import { AuditService } from './audit.service.js';
-
 /** 提供管理员变更审计查询接口。 */
 @ApiTags('审计')
 @ApiCommonResponses()
 @Controller('audit')
 export class AuditController {
+  /** 创建当前实例。 */
   constructor(@Inject(AuditService) private readonly auditService: AuditService) {}
 
   /** 查询管理员、角色和权限变更审计记录。 */

@@ -1,6 +1,5 @@
 import type { MenuListItem } from '#/modules/menu/types/menu.types.js';
 import type { MenuTreeItem } from '../types/authorization.types.js';
-
 /**
  * 按当前管理员的根身份和权限编码构建可见菜单树。
  *
@@ -13,7 +12,7 @@ export function buildMenuTree(items: MenuListItem[], isRoot: boolean, permission
   const byParent = new Map<string | null, MenuListItem[]>();
   items.forEach(item => byParent.set(item.parentKey, [...(byParent.get(item.parentKey) ?? []), item]));
   const directoryKeys = new Set(items.flatMap(item => (item.parentKey === null ? [] : [item.parentKey])));
-
+  /** build。 */
   const build = (parentKey: string | null): MenuTreeItem[] => {
     return (byParent.get(parentKey) ?? [])
       .filter(item => item.isActive && (!item.isRootOnly || isRoot) && isPermissionAvailable(item, permissions))

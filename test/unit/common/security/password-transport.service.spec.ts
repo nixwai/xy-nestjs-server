@@ -3,11 +3,12 @@ import { constants, createPublicKey, publicEncrypt } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import { TEST_RSA_PRIVATE_KEY } from '../../../fixtures/rsa-key.js';
 import { PasswordTransportService } from '#/common/security/password-transport.service.js';
-
+/** 构造测试服务及其依赖 */
 function createService(): PasswordTransportService {
   return new PasswordTransportService(new ConfigService({ auth: { rsaPrivateKey: TEST_RSA_PRIVATE_KEY } }));
 }
 
+/** 加密测试密码 */
 function encrypt(publicKey: string, password: string): string {
   return publicEncrypt(
     {

@@ -12,14 +12,14 @@ export interface AuditRecordInput {
   /** 被操作资源 ID，没有具体资源时省略。 */
   targetId?: string;
 
-  /** 结构化变更摘要，不包含敏感字段。 */
+  /** 结构化变更摘要，不包含敏感信息。 */
   details?: Record<string, unknown>;
 
   /** 操作是否成功，省略时按成功记录。 */
   succeeded?: boolean;
 }
 
-/** 审计记录游标分页的定位字段。 */
+/** 审计记录游标分页的定位信息。 */
 export interface AuditLogCursor {
   /** 游标指向的创建时间。 */
   createdAt: Date;

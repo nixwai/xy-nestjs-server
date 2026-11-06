@@ -6,7 +6,6 @@ import { loadEnvironment } from './config/environment.js';
 loadEnvironment();
 const config = buildApplicationConfig();
 const database = config.database;
-
 /** TypeORM CLI 使用的数据源，禁止启用 synchronize。 */
 export default new DataSource({
   type: 'mysql',

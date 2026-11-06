@@ -5,10 +5,10 @@ import { MenuService } from '../menu/menu.service.js';
 import type { AdminPublicRecord } from './types/admin.types.js';
 import type { AdminAuthorizationView } from './types/authorization.types.js';
 import { buildMenuTree } from './utils/menu-tree.util.js';
-
 /** 组装管理员当前授权信息和菜单树。 */
 @Injectable()
 export class AdminAuthorizationQueryService {
+  /** 创建当前实例。 */
   constructor(
     @Inject(RoleService) private readonly roleService: RoleService,
     @Inject(PermissionService) private readonly permissionService: PermissionService,

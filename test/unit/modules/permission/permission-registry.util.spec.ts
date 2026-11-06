@@ -7,7 +7,6 @@ import {
   collectDefinitionChanges,
   validatePermissionRegistry
 } from '#/modules/permission/utils/permission-registry.util.js';
-
 /** 构造仅包含已声明权限编码的合法分组，便于按用例覆盖单个字段。 */
 function createGroup(overrides: Partial<RegisteredPermissionGroup> = {}): RegisteredPermissionGroup {
   return {
@@ -31,7 +30,10 @@ function catchErrorData(groups: readonly RegisteredPermissionGroup[]): Record<st
   try {
     validatePermissionRegistry(groups);
   } catch (error) {
-    const response = (error as BadRequestException).getResponse() as { data: Record<string, unknown> };
+    const response = (error as BadRequestException).getResponse() as {
+      /** 业务数据。 */
+      data: Record<string, unknown>;
+    };
     return response.data;
   }
   throw new Error('注册表校验未按预期失败');

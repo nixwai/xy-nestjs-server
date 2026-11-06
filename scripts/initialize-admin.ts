@@ -8,7 +8,6 @@ import { hashPassword } from '../src/modules/auth/utils/password.util.js';
 
 const USERNAME_PATTERN = /^[A-Za-z0-9._-]{3,64}$/;
 const PASSWORD_PATTERN = /^(?=.*[A-Za-z])(?=.*\d).{8,72}$/;
-
 /** 幂等初始化根管理员、默认角色和管理员绑定。 */
 async function main(): Promise<void> {
   const readline = createInterface({ input, output });
@@ -107,6 +106,7 @@ async function readHidden(prompt: string): Promise<string> {
   input.setRawMode(true);
   return new Promise((resolve, reject) => {
     let value = '';
+    /** 处理初始化数据 */
     const onData = (chunk: Buffer) => {
       const character = chunk.toString('utf8');
       if (character === '\r' || character === '\n') {

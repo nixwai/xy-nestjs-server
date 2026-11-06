@@ -10,7 +10,7 @@ const admin = {
   createdAt: new Date(),
   updatedAt: new Date()
 };
-
+/** 构造测试服务及其依赖 */
 function createService() {
   const roles = {
     findByIds: vi.fn().mockResolvedValue([{ id: 'role-1', isActive: true, permissionIds: ['1'] }])

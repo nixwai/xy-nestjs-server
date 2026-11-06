@@ -5,7 +5,6 @@ import { InMemoryMenuRepository } from '#/modules/menu/repositories/in-memory-me
 import { PermissionCode } from '#/modules/authorization/constants/index.js';
 import type { PermissionRecord } from '#/modules/authorization/types/permission.types.js';
 import { flattenRegisteredMenus } from '#/modules/menu/utils/registered-menu.util.js';
-
 /** 菜单注册表绑定的权限记录，启动校验要求它在权限目录中真实存在。 */
 const auditPermission: PermissionRecord = {
   id: 'permission-1',
@@ -17,7 +16,7 @@ const auditPermission: PermissionRecord = {
   isProtected: false,
   isActive: true
 };
-
+/** 构造测试服务及其依赖 */
 function createService(permission: PermissionRecord | null = auditPermission) {
   const repository = new InMemoryMenuRepository();
   const audit = { record: vi.fn().mockResolvedValue(undefined) };

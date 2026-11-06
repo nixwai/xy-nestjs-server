@@ -7,13 +7,13 @@ import { RootOnly } from '../authorization/decorators/index.js';
 import { PermissionGroupListResponseDto, PermissionResponseDto, PermissionStatusRequestDto } from './dto/index.js';
 import { countPermissions } from './utils/permission-group.util.js';
 import { PermissionService } from './permission.service.js';
-
 /** 提供权限目录查询和启停管理接口。 */
 @ApiTags('权限管理')
 @ApiCommonResponses()
 @Controller('permission')
 @RootOnly()
 export class PermissionController {
+  /** 创建当前实例。 */
   constructor(@Inject(PermissionService) private readonly permissionService: PermissionService) {}
 
   /** 查询完整权限目录。 */

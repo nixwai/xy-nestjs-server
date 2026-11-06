@@ -17,7 +17,7 @@ const permission: PermissionRecord = {
   isProtected: false,
   isActive: true
 };
-
+/** 构造测试服务及其依赖 */
 function createService() {
   const repository: Partial<PermissionRepository> = {
     list: vi.fn().mockResolvedValue([permission]),

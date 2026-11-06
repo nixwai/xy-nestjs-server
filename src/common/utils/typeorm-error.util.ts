@@ -1,9 +1,13 @@
 import { QueryFailedError } from 'typeorm';
-
+/** 定义 MysqlDriverError 数据契约。 */
 interface MysqlDriverError {
+  /** 业务编码。 */
   code?: string;
+  /** 数据库错误编号。 */
   errno?: number;
+  /** 响应消息。 */
   message?: string;
+  /** 数据库错误消息。 */
   sqlMessage?: string;
 }
 
@@ -15,7 +19,6 @@ const DUPLICATE_INDEX_KEY_MAP: Readonly<Record<string, string>> = Object.freeze(
   uk_permission_code: 'permissionCode',
   uk_role_permission_assignment_role_id_permission_id: 'rolePermission'
 });
-
 /** 从 MySQL 错误消息中提取唯一索引名称。 */
 function extractIndexName(message: string): string | null {
   const match = message.match(/\bfor key\s+(?:'([^']+)'|"([^"]+)"|`([^`]+)`|([^\s,;]+))/i);

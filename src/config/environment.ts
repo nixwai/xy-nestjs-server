@@ -4,7 +4,6 @@ import dotenv from 'dotenv';
 import type { AppEnvironment, EnvironmentLoaderOptions } from './config.types.js';
 
 const APP_ENVIRONMENTS: readonly AppEnvironment[] = ['development', 'test', 'production'];
-
 /**
  * 返回环境文件的优先级顺序，数组前面的文件优先级更高。
  *

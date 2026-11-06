@@ -33,11 +33,14 @@ const permission = {
   description: null,
   isActive: true
 };
-
+/** 构造测试服务及其依赖 */
 function createService(
   options: {
+    /** 管理员服务。 */
     adminService?: Partial<AdminService>;
+    /** 角色服务。 */
     roleService?: Partial<RoleService>;
+    /** 权限服务。 */
     permissionService?: Partial<PermissionService>;
   } = {}
 ) {

@@ -4,13 +4,13 @@ import { ApiCommonResponses, ApiOkResponseData } from '#/common/decorators/index
 import { Public } from '../authorization/decorators/index.js';
 import { HealthResponseDto, ReadinessResponseDto } from './dto/index.js';
 import { HealthService } from './health.service.js';
-
 /** 提供容器存活和依赖就绪探针。 */
 @ApiTags('健康检查')
 @ApiCommonResponses()
 @Controller('health')
 @Public()
 export class HealthController {
+  /** 创建当前实例。 */
   constructor(@Inject(HealthService) private readonly healthService: HealthService) {}
 
   /** 返回应用进程存活状态。 */

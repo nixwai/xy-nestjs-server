@@ -5,14 +5,28 @@ import { describe, expect, it, vi } from 'vitest';
 import { HttpCode } from '#/common/enums/index.js';
 import { DomainConflictError, DomainNotFoundError } from '#/common/errors/index.js';
 import { GlobalExceptionFilter } from '#/common/filters/global-exception.filter.js';
-
+/** 定义 ResponseMock 数据契约。 */
 interface ResponseMock {
+  /** 当前状态。 */
   status: ReturnType<typeof vi.fn>;
+  /** JSON 响应方法。 */
   json: ReturnType<typeof vi.fn>;
 }
 
-function createHost(request: Partial<{ method: string; path: string; originalUrl: string }> = {}): {
+/** 构造异常过滤器测试上下文 */
+function createHost(
+  request: Partial<{
+    /** 请求方法。 */
+    method: string;
+    /** 请求路径。 */
+    path: string;
+    /** 原始请求地址。 */
+    originalUrl: string;
+  }> = {}
+): {
+  /** 请求上下文。 */
   host: ArgumentsHost;
+  /** HTTP 响应对象。 */
   response: ResponseMock;
 } {
   const response: ResponseMock = {
@@ -34,10 +48,14 @@ function createHost(request: Partial<{ method: string; path: string; originalUrl
   return { host, response };
 }
 
+/** 构造数据库查询异常 */
 function createQueryFailedError(
   driverError: Error & {
+    /** 业务编码。 */
     code?: string;
+    /** 数据库错误编号。 */
     errno?: number;
+    /** 数据库错误消息。 */
     sqlMessage?: string;
   }
 ): QueryFailedError {

@@ -9,9 +9,9 @@ const idValidation = createValidationMessages('ID');
 const isActiveValidation = createValidationMessages('启用状态');
 const roleIdValidation = createValidationMessages('角色 ID');
 const permissionIdValidation = createValidationMessages('权限 ID');
-
 /** 创建角色请求。 */
 export class RoleCreateRequestDto {
+  /** 业务编码。 */
   @ApiProperty({
     type: String,
     maxLength: 64,
@@ -23,7 +23,7 @@ export class RoleCreateRequestDto {
   @MaxLength(64, { message: codeValidation.maxLength(64) })
   @Matches(/^[a-z][a-z0-9:_-]+$/, { message: '角色编码格式不正确' })
   code!: string;
-
+  /** 名称。 */
   @ApiProperty({
     type: String,
     maxLength: 128,
@@ -34,7 +34,7 @@ export class RoleCreateRequestDto {
   @IsNotEmpty({ message: nameValidation.isNotEmpty })
   @MaxLength(128, { message: nameValidation.maxLength(128) })
   name!: string;
-
+  /** 资源描述。 */
   @ApiPropertyOptional({
     type: String,
     maxLength: 255,
@@ -49,11 +49,12 @@ export class RoleCreateRequestDto {
 
 /** 更新角色请求。 */
 export class RoleUpdateRequestDto {
+  /** 唯一标识。 */
   @ApiProperty({ type: String, example: '1', description: '待更新角色 ID。' })
   @IsString({ message: idValidation.isString })
   @IsNotEmpty({ message: idValidation.isNotEmpty })
   id!: string;
-
+  /** 名称。 */
   @ApiPropertyOptional({
     type: String,
     maxLength: 128,
@@ -65,7 +66,7 @@ export class RoleUpdateRequestDto {
   @IsNotEmpty({ message: nameValidation.isNotEmpty })
   @MaxLength(128, { message: nameValidation.maxLength(128) })
   name?: string;
-
+  /** 资源描述。 */
   @ApiPropertyOptional({
     type: String,
     maxLength: 255,
@@ -76,7 +77,7 @@ export class RoleUpdateRequestDto {
   @IsString({ message: descriptionValidation.isString })
   @MaxLength(255, { message: descriptionValidation.maxLength(255) })
   description?: string;
-
+  /** 是否启用。 */
   @ApiPropertyOptional({
     type: Boolean,
     example: true,
@@ -89,6 +90,7 @@ export class RoleUpdateRequestDto {
 
 /** 软删除角色请求。 */
 export class RoleSoftDeleteRequestDto {
+  /** 唯一标识。 */
   @ApiProperty({ type: String, example: '1', description: '待删除角色 ID。' })
   @IsString({ message: idValidation.isString })
   @IsNotEmpty({ message: idValidation.isNotEmpty })
@@ -97,11 +99,12 @@ export class RoleSoftDeleteRequestDto {
 
 /** 角色权限绑定请求。 */
 export class RolePermissionBindingRequestDto {
+  /** 角色唯一标识。 */
   @ApiProperty({ type: String, example: '1', description: '角色 ID。' })
   @IsString({ message: roleIdValidation.isString })
   @IsNotEmpty({ message: roleIdValidation.isNotEmpty })
   roleId!: string;
-
+  /** 权限唯一标识。 */
   @ApiProperty({ type: String, example: '1', description: '权限 ID。' })
   @IsString({ message: permissionIdValidation.isString })
   @IsNotEmpty({ message: permissionIdValidation.isNotEmpty })

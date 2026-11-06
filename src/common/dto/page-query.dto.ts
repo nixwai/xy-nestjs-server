@@ -5,9 +5,9 @@ import { createValidationMessages } from '../constants/index.js';
 
 const pageValidation = createValidationMessages('页码');
 const pageSizeValidation = createValidationMessages('每页条数');
-
 /** 页码分页查询参数。 */
 export class PageQueryDto {
+  /** 当前页码。 */
   @ApiPropertyOptional({
     type: Number,
     default: 1,
@@ -19,7 +19,7 @@ export class PageQueryDto {
   @IsInt({ message: pageValidation.isInt })
   @Min(1, { message: pageValidation.min(1) })
   page = 1;
-
+  /** 每页返回数量。 */
   @ApiPropertyOptional({
     type: Number,
     default: 20,
@@ -33,7 +33,6 @@ export class PageQueryDto {
   @Min(1, { message: pageSizeValidation.min(1) })
   @Max(100, { message: pageSizeValidation.max(100) })
   pageSize = 20;
-
   /** 当前页之前需要跳过的记录数。 */
   get skip(): number {
     return (this.page - 1) * this.pageSize;

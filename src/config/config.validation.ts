@@ -1,6 +1,5 @@
 import { createPrivateKey } from 'node:crypto';
 import Joi from 'joi';
-
 /**
  * 创建原始环境变量校验器。
  *

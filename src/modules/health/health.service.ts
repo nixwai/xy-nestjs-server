@@ -1,10 +1,10 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
-
 /** 提供进程和依赖就绪状态。 */
 @Injectable()
 export class HealthService {
+  /** 创建当前实例。 */
   constructor(
     /** 读取应用环境和数据库启用状态。 */
     @Inject(ConfigService) private readonly configService: ConfigService,

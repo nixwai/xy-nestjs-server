@@ -6,16 +6,14 @@ import { buildPermissionGroups } from './utils/permission-group.util.js';
 import { collectDefinitionChanges, validatePermissionRegistry } from './utils/permission-registry.util.js';
 import { REGISTERED_PERMISSIONS, REGISTERED_PERMISSION_GROUPS } from './constants/registered-permissions.constant.js';
 import { AuditService } from '../audit/audit.service.js';
-
 /** 权限目录应用服务。 */
 @Injectable()
 export class PermissionService implements OnModuleInit {
   /** 记录启动同步对数据库权限定义的写入结果。 */
   private readonly logger = new Logger(PermissionService.name);
-
   /** 注册表声明的权限编码集合，用于识别注册表之外的历史权限。 */
   private readonly registeredCodes = new Set(REGISTERED_PERMISSIONS.map(definition => definition.code));
-
+  /** 创建当前实例。 */
   constructor(
     @Inject(PERMISSION_REPOSITORY) private readonly repository: PermissionRepository,
     @Inject(AuditService) private readonly auditService: AuditService

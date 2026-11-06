@@ -8,7 +8,7 @@ import type { RoleService } from '#/modules/role/role.service.js';
 import type { AuditService } from '#/modules/audit/audit.service.js';
 
 const now = new Date('2026-01-01T00:00:00.000Z');
-
+/** admin。 */
 function admin(overrides: Partial<AdminRecord> = {}): AdminRecord {
   return {
     id: '1',
@@ -24,15 +24,22 @@ function admin(overrides: Partial<AdminRecord> = {}): AdminRecord {
   };
 }
 
+/** 构造测试服务及其依赖 */
 function createService(
   options: {
+    /** 数据仓储。 */
     repository?: Partial<AdminRepository>;
+    /** 角色服务。 */
     roleService?: Partial<RoleService>;
+    /** 审计服务。 */
     auditService?: Partial<AuditService>;
   } = {}
 ): {
+  /** 业务服务。 */
   service: AdminService;
+  /** 数据仓储。 */
   repository: Partial<AdminRepository>;
+  /** 审计服务。 */
   auditService: Partial<AuditService>;
 } {
   const repository: Partial<AdminRepository> = {

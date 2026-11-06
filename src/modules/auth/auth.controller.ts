@@ -10,13 +10,13 @@ import {
   AuthTokenResponseDto,
   RefreshTokenRequestDto
 } from './dto/index.js';
-
 /** 提供管理员认证、令牌刷新和会话注销接口。 */
 @ApiTags('认证')
 @ApiCommonResponses()
 @Controller('auth')
 @Public()
 export class AuthController {
+  /** 创建当前实例。 */
   constructor(
     @Inject(AuthService) private readonly authService: AuthService,
     @Inject(PasswordTransportService) private readonly passwordTransportService: PasswordTransportService

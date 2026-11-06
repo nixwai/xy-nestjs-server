@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { AuditService } from '#/modules/audit/audit.service.js';
 import { AuditLogListQueryDto } from '#/modules/audit/dto/index.js';
-
+/** 查询参数。 */
 function query(overrides: Partial<AuditLogListQueryDto> = {}) {
   return Object.assign(new AuditLogListQueryDto(), overrides);
 }

@@ -1,9 +1,11 @@
 import type { MigrationInterface, QueryRunner } from "typeorm";
-
+      /** 定义初始数据库结构迁移。 */
 export class Initial1793785310578 implements MigrationInterface {
-    name = 'Initial1793785310578'
+    /** 名称。 */
+name = 'Initial1793785310578'
 
-    public async up(queryRunner: QueryRunner): Promise<void> {
+    /** 执行数据库迁移 */
+public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`CREATE TABLE \`admin_role_assignment\` (\`id\` bigint UNSIGNED NOT NULL AUTO_INCREMENT, \`admin_id\` bigint UNSIGNED NOT NULL, \`role_id\` bigint UNSIGNED NOT NULL, \`gmt_create\` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), \`gmt_modified\` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6), INDEX \`idx_admin_role_assignment_role_id\` (\`role_id\`), UNIQUE INDEX \`uk_admin_role_assignment_admin_id_role_id\` (\`admin_id\`, \`role_id\`), PRIMARY KEY (\`id\`)) ENGINE=InnoDB`);
         await queryRunner.query(`CREATE TABLE \`admin_session\` (\`id\` bigint UNSIGNED NOT NULL AUTO_INCREMENT, \`admin_id\` bigint UNSIGNED NOT NULL, \`token_hash\` char(64) NOT NULL, \`expires_at\` datetime NOT NULL, \`revoked_at\` datetime NULL, \`replaced_by_session_id\` bigint UNSIGNED NULL, \`gmt_create\` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), \`gmt_modified\` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6), \`last_used_at\` datetime NULL, INDEX \`idx_admin_session_replaced_by_session_id\` (\`replaced_by_session_id\`), INDEX \`idx_admin_session_expires_at\` (\`expires_at\`), INDEX \`idx_admin_session_admin_id\` (\`admin_id\`), UNIQUE INDEX \`uk_admin_session_token_hash\` (\`token_hash\`), PRIMARY KEY (\`id\`)) ENGINE=InnoDB`);
         await queryRunner.query(`CREATE TABLE \`audit_log\` (\`id\` bigint UNSIGNED NOT NULL AUTO_INCREMENT, \`actor_admin_id\` bigint UNSIGNED NULL, \`action\` varchar(64) NOT NULL, \`resource_type\` varchar(64) NOT NULL, \`target_id\` varchar(64) NULL, \`details\` json NULL, \`succeeded\` tinyint UNSIGNED NOT NULL DEFAULT '1', \`gmt_create\` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), \`gmt_modified\` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6), INDEX \`idx_audit_log_actor_admin_id\` (\`actor_admin_id\`), INDEX \`idx_audit_log_resource_type_target_id\` (\`resource_type\`, \`target_id\`), INDEX \`idx_audit_log_cursor\` (\`gmt_create\`, \`id\`), INDEX \`idx_audit_log_created_at\` (\`gmt_create\`), PRIMARY KEY (\`id\`)) ENGINE=InnoDB`);
@@ -14,7 +16,8 @@ export class Initial1793785310578 implements MigrationInterface {
         await queryRunner.query(`CREATE TABLE \`role_permission_assignment\` (\`id\` bigint UNSIGNED NOT NULL AUTO_INCREMENT, \`role_id\` bigint UNSIGNED NOT NULL, \`permission_id\` bigint UNSIGNED NOT NULL, \`gmt_create\` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), \`gmt_modified\` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6), INDEX \`idx_role_permission_assignment_permission_id\` (\`permission_id\`), UNIQUE INDEX \`uk_role_permission_assignment_role_id_permission_id\` (\`role_id\`, \`permission_id\`), PRIMARY KEY (\`id\`)) ENGINE=InnoDB`);
     }
 
-    public async down(queryRunner: QueryRunner): Promise<void> {
+    /** 回滚数据库迁移 */
+public async down(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`DROP INDEX \`uk_role_permission_assignment_role_id_permission_id\` ON \`role_permission_assignment\``);
         await queryRunner.query(`DROP INDEX \`idx_role_permission_assignment_permission_id\` ON \`role_permission_assignment\``);
         await queryRunner.query(`DROP TABLE \`role_permission_assignment\``);

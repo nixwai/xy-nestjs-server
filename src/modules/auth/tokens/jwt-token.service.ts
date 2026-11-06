@@ -3,10 +3,10 @@ import { ConfigService } from '@nestjs/config';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import type { AdminJwtPayload } from '../types/jwt.types.js';
 import { decodeJson, encodeJson, isFiniteNumber, parseDuration } from '../utils/jwt.util.js';
-
 /** 生成和校验管理员访问令牌。 */
 @Injectable()
 export class JwtTokenService {
+  /** 创建当前实例。 */
   constructor(@Inject(ConfigService) private readonly configService: ConfigService) {}
   /** 签发短期管理员访问令牌。 */
   signAccessToken(adminId: string): string {

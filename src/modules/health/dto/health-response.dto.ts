@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-
 /** 应用存活检查响应数据。 */
 export class HealthResponseDto {
+  /** 当前状态。 */
   @ApiProperty({
     type: String,
     enum: ['ok'],
@@ -9,7 +9,7 @@ export class HealthResponseDto {
     example: 'ok'
   })
   status!: 'ok';
-
+  /** 当前运行环境名称。 */
   @ApiProperty({
     type: String,
     description: '当前运行环境。',
@@ -20,6 +20,7 @@ export class HealthResponseDto {
 
 /** 应用依赖就绪检查响应数据。 */
 export class ReadinessResponseDto {
+  /** 当前状态。 */
   @ApiProperty({
     type: String,
     enum: ['ready', 'not_ready'],
@@ -27,7 +28,7 @@ export class ReadinessResponseDto {
     example: 'ready'
   })
   status!: 'ready' | 'not_ready';
-
+  /** 各项健康检查结果。 */
   @ApiProperty({
     type: 'object',
     additionalProperties: { type: 'string', enum: ['up', 'down'] },

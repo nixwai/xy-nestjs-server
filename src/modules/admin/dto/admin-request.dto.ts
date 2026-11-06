@@ -11,12 +11,12 @@ const adminIdValidation = createValidationMessages('管理员 ID');
 const roleIdValidation = createValidationMessages('角色 ID');
 const isActiveValidation = createValidationMessages('启用状态');
 const isRootValidation = createValidationMessages('根管理员标识');
-
 /** 管理员列表分页查询参数。 */
 export class AdminListQueryDto extends PageQueryDto {}
 
 /** 创建管理员请求。 */
 export class AdminCreateRequestDto {
+  /** 登录用户名。 */
   @ApiProperty({
     type: String,
     minLength: 3,
@@ -30,7 +30,7 @@ export class AdminCreateRequestDto {
   @MaxLength(64, { message: usernameValidation.maxLength(64) })
   @Matches(/^[A-Za-z0-9._-]+$/, { message: '用户名格式不正确' })
   username!: string;
-
+  /** 密码内容。 */
   @ApiProperty({
     type: String,
     maxLength: 512,
@@ -42,7 +42,7 @@ export class AdminCreateRequestDto {
   @MaxLength(512, { message: passwordValidation.maxLength(512) })
   @IsBase64({}, { message: '密码密文必须是 Base64 字符串' })
   password!: string;
-
+  /** 是否为根管理员。 */
   @ApiPropertyOptional({
     type: Boolean,
     default: false,
@@ -52,7 +52,7 @@ export class AdminCreateRequestDto {
   @IsOptional()
   @IsBoolean({ message: isRootValidation.isBoolean })
   isRoot?: boolean;
-
+  /** 用于验证当前身份的密码密文。 */
   @ApiPropertyOptional({
     type: String,
     maxLength: 512,
@@ -68,11 +68,12 @@ export class AdminCreateRequestDto {
 
 /** 更新管理员请求。 */
 export class AdminUpdateRequestDto {
+  /** 唯一标识。 */
   @ApiProperty({ type: String, example: '1', description: '待更新管理员 ID。' })
   @IsString({ message: idValidation.isString })
   @IsNotEmpty({ message: idValidation.isNotEmpty })
   id!: string;
-
+  /** 登录用户名。 */
   @ApiPropertyOptional({
     type: String,
     minLength: 3,
@@ -86,7 +87,7 @@ export class AdminUpdateRequestDto {
   @MaxLength(64, { message: usernameValidation.maxLength(64) })
   @Matches(/^[A-Za-z0-9._-]+$/, { message: '用户名格式不正确' })
   username?: string;
-
+  /** 密码内容。 */
   @ApiPropertyOptional({
     type: String,
     maxLength: 512,
@@ -98,7 +99,7 @@ export class AdminUpdateRequestDto {
   @MaxLength(512, { message: passwordValidation.maxLength(512) })
   @IsBase64({}, { message: '密码密文必须是 Base64 字符串' })
   password?: string;
-
+  /** 是否启用。 */
   @ApiPropertyOptional({
     type: Boolean,
     example: true,
@@ -107,7 +108,7 @@ export class AdminUpdateRequestDto {
   @IsOptional()
   @IsBoolean({ message: isActiveValidation.isBoolean })
   isActive?: boolean;
-
+  /** 是否为根管理员。 */
   @ApiPropertyOptional({
     type: Boolean,
     example: false,
@@ -116,7 +117,7 @@ export class AdminUpdateRequestDto {
   @IsOptional()
   @IsBoolean({ message: isRootValidation.isBoolean })
   isRoot?: boolean;
-
+  /** 用于验证当前身份的密码密文。 */
   @ApiPropertyOptional({
     type: String,
     maxLength: 512,
@@ -132,11 +133,12 @@ export class AdminUpdateRequestDto {
 
 /** 重置管理员密码请求。 */
 export class AdminResetPasswordRequestDto {
+  /** 唯一标识。 */
   @ApiProperty({ type: String, example: '2', description: '待重置管理员 ID。' })
   @IsString({ message: idValidation.isString })
   @IsNotEmpty({ message: idValidation.isNotEmpty })
   id!: string;
-
+  /** 密码内容。 */
   @ApiProperty({
     type: String,
     maxLength: 512,
@@ -148,7 +150,7 @@ export class AdminResetPasswordRequestDto {
   @MaxLength(512, { message: passwordValidation.maxLength(512) })
   @IsBase64({}, { message: '密码密文必须是 Base64 字符串' })
   password!: string;
-
+  /** 用于验证当前身份的密码密文。 */
   @ApiProperty({
     type: String,
     maxLength: 512,
@@ -164,11 +166,12 @@ export class AdminResetPasswordRequestDto {
 
 /** 删除管理员请求。 */
 export class AdminSoftDeleteRequestDto {
+  /** 唯一标识。 */
   @ApiProperty({ type: String, example: '1', description: '待删除管理员 ID。' })
   @IsString({ message: idValidation.isString })
   @IsNotEmpty({ message: idValidation.isNotEmpty })
   id!: string;
-
+  /** 用于验证当前身份的密码密文。 */
   @ApiPropertyOptional({
     type: String,
     maxLength: 512,
@@ -184,11 +187,12 @@ export class AdminSoftDeleteRequestDto {
 
 /** 管理员角色绑定请求。 */
 export class AdminRoleBindingRequestDto {
+  /** 目标管理员的唯一标识。 */
   @ApiProperty({ type: String, example: '2', description: '管理员 ID。' })
   @IsString({ message: adminIdValidation.isString })
   @IsNotEmpty({ message: adminIdValidation.isNotEmpty })
   adminId!: string;
-
+  /** 角色唯一标识。 */
   @ApiProperty({ type: String, example: '1', description: '角色 ID。' })
   @IsString({ message: roleIdValidation.isString })
   @IsNotEmpty({ message: roleIdValidation.isNotEmpty })

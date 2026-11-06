@@ -18,12 +18,12 @@ import {
 import { AdminService } from './admin.service.js';
 import { AdminAuthorizationQueryService } from './authorization-query.service.js';
 import { PasswordTransportService } from '#/common/security/index.js';
-
 /** 提供管理员账户、状态和角色绑定管理接口。 */
 @ApiTags('管理员管理')
 @ApiCommonResponses()
 @Controller()
 export class AdminController {
+  /** 创建当前实例。 */
   constructor(
     @Inject(AdminService) private readonly adminService: AdminService,
     @Inject(AdminAuthorizationQueryService) private readonly authorizationQueryService: AdminAuthorizationQueryService,

@@ -5,7 +5,6 @@ import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { createSwaggerConfig } from '../src/common/swagger/swagger.config.js';
 import type { AppConfig } from '../src/config/config.types.js';
-
 /** 使用测试环境配置生成 OpenAPI 文档，避免连接真实数据库。 */
 process.env.NODE_ENV = 'test';
 process.env.DB_ENABLED = 'false';

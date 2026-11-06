@@ -5,16 +5,17 @@ import { AuthService } from '../auth.service.js';
 import { JwtTokenService } from '../tokens/jwt-token.service.js';
 import type { AuthenticatedRequest } from '../types/jwt.types.js';
 import { PUBLIC_ROUTE_KEY } from '#/modules/authorization/decorators/index.js';
-
 /** 校验访问令牌并将当前管理员身份写入请求。 */
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
+  /** 创建当前实例。 */
   constructor(
     @Inject(AuthService) private readonly authService: AuthService,
     @Inject(JwtTokenService) private readonly jwtTokenService: JwtTokenService,
     @Inject(Reflector) private readonly reflector?: Reflector
   ) {}
 
+  /** canActivate。 */
   async canActivate(context: ExecutionContext): Promise<boolean> {
     if (
       typeof context.getHandler === 'function' &&

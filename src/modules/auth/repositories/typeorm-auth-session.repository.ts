@@ -4,20 +4,22 @@ import type { Repository } from 'typeorm';
 import { AdminSessionEntity } from '#/modules/admin/entities/admin-session.entity.js';
 import type { AuthSessionRepository } from './auth-session-repository.port.js';
 import type { AdminSessionRecord, AuthSessionInput, SessionRotationResult } from '../types/session.types.js';
-
 /** 使用 TypeORM 保存刷新会话。 */
 @Injectable()
 export class TypeOrmAuthSessionRepository implements AuthSessionRepository {
+  /** 创建当前实例。 */
   constructor(
     @InjectRepository(AdminSessionEntity)
     private readonly sessions: Repository<AdminSessionEntity>
   ) {}
 
+  /** findByTokenHash。 */
   async findByTokenHash(tokenHash: string): Promise<AdminSessionRecord | null> {
     const item = await this.sessions.findOne({ where: { tokenHash } });
     return item ? this.toRecord(item) : null;
   }
 
+  /** 创建记录 */
   async create(input: AuthSessionInput): Promise<AdminSessionRecord> {
     const item = await this.sessions.save(
       this.sessions.create({
@@ -30,6 +32,7 @@ export class TypeOrmAuthSessionRepository implements AuthSessionRepository {
     return this.toRecord(item);
   }
 
+  /** rotate。 */
   async rotate(sessionId: string, replacement: AuthSessionInput, now: Date): Promise<SessionRotationResult> {
     return this.sessions.manager.transaction(async manager => {
       const repository = manager.getRepository(AdminSessionEntity);
@@ -66,6 +69,7 @@ export class TypeOrmAuthSessionRepository implements AuthSessionRepository {
     });
   }
 
+  /** revokeByTokenHash。 */
   async revokeByTokenHash(tokenHash: string, now: Date): Promise<boolean> {
     const item = await this.sessions.findOne({ where: { tokenHash } });
     if (!item) {
@@ -80,6 +84,7 @@ export class TypeOrmAuthSessionRepository implements AuthSessionRepository {
     return true;
   }
 
+  /** revokeChain。 */
   async revokeChain(sessionId: string, now: Date): Promise<void> {
     let item = await this.sessions.findOne({ where: { id: sessionId } });
     while (item) {
@@ -96,6 +101,7 @@ export class TypeOrmAuthSessionRepository implements AuthSessionRepository {
     }
   }
 
+  /** 将实体转换为领域记录 */
   private toRecord(item: AdminSessionEntity): AdminSessionRecord {
     return {
       id: String(item.id),
