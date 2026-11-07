@@ -27,6 +27,8 @@ describe('AuditService', () => {
     expect(first.items).toHaveLength(1);
     expect(first.items[0]).toMatchObject({
       action: 'admin.soft-delete',
+      actionLabel: '删除管理员',
+      resourceTypeLabel: '管理员',
       succeeded: false
     });
     expect(first.hasMore).toBe(true);
@@ -36,10 +38,18 @@ describe('AuditService', () => {
     expect(second.items).toHaveLength(1);
     expect(second.items[0]).toMatchObject({
       action: 'admin.create',
+      actionLabel: '创建管理员',
       targetId: '1'
     });
     expect(second.hasMore).toBe(false);
     expect(second.nextCursor).toBeNull();
+  });
+
+  it('未知动作和资源编码应回退为原始编码', async () => {
+    const service = new AuditService();
+    await service.record({ actorAdminId: null, action: 'unknown.action', resourceType: 'unknown-resource' });
+    const result = await service.list(query({ limit: 1 }));
+    expect(result.items[0]).toMatchObject({ actionLabel: 'unknown.action', resourceTypeLabel: 'unknown-resource' });
   });
 
   it('非法游标应拒绝查询', async () => {

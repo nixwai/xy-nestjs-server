@@ -27,3 +27,18 @@ export interface AuditLogCursor {
   /** 游标指向的审计记录 ID。 */
   id: string;
 }
+
+/** 审计记录接口响应模型。 */
+export interface AuditLogResponse {
+  id: string;
+  actorAdminId: string | null;
+  action: string;
+  actionLabel: string;
+  resourceType: string;
+  resourceTypeLabel: string;
+  targetId: string | null;
+  details: Record<string, unknown> | null;
+  succeeded: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}

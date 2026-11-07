@@ -3,7 +3,8 @@ import { DataSource } from 'typeorm';
 import { decodeCursor, encodeCursor } from '#/common/utils/index.js';
 import type { CursorPageResult } from '#/common/types/index.js';
 import { CursorPageQueryDto } from '#/common/dto/index.js';
-import type { AuditLogCursor, AuditRecordInput } from './types/audit.types.js';
+import type { AuditLogCursor, AuditLogResponse, AuditRecordInput } from './types/audit.types.js';
+import { getAuditActionLabel, getAuditResourceLabel } from './constants/audit-labels.constant.js';
 import type { AuditLogListQueryDto } from './dto/index.js';
 import { AuditLogEntity } from './entities/audit-log.entity.js';
 /** 记录和查询管理员操作审计。 */
@@ -38,7 +39,7 @@ export class AuditService {
   }
 
   /** 按创建时间和 ID 倒序查询审计记录。 */
-  async list(query: AuditLogListQueryDto = new CursorPageQueryDto()): Promise<CursorPageResult<AuditLogEntity>> {
+  async list(query: AuditLogListQueryDto = new CursorPageQueryDto()): Promise<CursorPageResult<AuditLogResponse>> {
     const cursor = query.cursor ? this.parseCursor(query.cursor) : null;
     if (this.dataSource?.isInitialized) {
       const repository = this.dataSource.getRepository(AuditLogEntity);
@@ -87,9 +88,9 @@ export class AuditService {
   }
 
   /** toCursorResult。 */
-  private toCursorResult(records: AuditLogEntity[], limit: number): CursorPageResult<AuditLogEntity> {
+  private toCursorResult(records: AuditLogEntity[], limit: number): CursorPageResult<AuditLogResponse> {
     const hasMore = records.length > limit;
-    const items = records.slice(0, limit).map(item => Object.assign(new AuditLogEntity(), item));
+    const items = records.slice(0, limit).map(item => this.toResponse(item));
     const last = items.at(-1);
     return {
       items,
@@ -101,6 +102,23 @@ export class AuditService {
               id: String(last.id)
             })
           : null
+    };
+  }
+
+  /** 将审计实体转换为接口响应，避免直接暴露持久化实体。 */
+  private toResponse(item: AuditLogEntity): AuditLogResponse {
+    return {
+      id: String(item.id),
+      actorAdminId: item.actorAdminId,
+      action: item.action,
+      actionLabel: getAuditActionLabel(item.action),
+      resourceType: item.resourceType,
+      resourceTypeLabel: getAuditResourceLabel(item.resourceType),
+      targetId: item.targetId,
+      details: item.details,
+      succeeded: item.succeeded,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt
     };
   }
 }

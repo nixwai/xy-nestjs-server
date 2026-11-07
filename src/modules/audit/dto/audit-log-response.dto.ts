@@ -19,9 +19,15 @@ export class AuditLogResponseDto {
     example: 'admin.create'
   })
   action!: string;
+  /** 审计动作中文名称。 */
+  @ApiProperty({ type: String, description: '操作动作中文名称。', example: '创建管理员' })
+  actionLabel!: string;
   /** 被操作资源的类型。 */
   @ApiProperty({ type: String, description: '资源类型。', example: 'admin' })
   resourceType!: string;
+  /** 资源类型中文名称。 */
+  @ApiProperty({ type: String, description: '资源类型中文名称。', example: '管理员' })
+  resourceTypeLabel!: string;
   /** 被操作资源的标识。 */
   @ApiProperty({
     type: String,
