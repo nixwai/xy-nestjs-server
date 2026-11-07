@@ -18,8 +18,6 @@ export const CONFIG_KEYS = {
   /** Swagger 配置键。 */
   swagger: 'swagger',
 
-
-
   /** 限流配置键。 */
   throttler: 'throttler'
 } as const;

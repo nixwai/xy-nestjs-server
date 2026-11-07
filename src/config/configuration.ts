@@ -64,10 +64,7 @@ export function applyEnvironmentOverrides(baseConfig: ConfigRecord, environment:
       port: readNumber(environment.DB_PORT, baseConfigValue(baseConfig, ['database', 'port'], 3306)),
       username: readString(environment.DB_USERNAME, baseConfigValue(baseConfig, ['database', 'username'], 'root')),
       password: readString(environment.DB_PASSWORD, baseConfigValue(baseConfig, ['database', 'password'], '')),
-      database: readString(
-        environment.DB_DATABASE,
-        baseConfigValue(baseConfig, ['database', 'database'], 'app')
-      ),
+      database: readString(environment.DB_DATABASE, baseConfigValue(baseConfig, ['database', 'database'], 'app')),
       synchronize: false
     },
     jwt: {

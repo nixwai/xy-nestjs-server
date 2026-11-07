@@ -38,7 +38,7 @@ import { AuditModule } from './modules/audit/audit.module.js';
     PermissionModule,
     RoleModule,
     AuthorizationModule,
-    AuditModule,
+    AuditModule
   ],
   providers: [
     { provide: APP_GUARD, useClass: RateLimitGuard },
