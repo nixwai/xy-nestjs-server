@@ -10,7 +10,7 @@ describe('createDatabaseOptions', () => {
           'database.host': 'mysql.internal',
           'database.port': 3306,
           'database.username': 'admin',
-          'database.database': 'scenic_booking'
+          'database.database': 'app'
         })[key],
       get: (_key: string, fallback: string) => fallback
     } as unknown as ConfigService;

@@ -30,14 +30,6 @@ export function createConfigValidationSchema(): Joi.ObjectSchema {
         return value;
       }),
     SWAGGER_ENABLED: Joi.boolean().truthy('true').falsy('false'),
-    STORAGE_ENABLED: Joi.boolean().truthy('true').falsy('false'),
-    COS_REGION: Joi.string().allow(''),
-    COS_BUCKET: Joi.string().allow(''),
-    COS_SECRET_ID: Joi.string().allow(''),
-    COS_SECRET_KEY: Joi.string().allow(''),
-    WECHAT_ENABLED: Joi.boolean().truthy('true').falsy('false'),
-    WECHAT_APP_ID: Joi.string().allow(''),
-    WECHAT_APP_SECRET: Joi.string().allow(''),
     THROTTLE_TTL: Joi.number().integer().positive(),
     THROTTLE_LIMIT: Joi.number().integer().positive()
   })
@@ -56,24 +48,6 @@ export function createConfigValidationSchema(): Joi.ObjectSchema {
         if (isWeakProductionSecret(value.JWT_SECRET)) {
           return helpers.message({
             custom: '生产环境禁止使用占位或测试 JWT 密钥'
-          });
-        }
-      }
-      if (value.STORAGE_ENABLED === true) {
-        const requiredKeys = ['COS_REGION', 'COS_BUCKET', 'COS_SECRET_ID', 'COS_SECRET_KEY'] as const;
-        const missingKeys = requiredKeys.filter(key => !value[key]);
-        if (missingKeys.length > 0) {
-          return helpers.message({
-            custom: `启用对象存储时缺少配置：${missingKeys.join(', ')}`
-          });
-        }
-      }
-      if (value.WECHAT_ENABLED === true) {
-        const requiredKeys = ['WECHAT_APP_ID', 'WECHAT_APP_SECRET'] as const;
-        const missingKeys = requiredKeys.filter(key => !value[key]);
-        if (missingKeys.length > 0) {
-          return helpers.message({
-            custom: `启用微信能力时缺少配置：${missingKeys.join(', ')}`
           });
         }
       }
@@ -127,36 +101,6 @@ export function createApplicationConfigSchema(): Joi.ObjectSchema {
       enabled: Joi.boolean().required(),
       path: Joi.string().min(1).required()
     }).required(),
-    storage: Joi.object({
-      enabled: Joi.boolean().required(),
-      region: Joi.string().allow('').required(),
-      bucket: Joi.string().allow('').required(),
-      secretId: Joi.string().allow('').required(),
-      secretKey: Joi.string().allow('').required()
-    })
-      .custom((value, helpers) => {
-        if (value.enabled && (!value.region || !value.bucket || !value.secretId || !value.secretKey)) {
-          return helpers.message({
-            custom: '启用对象存储时必须提供完整 COS 配置'
-          });
-        }
-        return value;
-      })
-      .required(),
-    wechat: Joi.object({
-      enabled: Joi.boolean().required(),
-      appId: Joi.string().allow('').required(),
-      appSecret: Joi.string().allow('').required()
-    })
-      .custom((value, helpers) => {
-        if (value.enabled && (!value.appId || !value.appSecret)) {
-          return helpers.message({
-            custom: '启用微信能力时必须提供完整微信配置'
-          });
-        }
-        return value;
-      })
-      .required(),
     throttler: Joi.object({
       ttl: Joi.number().integer().positive().required(),
       limit: Joi.number().integer().positive().required()

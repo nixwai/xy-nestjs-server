@@ -58,30 +58,6 @@ export interface SwaggerConfig {
   path: string;
 }
 
-/** 对象存储配置。 */
-export interface StorageConfig {
-  /** 是否启用对象存储。 */
-  enabled: boolean;
-  /** COS 所在地域。 */
-  region: string;
-  /** COS 存储桶名称。 */
-  bucket: string;
-  /** COS 访问标识。 */
-  secretId: string;
-  /** COS 访问密钥。 */
-  secretKey: string;
-}
-
-/** 微信配置。 */
-export interface WechatConfig {
-  /** 是否启用微信能力。 */
-  enabled: boolean;
-  /** 微信小程序 AppID。 */
-  appId: string;
-  /** 微信小程序 AppSecret。 */
-  appSecret: string;
-}
-
 /** 限流配置。 */
 export interface ThrottlerConfig {
   /** 限流窗口时长，单位为毫秒。 */
@@ -102,10 +78,6 @@ export interface ApplicationConfig {
   jwt: JwtConfig;
   /** Swagger 文档配置。 */
   swagger: SwaggerConfig;
-  /** 对象存储配置。 */
-  storage: StorageConfig;
-  /** 微信能力配置。 */
-  wechat: WechatConfig;
   /** 请求限流配置。 */
   throttler: ThrottlerConfig;
 }

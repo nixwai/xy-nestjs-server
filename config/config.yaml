@@ -10,7 +10,7 @@ database:
   port: 3306
   username: root
   password: ''
-  database: scenic_booking
+  database: app
   synchronize: false
 jwt:
   secret: ''
@@ -21,16 +21,6 @@ auth:
 swagger:
   enabled: true
   path: docs
-storage:
-  enabled: false
-  region: ''
-  bucket: ''
-  secretId: ''
-  secretKey: ''
-wechat:
-  enabled: false
-  appId: ''
-  appSecret: ''
 throttler:
   ttl: 60000
   limit: 100

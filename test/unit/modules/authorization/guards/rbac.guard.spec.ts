@@ -54,13 +54,13 @@ describe('RbacGuard', () => {
   });
 
   it('checks a dynamic permission by its business code', async () => {
-    const { guard, authorizationService } = createGuard({ requiredPermission: 'booking.read' });
+    const { guard, authorizationService } = createGuard({ requiredPermission: 'resource.read' });
     await expect(guard.canActivate(contextFor({ sub: '1' }))).resolves.toBe(true);
-    expect(authorizationService.hasPermission).toHaveBeenCalledWith('1', 'booking.read');
+    expect(authorizationService.hasPermission).toHaveBeenCalledWith('1', 'resource.read');
   });
 
   it('rejects an administrator without the required dynamic permission', async () => {
-    const { guard } = createGuard({ requiredPermission: 'booking.read' }, false);
+    const { guard } = createGuard({ requiredPermission: 'resource.read' }, false);
     await expect(guard.canActivate(contextFor({ sub: '1' }))).rejects.toThrow('无权访问');
   });
 

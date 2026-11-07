@@ -81,7 +81,7 @@ describe('config validation', () => {
       DB_PORT: 3306,
       DB_USERNAME: 'app',
       DB_PASSWORD: 'strong-password',
-      DB_DATABASE: 'scenic_booking',
+      DB_DATABASE: 'app',
       JWT_SECRET: 'test-only-secret-with-at-least-32-chars',
       AUTH_RSA_PRIVATE_KEY: TEST_RSA_PRIVATE_KEY
     });
@@ -98,7 +98,7 @@ describe('config validation', () => {
         port: 3306,
         username: 'root',
         password: 'password',
-        database: 'scenic_booking',
+        database: 'app',
         synchronize: false
       },
       jwt: {
@@ -115,7 +115,6 @@ describe('config validation', () => {
         secretId: '',
         secretKey: ''
       },
-      wechat: { enabled: false, appId: '', appSecret: '' },
       throttler: { ttl: 60000, limit: 100 }
     };
     expect(createApplicationConfigSchema().validate(config).error).toBeDefined();

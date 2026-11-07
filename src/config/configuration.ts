@@ -66,7 +66,7 @@ export function applyEnvironmentOverrides(baseConfig: ConfigRecord, environment:
       password: readString(environment.DB_PASSWORD, baseConfigValue(baseConfig, ['database', 'password'], '')),
       database: readString(
         environment.DB_DATABASE,
-        baseConfigValue(baseConfig, ['database', 'database'], 'scenic_booking')
+        baseConfigValue(baseConfig, ['database', 'database'], 'app')
       ),
       synchronize: false
     },
@@ -89,18 +89,6 @@ export function applyEnvironmentOverrides(baseConfig: ConfigRecord, environment:
     },
     swagger: {
       enabled: readBoolean(environment.SWAGGER_ENABLED, baseConfigValue(baseConfig, ['swagger', 'enabled'], true))
-    },
-    storage: {
-      enabled: readBoolean(environment.STORAGE_ENABLED, baseConfigValue(baseConfig, ['storage', 'enabled'], false)),
-      region: readString(environment.COS_REGION, baseConfigValue(baseConfig, ['storage', 'region'], '')),
-      bucket: readString(environment.COS_BUCKET, baseConfigValue(baseConfig, ['storage', 'bucket'], '')),
-      secretId: readString(environment.COS_SECRET_ID, baseConfigValue(baseConfig, ['storage', 'secretId'], '')),
-      secretKey: readString(environment.COS_SECRET_KEY, baseConfigValue(baseConfig, ['storage', 'secretKey'], ''))
-    },
-    wechat: {
-      enabled: readBoolean(environment.WECHAT_ENABLED, baseConfigValue(baseConfig, ['wechat', 'enabled'], false)),
-      appId: readString(environment.WECHAT_APP_ID, baseConfigValue(baseConfig, ['wechat', 'appId'], '')),
-      appSecret: readString(environment.WECHAT_APP_SECRET, baseConfigValue(baseConfig, ['wechat', 'appSecret'], ''))
     },
     throttler: {
       ttl: readNumber(environment.THROTTLE_TTL, baseConfigValue(baseConfig, ['throttler', 'ttl'], 60000)),

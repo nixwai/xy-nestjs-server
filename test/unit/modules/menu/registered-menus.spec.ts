@@ -32,9 +32,9 @@ const nested: readonly RegisteredMenu[] = [
     ]
   },
   {
-    menuKey: 'booking',
-    title: '预约',
-    path: '/booking',
+    menuKey: 'resource',
+    title: '资源',
+    path: '/resource',
     order: 2,
     permissionCode: null,
     isRootOnly: false
@@ -47,7 +47,7 @@ describe('flattenRegisteredMenus', () => {
       ['system', null],
       ['system.audit', 'system'],
       ['system.audit.detail', 'system.audit'],
-      ['booking', null]
+      ['resource', null]
     ]);
   });
 

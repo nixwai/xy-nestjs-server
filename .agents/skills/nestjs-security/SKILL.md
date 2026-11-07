@@ -7,7 +7,7 @@ description: 实施本项目 NestJS 的配置安全、请求边界、HTTP 安全
 
 ## 密钥与敏感配置
 
-- 源码、YAML、环境模板、测试配置和日志中禁止提交生产密钥、数据库密码、COS SecretId、COS SecretKey、微信 AppSecret、JWT 密钥或 Token。
+- 源码、YAML、环境模板、测试配置和日志中禁止提交生产密钥、数据库密码或外部服务凭据、JWT 密钥或 Token。
 - 敏感值通过运行时环境变量注入；业务代码不直接读取 `process.env`，统一使用配置入口和 `ConfigService`。
 - 禁止使用 `default-secret`、`password`、`change-me`、`test-only` 等弱默认值作为生产凭据。
 - 配置开关启用外部能力时，必须由 Joi 校验确保凭据完整。

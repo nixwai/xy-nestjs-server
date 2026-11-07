@@ -18,11 +18,7 @@ export const CONFIG_KEYS = {
   /** Swagger 配置键。 */
   swagger: 'swagger',
 
-  /** 对象存储配置键。 */
-  storage: 'storage',
 
-  /** 微信配置键。 */
-  wechat: 'wechat',
 
   /** 限流配置键。 */
   throttler: 'throttler'

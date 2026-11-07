@@ -6,16 +6,16 @@ export class PermissionResponseDto implements Omit<PermissionRecord, 'id'> {
   @ApiProperty({ type: String, description: '权限 ID。', example: '1' })
   id!: string;
   /** 业务编码。 */
-  @ApiProperty({ type: String, description: '权限唯一编码。', example: 'booking.read' })
+  @ApiProperty({ type: String, description: '权限编码。', example: 'resource.read' })
   code!: string;
   /** 名称。 */
-  @ApiProperty({ type: String, description: '权限名称。', example: '查看预约' })
+  @ApiProperty({ type: String, description: '权限名称。', example: '查看资源' })
   name!: string;
   /** 资源描述。 */
   @ApiProperty({ type: String, nullable: true, description: '权限描述。' })
   description!: string | null;
   /** 业务分类。 */
-  @ApiProperty({ type: String, description: '权限分类。', example: '预约' })
+  @ApiProperty({ type: String, description: '权限分类。', example: '资源' })
   category!: string;
   /** 权限是否允许分配给角色。 */
   @ApiProperty({ type: Boolean, description: '是否允许绑定给普通角色。' })

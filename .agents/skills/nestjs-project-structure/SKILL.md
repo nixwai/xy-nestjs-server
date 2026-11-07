@@ -12,7 +12,7 @@ src/
   common/{constants,decorators,dto,enums,filters,guards,interceptors,pipes,types,utils}
   config/
   database/migrations/
-  modules/{admin,attraction,audit,auth,authorization,booking,guide,guide-session,health,media,menu,notification,permission,role,site,storage,task,user}
+  modules/{admin,audit,auth,authorization,health,menu,permission,role...}
   shared/{database,persistence.module.ts}
 config/
 scripts/
@@ -35,7 +35,7 @@ test/{unit,e2e}
 - 一个领域模块负责自身的 Controller、Service、DTO、Entity 和业务协作。
 - 跨模块协作通过公开 Service 或明确接口完成，不直接访问其他模块的私有实现、Repository 或内部文件。
 - 横切能力放入 `common`，全局基础设施放入 `shared`。
-- 业务模块不得直接依赖腾讯云 COS SDK；对象存储通过 `storage` 模块抽象。
+- 业务模块不得直接依赖外部服务 SDK；外部服务通过独立模块抽象。
 - 未确认领域只保留已存在的模块边界，不创建伪实体、伪 DTO、伪 API 或伪实现。
 
 ## 领域与基础设施边界

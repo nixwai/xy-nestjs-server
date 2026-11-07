@@ -15,23 +15,13 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter.
 import { SharedModule } from './shared/database/shared.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
-import { UserModule } from './modules/user/user.module.js';
 import { AdminModule } from './modules/admin/admin.module.js';
 import { PermissionModule } from './modules/permission/permission.module.js';
 import { RoleModule } from './modules/role/role.module.js';
 import { AuthorizationModule } from './modules/authorization/authorization.module.js';
-import { SiteModule } from './modules/site/site.module.js';
-import { AttractionModule } from './modules/attraction/attraction.module.js';
-import { MediaModule } from './modules/media/media.module.js';
-import { GuideModule } from './modules/guide/guide.module.js';
-import { GuideSessionModule } from './modules/guide-session/guide-session.module.js';
-import { BookingModule } from './modules/booking/booking.module.js';
-import { NotificationModule } from './modules/notification/notification.module.js';
 import { AuditModule } from './modules/audit/audit.module.js';
-import { StorageModule } from './modules/storage/storage.module.js';
-import { TaskModule } from './modules/task/task.module.js';
 
-/** 注册应用模块、领域模块和全局请求处理能力。 */
+/** 注册应用模块和全局请求处理能力。 */
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -44,21 +34,11 @@ import { TaskModule } from './modules/task/task.module.js';
     SharedModule,
     HealthModule,
     AuthModule,
-    UserModule,
     AdminModule,
     PermissionModule,
     RoleModule,
     AuthorizationModule,
-    SiteModule,
-    AttractionModule,
-    MediaModule,
-    GuideModule,
-    GuideSessionModule,
-    BookingModule,
-    NotificationModule,
     AuditModule,
-    StorageModule,
-    TaskModule
   ],
   providers: [
     { provide: APP_GUARD, useClass: RateLimitGuard },

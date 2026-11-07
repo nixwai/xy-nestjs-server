@@ -2,10 +2,10 @@ import { DocumentBuilder } from '@nestjs/swagger';
 /** 创建当前服务使用的 OpenAPI 基础配置。 */
 export function createSwaggerConfig(globalPrefix = 'api') {
   return new DocumentBuilder()
-    .setTitle('景区导游预约平台 API')
+    .setTitle('服务端 API')
     .setDescription(
       [
-        '面向微信小程序和管理后台的 REST API。',
+        '提供 REST API。',
         '',
         '调用说明：',
         '1. 需要登录的接口使用 Bearer Token，在 Authorize 中填入 accessToken。',

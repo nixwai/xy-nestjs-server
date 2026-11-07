@@ -26,7 +26,7 @@ description: 管理本项目 NestJS 配置、环境变量、Joi 校验和 TypeOR
 
 ## 配置分组
 
-当前分组为 `app`、`cors`、`database`、`jwt`、`swagger`、`storage`、`wechat` 和 `throttler`。分别承载应用、CORS、MySQL、JWT、Swagger、COS、微信和限流配置。
+当前分组为 `app`、`cors`、`database`、`jwt`、`swagger` 和 `throttler`。分别承载应用、CORS、MySQL、JWT、Swagger 和限流配置。
 
 ## 数据库
 
@@ -37,7 +37,7 @@ description: 管理本项目 NestJS 配置、环境变量、Joi 校验和 TypeOR
 
 ## 安全约束
 
-- 配置文件只允许空值、占位符或测试值，不得提交生产密钥、数据库密码、COS 凭据、微信 AppSecret 或 JWT 密钥。
+- 配置文件只允许空值、占位符或测试值，不得提交生产密钥、数据库密码、外部服务凭据 或 JWT 密钥。
 - `JWT_SECRET` 必须通过校验；生产环境拒绝占位或测试密钥。
-- COS 或微信开关启用时，必须校验完整凭据。
+- 外部服务开关启用时，必须校验完整凭据。
 - 禁止新增隐式配置来源、静默默认密钥或绕过 `buildApplicationConfig()` 的读取路径。

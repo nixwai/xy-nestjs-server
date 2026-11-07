@@ -17,8 +17,8 @@ function createService() {
   };
   const permissions = {
     findByIds: vi.fn().mockResolvedValue([
-      { id: '1', code: 'booking.read', isActive: true, isAssignable: true, isProtected: false },
-      { id: '4', code: 'booking.write', isActive: false, isAssignable: true, isProtected: false }
+      { id: '1', code: 'resource.read', isActive: true, isAssignable: true, isProtected: false },
+      { id: '4', code: 'resource.write', isActive: false, isAssignable: true, isProtected: false }
     ]),
     listPermissions: vi.fn().mockResolvedValue([
       { id: '2', code: 'admin.account.read', isActive: true, isAssignable: false, isProtected: true },
@@ -41,12 +41,12 @@ function createService() {
       },
       {
         id: '2',
-        menuKey: 'booking',
+        menuKey: 'resource',
         parentKey: null,
-        title: '预约',
-        path: '/booking',
+        title: '资源',
+        path: '/resource',
         order: 2,
-        permissionCode: 'booking.read',
+        permissionCode: 'resource.read',
         isRootOnly: false,
         isActive: true,
         permissionAvailable: true
@@ -112,8 +112,8 @@ describe('AdminAuthorizationQueryService', () => {
   it('应按动态权限和根管理员边界生成菜单与权限', async () => {
     const { service, permissions } = createService();
     const normal = await service.getAuthorization(admin);
-    expect(normal.permissions).toEqual(['booking.read']);
-    expect(normal.menus.map(item => item.path)).toEqual(['/home', '/booking']);
+    expect(normal.permissions).toEqual(['resource.read']);
+    expect(normal.menus.map(item => item.path)).toEqual(['/home', '/resource']);
 
     const root = await service.getAuthorization({ ...admin, isRoot: true });
     expect(permissions.listPermissions).toHaveBeenCalled();

@@ -41,7 +41,7 @@ describe('getMysqlDuplicateKey', () => {
   it('应移除表名前缀和引号后再解析索引名', () => {
     const error = createQueryFailedError({
       code: 'ER_DUP_ENTRY',
-      message: "Duplicate entry 'secret' for key 'scenic`.`uk_permission_code'"
+      message: "Duplicate entry 'secret' for key 'app`.`uk_permission_code'"
     });
 
     expect(getMysqlDuplicateKey(error)).toBe('permissionCode');
