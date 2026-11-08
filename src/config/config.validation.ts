@@ -30,6 +30,16 @@ export function createConfigValidationSchema(): Joi.ObjectSchema {
         return value;
       }),
     SWAGGER_ENABLED: Joi.boolean().truthy('true').falsy('false'),
+    OSS_REGION: Joi.string().allow(''),
+    OSS_BUCKET: Joi.string().allow(''),
+    OSS_ACCESS_KEY_ID: Joi.string().allow(''),
+    OSS_ACCESS_KEY_SECRET: Joi.string().allow(''),
+    OSS_PUBLIC_BASE_URL: Joi.string().uri({ allowRelative: false }).allow(''),
+    IMAGE_QUALITY: Joi.number().integer().min(1).max(100),
+    IMAGE_MAX_WIDTH: Joi.number().integer().positive(),
+    IMAGE_MAX_HEIGHT: Joi.number().integer().positive(),
+    IMAGE_MAX_FILE_SIZE: Joi.number().integer().positive(),
+    IMAGE_MAX_FILES: Joi.number().integer().positive(),
     THROTTLE_TTL: Joi.number().integer().positive(),
     THROTTLE_LIMIT: Joi.number().integer().positive()
   })
@@ -100,6 +110,20 @@ export function createApplicationConfigSchema(): Joi.ObjectSchema {
     swagger: Joi.object({
       enabled: Joi.boolean().required(),
       path: Joi.string().min(1).required()
+    }).required(),
+    oss: Joi.object({
+      region: Joi.string().allow('').required(),
+      bucket: Joi.string().allow('').required(),
+      accessKeyId: Joi.string().allow('').required(),
+      accessKeySecret: Joi.string().allow('').required(),
+      publicBaseUrl: Joi.string().uri({ allowRelative: false }).allow('').required()
+    }).required(),
+    image: Joi.object({
+      quality: Joi.number().integer().min(1).max(100).required(),
+      maxWidth: Joi.number().integer().positive().required(),
+      maxHeight: Joi.number().integer().positive().required(),
+      maxFileSize: Joi.number().integer().positive().required(),
+      maxFiles: Joi.number().integer().positive().required()
     }).required(),
     throttler: Joi.object({
       ttl: Joi.number().integer().positive().required(),

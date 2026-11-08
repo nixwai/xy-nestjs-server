@@ -87,6 +87,29 @@ export function applyEnvironmentOverrides(baseConfig: ConfigRecord, environment:
     swagger: {
       enabled: readBoolean(environment.SWAGGER_ENABLED, baseConfigValue(baseConfig, ['swagger', 'enabled'], true))
     },
+    oss: {
+      region: readString(environment.OSS_REGION, baseConfigValue(baseConfig, ['oss', 'region'], '')),
+      bucket: readString(environment.OSS_BUCKET, baseConfigValue(baseConfig, ['oss', 'bucket'], '')),
+      accessKeyId: readString(environment.OSS_ACCESS_KEY_ID, baseConfigValue(baseConfig, ['oss', 'accessKeyId'], '')),
+      accessKeySecret: readString(
+        environment.OSS_ACCESS_KEY_SECRET,
+        baseConfigValue(baseConfig, ['oss', 'accessKeySecret'], '')
+      ),
+      publicBaseUrl: readString(
+        environment.OSS_PUBLIC_BASE_URL,
+        baseConfigValue(baseConfig, ['oss', 'publicBaseUrl'], '')
+      )
+    },
+    image: {
+      quality: readNumber(environment.IMAGE_QUALITY, baseConfigValue(baseConfig, ['image', 'quality'], 75)),
+      maxWidth: readNumber(environment.IMAGE_MAX_WIDTH, baseConfigValue(baseConfig, ['image', 'maxWidth'], 3840)),
+      maxHeight: readNumber(environment.IMAGE_MAX_HEIGHT, baseConfigValue(baseConfig, ['image', 'maxHeight'], 2160)),
+      maxFileSize: readNumber(
+        environment.IMAGE_MAX_FILE_SIZE,
+        baseConfigValue(baseConfig, ['image', 'maxFileSize'], 52428800)
+      ),
+      maxFiles: readNumber(environment.IMAGE_MAX_FILES, baseConfigValue(baseConfig, ['image', 'maxFiles'], 50))
+    },
     throttler: {
       ttl: readNumber(environment.THROTTLE_TTL, baseConfigValue(baseConfig, ['throttler', 'ttl'], 60000)),
       limit: readNumber(environment.THROTTLE_LIMIT, baseConfigValue(baseConfig, ['throttler', 'limit'], 100))

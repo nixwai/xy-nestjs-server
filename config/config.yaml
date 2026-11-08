@@ -21,6 +21,18 @@ auth:
 swagger:
   enabled: true
   path: docs
+oss:
+  region: ''
+  bucket: ''
+  accessKeyId: ''
+  accessKeySecret: ''
+  publicBaseUrl: ''
+image:
+  quality: 75
+  maxWidth: 3840
+  maxHeight: 2160
+  maxFileSize: 52428800
+  maxFiles: 50
 throttler:
   ttl: 60000
   limit: 100

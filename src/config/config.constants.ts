@@ -18,6 +18,12 @@ export const CONFIG_KEYS = {
   /** Swagger 配置键。 */
   swagger: 'swagger',
 
+  /** 阿里 OSS 配置键。 */
+  oss: 'oss',
+
+  /** 图片处理配置键。 */
+  image: 'image',
+
   /** 限流配置键。 */
   throttler: 'throttler'
 } as const;

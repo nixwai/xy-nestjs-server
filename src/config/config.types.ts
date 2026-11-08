@@ -50,6 +50,34 @@ export interface AuthConfig {
   rsaPrivateKey: string;
 }
 
+/** 阿里 OSS 配置。 */
+export interface OssConfig {
+  /** OSS 区域。 */
+  region: string;
+  /** OSS Bucket 名称。 */
+  bucket: string;
+  /** AccessKey ID。 */
+  accessKeyId: string;
+  /** AccessKey Secret。 */
+  accessKeySecret: string;
+  /** 对外访问地址，可配置 OSS、CDN 或自定义域名。 */
+  publicBaseUrl: string;
+}
+
+/** 图片处理配置。 */
+export interface ImageConfig {
+  /** 图片压缩质量。 */
+  quality: number;
+  /** 最大宽度。 */
+  maxWidth: number;
+  /** 最大高度。 */
+  maxHeight: number;
+  /** 单张图片最大字节数。 */
+  maxFileSize: number;
+  /** 批量上传最大文件数。 */
+  maxFiles: number;
+}
+
 /** Swagger 配置。 */
 export interface SwaggerConfig {
   /** 是否启用 Swagger 文档。 */
