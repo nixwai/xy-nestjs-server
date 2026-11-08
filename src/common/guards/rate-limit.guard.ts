@@ -1,18 +1,11 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import type { CanActivate, ExecutionContext } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { Request } from 'express';
-
 /** 单个客户端的限流计数记录。 */
 interface RateLimitEntry {
   /** 当前时间窗口内的请求数。 */
   count: number;
-
   /** 当前时间窗口的到期时间戳。 */
   expiresAt: number;
 }
@@ -24,13 +17,12 @@ export class RateLimitGuard implements CanActivate {
   private readonly entries = new Map<string, RateLimitEntry>();
   /** 上一次清理过期记录的时间戳。 */
   private lastCleanupAt = 0;
-
   /** 清理过期记录的最短间隔。 */
   private readonly cleanupIntervalMs = 60_000;
-
+  /** 创建当前实例。 */
   constructor(
     /** 读取限流窗口和请求上限配置。 */
-    private readonly configService: ConfigService,
+    @Inject(ConfigService) private readonly configService: ConfigService
   ) {}
 
   /**
@@ -50,26 +42,34 @@ export class RateLimitGuard implements CanActivate {
       this.removeExpiredEntries(now);
       this.lastCleanupAt = now;
     }
+
     const current = this.entries.get(key);
-    const entry =
-      !current || current.expiresAt <= now
-        ? { count: 0, expiresAt: now + ttl }
-        : current;
+    const entry = this.createEntry(current, now, ttl);
     const nextEntry = { count: entry.count + 1, expiresAt: entry.expiresAt };
     this.entries.set(key, nextEntry);
-    if (nextEntry.count > limit) {
-      throw new HttpException(
-        '请求过于频繁，请稍后重试',
-        HttpStatus.TOO_MANY_REQUESTS,
-      );
+
+    if (nextEntry.count <= limit) {
+      return true;
     }
-    return true;
+
+    throw new HttpException('请求过于频繁，请稍后重试', HttpStatus.TOO_MANY_REQUESTS);
+  }
+
+  /** 创建当前时间窗口的计数记录。 */
+  private createEntry(current: RateLimitEntry | undefined, now: number, ttl: number): RateLimitEntry {
+    if (!current || current.expiresAt <= now) {
+      return { count: 0, expiresAt: now + ttl };
+    }
+
+    return current;
   }
 
   /** 删除已经过期的客户端限流记录。 */
   private removeExpiredEntries(now: number): void {
     for (const [entryKey, entry] of this.entries) {
-      if (entry.expiresAt <= now) this.entries.delete(entryKey);
+      if (entry.expiresAt <= now) {
+        this.entries.delete(entryKey);
+      }
     }
   }
 }

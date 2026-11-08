@@ -1,15 +1,15 @@
-import { Optional, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
-
 /** 提供进程和依赖就绪状态。 */
 @Injectable()
 export class HealthService {
+  /** 创建当前实例。 */
   constructor(
     /** 读取应用环境和数据库启用状态。 */
-    private readonly configService: ConfigService,
+    @Inject(ConfigService) private readonly configService: ConfigService,
     /** 提供数据库连接就绪状态，测试环境可以不注入。 */
-    @Optional() private readonly dataSource?: DataSource,
+    @Optional() @Inject(DataSource) private readonly dataSource?: DataSource
   ) {}
 
   /**
@@ -20,10 +20,7 @@ export class HealthService {
   getHealth() {
     return {
       status: 'ok' as const,
-      environment: this.configService.get<string>(
-        'app.environment',
-        'development',
-      ),
+      environment: this.configService.get<string>('app.environment', 'development')
     };
   }
 
@@ -33,17 +30,13 @@ export class HealthService {
    * @returns 当前应用及其数据库依赖的就绪状态。
    */
   async getReadiness() {
-    const databaseEnabled = this.configService.get<boolean>(
-      'database.enabled',
-      false,
-    );
-    const databaseReady =
-      !databaseEnabled || Boolean(this.dataSource?.isInitialized);
+    const databaseEnabled = this.configService.get<boolean>('database.enabled', false);
+    const databaseReady = !databaseEnabled || Boolean(this.dataSource?.isInitialized);
     return {
       status: databaseReady ? ('ready' as const) : ('not_ready' as const),
       checks: {
-        database: databaseReady ? ('up' as const) : ('down' as const),
-      },
+        database: databaseReady ? ('up' as const) : ('down' as const)
+      }
     };
   }
 }

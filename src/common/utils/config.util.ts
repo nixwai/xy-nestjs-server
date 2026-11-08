@@ -1,10 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import * as yaml from 'js-yaml';
-
-/** YAML 配置对象类型。 */
-export type ConfigRecord = Record<string, unknown>;
-
+import type { ConfigRecord } from '../types/index.js';
+import { isRecord } from './type-guard.util.js';
 /**
  * 递归合并配置对象，数组和标量值由后者覆盖。
  *
@@ -12,17 +10,11 @@ export type ConfigRecord = Record<string, unknown>;
  * @param override - 用于覆盖基础配置的对象。
  * @returns 合并后的新配置对象。
  */
-export function mergeConfig(
-  base: ConfigRecord,
-  override: ConfigRecord,
-): ConfigRecord {
+export function mergeConfig(base: ConfigRecord, override: ConfigRecord): ConfigRecord {
   const result: ConfigRecord = { ...base };
   for (const [key, value] of Object.entries(override)) {
     const current = result[key];
-    result[key] =
-      isConfigRecord(current) && isConfigRecord(value)
-        ? mergeConfig(current, value)
-        : value;
+    result[key] = isRecord(current) && isRecord(value) ? mergeConfig(current, value) : value;
   }
   return result;
 }
@@ -34,13 +26,6 @@ export function mergeConfig(
  * @returns 解析后的配置对象；模板为空或非对象时返回空对象。
  */
 export function loadBaseConfig(cwd = process.cwd()): ConfigRecord {
-  const parsed = yaml.load(
-    readFileSync(join(cwd, 'config', 'config.yaml'), 'utf8'),
-  );
-  return isConfigRecord(parsed) ? parsed : {};
-}
-
-/** 判断值是否为可递归合并的配置对象。 */
-function isConfigRecord(value: unknown): value is ConfigRecord {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+  const parsed = yaml.load(readFileSync(join(cwd, 'config', 'config.yaml'), 'utf8'));
+  return isRecord(parsed) ? parsed : {};
 }

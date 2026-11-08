@@ -1,9 +1,7 @@
+import { TEST_RSA_PRIVATE_KEY } from '../../fixtures/rsa-key.js';
 import { describe, expect, it } from 'vitest';
-import {
-  applyEnvironmentOverrides,
-  buildApplicationConfig,
-} from '../../../src/config/configuration.js';
-import { loadBaseConfig } from '../../../src/common/utils/config.util.js';
+import { applyEnvironmentOverrides, buildApplicationConfig } from '#/config/configuration.js';
+import { loadBaseConfig } from '#/common/utils/config.util.js';
 
 describe('application configuration', () => {
   it('maps environment variables into grouped configuration', () => {
@@ -13,16 +11,17 @@ describe('application configuration', () => {
       CORS_ORIGINS: 'http://localhost:5173,https://admin.example.com',
       DB_ENABLED: 'true',
       JWT_SECRET: 'test-only-secret-with-at-least-32-chars',
-      SWAGGER_ENABLED: 'false',
+      AUTH_RSA_PRIVATE_KEY: TEST_RSA_PRIVATE_KEY,
+      SWAGGER_ENABLED: 'false'
     });
 
     expect(config).toMatchObject({
       app: { environment: 'test', port: 3100 },
       cors: {
-        origins: ['http://localhost:5173', 'https://admin.example.com'],
+        origins: ['http://localhost:5173', 'https://admin.example.com']
       },
       database: { enabled: false },
-      swagger: { enabled: false },
+      swagger: { enabled: false }
     });
   });
 
@@ -32,6 +31,7 @@ describe('application configuration', () => {
       PORT: '9000',
       APP_PORT: '3100',
       JWT_SECRET: 'test-only-secret-with-at-least-32-chars',
+      AUTH_RSA_PRIVATE_KEY: TEST_RSA_PRIVATE_KEY
     });
 
     expect(config).toMatchObject({ app: { port: 9000 } });
@@ -48,15 +48,24 @@ describe('application configuration', () => {
     try {
       expect(buildApplicationConfig()).toMatchObject({
         app: { environment: 'test' },
-        database: { enabled: false },
+        database: { enabled: false }
       });
     } finally {
-      if (originalEnvironment === undefined) delete process.env.NODE_ENV;
-      else process.env.NODE_ENV = originalEnvironment;
-      if (originalSecret === undefined) delete process.env.JWT_SECRET;
-      else process.env.JWT_SECRET = originalSecret;
-      if (originalDatabase === undefined) delete process.env.DB_ENABLED;
-      else process.env.DB_ENABLED = originalDatabase;
+      if (originalEnvironment === undefined) {
+        delete process.env.NODE_ENV;
+      } else {
+        process.env.NODE_ENV = originalEnvironment;
+      }
+      if (originalSecret === undefined) {
+        delete process.env.JWT_SECRET;
+      } else {
+        process.env.JWT_SECRET = originalSecret;
+      }
+      if (originalDatabase === undefined) {
+        delete process.env.DB_ENABLED;
+      } else {
+        process.env.DB_ENABLED = originalDatabase;
+      }
     }
   });
 });

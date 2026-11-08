@@ -1,16 +1,13 @@
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { INestApplication, Logger } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { SwaggerModule } from '@nestjs/swagger';
+import type { INestApplication } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import helmet from 'helmet';
 import { AppModule } from './app.module.js';
 import { createStrictValidationPipe } from './common/pipes/index.js';
-import type {
-  AppConfig,
-  CorsConfig,
-  SwaggerConfig,
-} from './config/config.types.js';
+import { createSwaggerConfig } from './common/swagger/index.js';
+import type { AppConfig, CorsConfig, SwaggerConfig } from './config/config.types.js';
 
 /**
  * 将 CORS 白名单转换为 Nest 可接受的来源配置。
@@ -18,10 +15,12 @@ import type {
  * @param origins - CORS 允许的来源列表。
  * @returns 有来源时返回副本，没有来源时禁用 CORS。
  */
-export function resolveCorsOrigin(
-  origins: readonly string[],
-): false | string[] {
-  return origins.length > 0 ? [...origins] : false;
+export function resolveCorsOrigin(origins: readonly string[]): false | string[] {
+  if (origins.length === 0) {
+    return false;
+  }
+
+  return [...origins];
 }
 
 /**
@@ -40,29 +39,16 @@ export async function createApplication(): Promise<INestApplication> {
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'same-site' } }));
   app.enableCors({
     origin: resolveCorsOrigin(corsConfig.origins),
-    credentials: true,
+    credentials: true
   });
   app.useGlobalPipes(createStrictValidationPipe());
 
   if (swaggerConfig.enabled) {
-    const documentConfig = new DocumentBuilder()
-      .setTitle('Scenic Guide Booking API')
-      .setDescription('景区导游预约平台 REST API')
-      .setVersion('1.0.0')
-      .addBearerAuth()
-      .build();
-    const document = SwaggerModule.createDocument(app, documentConfig);
-    SwaggerModule.setup(
-      `${appConfig.globalPrefix}/${swaggerConfig.path}`,
-      app,
-      document,
-    );
+    const document = SwaggerModule.createDocument(app, createSwaggerConfig(appConfig.globalPrefix));
+    SwaggerModule.setup(`${appConfig.globalPrefix}/${swaggerConfig.path}`, app, document);
   }
 
-  Logger.log(
-    `Application configured for ${appConfig.environment}`,
-    'Bootstrap',
-  );
+  Logger.log(`Application configured for ${appConfig.environment}`, 'Bootstrap');
   return app;
 }
 
@@ -77,24 +63,4 @@ export async function bootstrap(): Promise<void> {
   const appConfig = configService.getOrThrow<AppConfig>('app');
   await app.listen(appConfig.port, '0.0.0.0');
   Logger.log(`Application is running on port ${appConfig.port}`, 'Bootstrap');
-
-  if (configService.get<boolean>('database.enabled', false)) {
-    void initializeDatabase(app.get(DataSource));
-  }
-}
-
-/** 在 HTTP 服务开始监听后初始化数据库连接。 */
-async function initializeDatabase(dataSource: DataSource): Promise<void> {
-  if (dataSource.isInitialized) return;
-
-  try {
-    await dataSource.initialize();
-    Logger.log('Database connection initialized', 'Bootstrap');
-  } catch (error: unknown) {
-    Logger.error(
-      'Database connection initialization failed',
-      error,
-      'Bootstrap',
-    );
-  }
 }

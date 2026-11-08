@@ -1,0 +1,192 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { IsNull } from 'typeorm';
+import type { Repository } from 'typeorm';
+import { DomainConflictError, DomainNotFoundError } from '#/common/errors/index.js';
+import { AdminEntity } from '../entities/admin.entity.js';
+import { AdminRoleAssignmentEntity } from '../entities/admin-role-assignment.entity.js';
+import { AdminSessionEntity } from '../entities/admin-session.entity.js';
+import type { AdminRepository } from './admin-repository.port.js';
+import { PageQueryDto } from '#/common/dto/index.js';
+import type { PageResult } from '#/common/types/index.js';
+import type { AdminCreateInput, AdminRecord, AdminUpdateInput } from '../types/admin.types.js';
+/** 使用 TypeORM 保存管理员账户和角色关系。 */
+@Injectable()
+export class TypeOrmAdminRepository implements AdminRepository {
+  /** 创建当前实例。 */
+  constructor(
+    @InjectRepository(AdminEntity)
+    private readonly admins: Repository<AdminEntity>,
+    @InjectRepository(AdminRoleAssignmentEntity)
+    private readonly adminRoles: Repository<AdminRoleAssignmentEntity>,
+    @InjectRepository(AdminSessionEntity)
+    private readonly adminSessions: Repository<AdminSessionEntity>
+  ) {}
+
+  /** 按用户名查询记录 */
+  async findByUsername(username: string): Promise<AdminRecord | null> {
+    const item = await this.admins.findOne({
+      where: { username }
+    });
+    return item ? this.toRecord(item) : null;
+  }
+
+  /** 按标识查询记录 */
+  async findById(id: string): Promise<AdminRecord | null> {
+    const item = await this.admins.findOne({
+      where: { id }
+    });
+    return item ? this.toRecord(item) : null;
+  }
+
+  /** 查询记录列表 */
+  async list(query: PageQueryDto = new PageQueryDto()): Promise<PageResult<AdminRecord>> {
+    const [items, total] = await this.admins.findAndCount({
+      order: { createdAt: 'DESC', id: 'DESC' },
+      skip: query.skip,
+      take: query.pageSize
+    });
+    const totalPages = total === 0 ? 0 : Math.ceil(total / query.pageSize);
+    return {
+      items: items.map(item => this.toRecord(item)),
+      total,
+      page: query.page,
+      pageSize: query.pageSize,
+      totalPages,
+      hasNextPage: query.page < totalPages,
+      hasPreviousPage: query.page > 1 && total > 0
+    };
+  }
+
+  /** 创建记录 */
+  async create(input: AdminCreateInput): Promise<AdminRecord> {
+    try {
+      const item = await this.admins.save(
+        this.admins.create({
+          ...input,
+          isActive: true,
+          isRoot: input.isRoot ?? false,
+          deletedAt: null
+        })
+      );
+      return this.toRecord(item);
+    } catch (error: unknown) {
+      if (this.isDuplicate(error)) {
+        throw new DomainConflictError('管理员用户名');
+      }
+      throw error;
+    }
+  }
+
+  /** 更新记录 */
+  async update(id: string, input: AdminUpdateInput): Promise<AdminRecord> {
+    const item = await this.findEntityOrThrow(id);
+    this.admins.merge(item, input);
+    try {
+      return this.toRecord(await this.admins.save(item));
+    } catch (error: unknown) {
+      if (this.isDuplicate(error)) {
+        throw new DomainConflictError('管理员用户名');
+      }
+      throw error;
+    }
+  }
+
+  /** 软删除记录 */
+  async softDelete(id: string): Promise<void> {
+    const item = await this.findEntityOrThrow(id);
+    const deletedAt = new Date();
+    await this.admins.softRemove(item);
+    await this.adminRoles.delete({ adminId: id });
+    await this.adminSessions.update(
+      { adminId: id, revokedAt: IsNull() },
+      { revokedAt: deletedAt, lastUsedAt: deletedAt }
+    );
+  }
+
+  /** countActiveRoots。 */
+  async countActiveRoots(): Promise<number> {
+    return this.admins.count({
+      where: { isActive: true, isRoot: true }
+    });
+  }
+
+  /** listRoleIds。 */
+  async listRoleIds(adminId: string): Promise<string[]> {
+    await this.findEntityOrThrow(adminId);
+    const items = await this.adminRoles.find({ where: { adminId } });
+    return items.map(item => String(item.roleId));
+  }
+
+  /** listRoleIdsByAdminIds。 */
+  async listRoleIdsByAdminIds(adminIds: string[]): Promise<Map<string, string[]>> {
+    const result = new Map<string, string[]>(adminIds.map(id => [id, []]));
+    if (adminIds.length === 0) {
+      return result;
+    }
+    const items = await this.adminRoles
+      .createQueryBuilder('adminRole')
+      .where('adminRole.adminId IN (:...adminIds)', { adminIds })
+      .getMany();
+    for (const item of items) {
+      const roleIds = result.get(String(item.adminId));
+      if (roleIds) {
+        result.set(String(item.adminId), [...roleIds, String(item.roleId)]);
+      }
+    }
+    return result;
+  }
+
+  /** 为管理员绑定角色 */
+  async bindRole(adminId: string, roleId: string): Promise<void> {
+    await this.findEntityOrThrow(adminId);
+    if (await this.adminRoles.findOne({ where: { adminId, roleId } })) {
+      throw new DomainConflictError('管理员角色关系');
+    }
+    try {
+      await this.adminRoles.save(this.adminRoles.create({ adminId, roleId }));
+    } catch (error: unknown) {
+      if (this.isDuplicate(error)) {
+        throw new DomainConflictError('管理员角色关系');
+      }
+      throw error;
+    }
+  }
+
+  /** 解除管理员角色绑定 */
+  async unbindRole(adminId: string, roleId: string): Promise<void> {
+    await this.findEntityOrThrow(adminId);
+    await this.adminRoles.delete({ adminId, roleId });
+  }
+
+  /** findEntityOrThrow。 */
+  private async findEntityOrThrow(id: string): Promise<AdminEntity> {
+    const item = await this.admins.findOne({
+      where: { id }
+    });
+    if (!item) {
+      throw new DomainNotFoundError('管理员');
+    }
+    return item;
+  }
+
+  /** 将实体转换为领域记录 */
+  private toRecord(item: AdminEntity): AdminRecord {
+    return {
+      id: String(item.id),
+      username: item.username,
+      passwordHash: item.passwordHash,
+      passwordSalt: item.passwordSalt,
+      isActive: item.isActive,
+      isRoot: item.isRoot,
+      deletedAt: item.deletedAt,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt
+    };
+  }
+
+  /** isDuplicate。 */
+  private isDuplicate(error: unknown): boolean {
+    return typeof error === 'object' && error !== null && 'code' in error && error.code === 'ER_DUP_ENTRY';
+  }
+}

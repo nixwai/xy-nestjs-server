@@ -4,12 +4,12 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set}
-      MYSQL_DATABASE: ${DB_DATABASE:-scenic_booking}
+      MYSQL_DATABASE: ${DB_DATABASE:-app}
       TZ: Asia/Shanghai
     ports:
       - "${DB_PORT:-3306}:3306"
     volumes:
-      - scenic_mysql_data:/var/lib/mysql
+      - app_mysql_data:/var/lib/mysql
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
@@ -17,4 +17,4 @@ services:
       retries: 10
 
 volumes:
-  scenic_mysql_data:
+  app_mysql_data:

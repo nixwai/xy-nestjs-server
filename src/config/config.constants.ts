@@ -12,18 +12,12 @@ export const CONFIG_KEYS = {
   /** JWT 配置键。 */
   jwt: 'jwt',
 
+  /** 管理员认证配置键。 */
+  auth: 'auth',
+
   /** Swagger 配置键。 */
   swagger: 'swagger',
 
-  /** 对象存储配置键。 */
-  storage: 'storage',
-
-  /** 微信配置键。 */
-  wechat: 'wechat',
-
   /** 限流配置键。 */
-  throttler: 'throttler',
-
-  /** API 版本配置键。 */
-  api: 'api',
+  throttler: 'throttler'
 } as const;

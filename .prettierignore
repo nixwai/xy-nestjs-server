@@ -1,0 +1,2 @@
+# TypeORM CLI 生成的迁移文件不参与格式化
+migrations/

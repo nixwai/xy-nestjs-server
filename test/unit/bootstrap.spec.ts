@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { resolveCorsOrigin } from '../../src/bootstrap.js';
+import { resolveCorsOrigin } from '#/bootstrap.js';
 
 describe('resolveCorsOrigin', () => {
   it('disables CORS when no origin is configured', () => {
