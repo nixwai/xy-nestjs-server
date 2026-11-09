@@ -1,4 +1,5 @@
 import type { PageQueryDto } from '#/common/dto/index.js';
+
 export interface AssetFolderRecord {
   id: string;
   name: string;

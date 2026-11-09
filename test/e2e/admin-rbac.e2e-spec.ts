@@ -153,6 +153,7 @@ describe('RBAC management API (e2e)', () => {
       .expect(200);
     expect(own.body.data.menus.map((item: { /** 请求路径。 */ path: string }) => item.path)).toEqual([
       '/home',
+      '/operation-management',
       '/system-management'
     ]);
     const systemMenu = own.body.data.menus.find(

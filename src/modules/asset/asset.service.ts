@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import sharp from 'sharp';
 import { AuthorizationService } from '../authorization/authorization.service.js';
 import { PermissionCode } from '../authorization/constants/index.js';
@@ -11,6 +11,7 @@ import type { AssetFolderRecord } from './types/asset.types.js';
 
 @Injectable()
 export class AssetService {
+  private readonly logger = new Logger(AssetService.name);
   constructor(
     @Inject(ASSET_FOLDER_REPOSITORY) private readonly folders: AssetFolderRepository,
     @Inject(ASSET_IMAGE_REPOSITORY) private readonly images: AssetImageRepository,
@@ -112,7 +113,10 @@ export class AssetService {
   private async requireOwnedFolder(adminId: string, id: string) {
     const item = await this.folders.findById(id);
     if (!item) throw new NotFoundException('文件夹不存在');
-    if (item.createdByAdminId !== adminId && !(await this.canReadAll(adminId, PermissionCode.ASSET_FOLDER_READ_ALL)))
+    if (
+      item.createdByAdminId !== adminId &&
+      !(await this.canReadAll(adminId, PermissionCode.ASSET_FOLDER_READ_ALL))
+    )
       throw new ForbiddenException('无权操作该文件夹');
     return item;
   }
@@ -120,8 +124,7 @@ export class AssetService {
     if (!folderId) return;
     const folder = await this.folders.findById(folderId);
     if (!folder) throw new NotFoundException('文件夹不存在');
-    if (folder.createdByAdminId !== adminId && !(await this.canReadAll(adminId, PermissionCode.ASSET_FOLDER_UPDATE)))
-      throw new ForbiddenException('无权使用该文件夹');
+    if (folder.createdByAdminId !== adminId) throw new ForbiddenException('无权使用该文件夹');
   }
   private async requireOwnedImage(adminId: string, id: string) {
     const item = await this.images.findById(id);
@@ -135,8 +138,8 @@ export class AssetService {
   private async cleanupUploadedObject(key: string) {
     try {
       await this.uploadService.deleteObject(key);
-    } catch {
-      /* 保留失败结果，避免向客户端返回虚假成功。 */
+    } catch (error) {
+      this.logger.error(`OSS 对象清理失败，需人工处理: ${key}`, error instanceof Error ? error.stack : undefined);
     }
   }
   private getErrorMessage(error: unknown) {

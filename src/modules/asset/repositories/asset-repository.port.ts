@@ -1,5 +1,6 @@
 import type { PageResult } from '#/common/types/index.js';
 import type {
+
   AssetFolderCreateInput,
   AssetFolderRecord,
   AssetFolderUpdateInput,
@@ -7,6 +8,7 @@ import type {
   AssetImageQuery,
   AssetImageRecord
 } from '../types/asset.types.js';
+
 export const ASSET_FOLDER_REPOSITORY = Symbol('ASSET_FOLDER_REPOSITORY');
 export const ASSET_IMAGE_REPOSITORY = Symbol('ASSET_IMAGE_REPOSITORY');
 export interface AssetFolderRepository {

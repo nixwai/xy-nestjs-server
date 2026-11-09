@@ -2,6 +2,7 @@ import { DomainNotFoundError } from '#/common/errors/index.js';
 import { createPageResult } from '#/common/utils/index.js';
 import type { PageResult } from '#/common/types/index.js';
 import type {
+
   AssetFolderCreateInput,
   AssetFolderRecord,
   AssetFolderUpdateInput,
@@ -10,6 +11,7 @@ import type {
   AssetImageRecord
 } from '../types/asset.types.js';
 import type { AssetFolderRepository, AssetImageRepository } from './asset-repository.port.js';
+
 export class InMemoryAssetFolderRepository implements AssetFolderRepository {
   private readonly items = new Map<string, AssetFolderRecord>();
   private nextId = 1;

@@ -6,6 +6,16 @@ import { PermissionCode } from '#/modules/authorization/constants/index.js';
 import type { PermissionRecord } from '#/modules/authorization/types/permission.types.js';
 import { flattenRegisteredMenus } from '#/modules/menu/utils/registered-menu.util.js';
 /** 菜单注册表绑定的权限记录，启动校验要求它在权限目录中真实存在。 */
+const assetPermission: PermissionRecord = {
+  id: 'permission-asset-folder-read',
+  code: PermissionCode.ASSET_FOLDER_READ,
+  name: '查看文件夹',
+  description: '查看文件夹',
+  category: 'asset',
+  isAssignable: true,
+  isProtected: false,
+  isActive: true
+};
 const auditPermission: PermissionRecord = {
   id: 'permission-1',
   code: PermissionCode.AUDIT_READ,
@@ -21,7 +31,11 @@ function createService(permission: PermissionRecord | null = auditPermission) {
   const repository = new InMemoryMenuRepository();
   const audit = { record: vi.fn().mockResolvedValue(undefined) };
   const permissionService = {
-    findByCode: vi.fn(async (code: string) => (code === permission?.code ? permission : null))
+    findByCode: vi.fn(async (code: string) => {
+      if (!permission) return null;
+      if (code === PermissionCode.ASSET_FOLDER_READ) return assetPermission;
+      return code === permission.code ? permission : null;
+    })
   };
   return { service: new MenuService(repository, audit as never, permissionService as never), repository, audit };
 }

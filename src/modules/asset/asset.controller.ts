@@ -50,7 +50,7 @@ export class AssetController {
   @ApiOkResponseData(AssetFolderListResponseDto)
   async listFolders(@CurrentAdmin() admin: AdminJwtPayload) {
     const items = await this.service.listFolders(admin.sub);
-    return { items, total: items.length };
+    return { items: items.map(item => ({ ...item, ownerId: item.createdByAdminId })), total: items.length };
   }
   @Get('folders/all')
   @RequirePermission(PermissionCode.ASSET_FOLDER_READ_ALL)
@@ -58,7 +58,7 @@ export class AssetController {
   @ApiOkResponseData(AssetFolderListResponseDto)
   async listAllFolders(@CurrentAdmin() admin: AdminJwtPayload) {
     const items = await this.service.listFolders(admin.sub);
-    return { items, total: items.length };
+    return { items: items.map(item => ({ ...item, ownerId: item.createdByAdminId })), total: items.length };
   }
   @Post('folders')
   @RequirePermission(PermissionCode.ASSET_FOLDER_CREATE)
@@ -66,7 +66,7 @@ export class AssetController {
   @ApiBody({ type: CreateAssetFolderDto })
   @ApiOkResponseData(AssetFolderResponseDto)
   createFolder(@CurrentAdmin() admin: AdminJwtPayload, @Body() dto: CreateAssetFolderDto) {
-    return this.service.createFolder(admin.sub, dto);
+    return this.service.createFolder(admin.sub, dto).then(item => ({ ...item, ownerId: item.createdByAdminId }));
   }
   @Patch('folders/:id')
   @RequirePermission(PermissionCode.ASSET_FOLDER_UPDATE)
@@ -74,7 +74,7 @@ export class AssetController {
   @ApiBody({ type: UpdateAssetFolderDto })
   @ApiOkResponseData(AssetFolderResponseDto)
   updateFolder(@CurrentAdmin() admin: AdminJwtPayload, @Param('id') id: string, @Body() dto: UpdateAssetFolderDto) {
-    return this.service.updateFolder(admin.sub, id, dto);
+    return this.service.updateFolder(admin.sub, id, dto).then(item => ({ ...item, ownerId: item.createdByAdminId }));
   }
   @Delete('folders/:id')
   @RequirePermission(PermissionCode.ASSET_FOLDER_DELETE)
@@ -91,7 +91,7 @@ export class AssetController {
   @ApiQuery({ name: 'keyword', required: false, type: String })
   @ApiOkResponseData(AssetImagePageResponseDto)
   listImages(@CurrentAdmin() admin: AdminJwtPayload, @Query() q: AssetImageQueryDto) {
-    return this.service.listImages(admin.sub, q);
+    return this.service.listImages(admin.sub, q).then(result => ({ ...result, items: result.items.map(item => ({ ...item, ownerId: item.createdByAdminId })) }));
   }
   @Get('images/all')
   @RequirePermission(PermissionCode.ASSET_IMAGE_READ_ALL)
@@ -101,7 +101,7 @@ export class AssetController {
   @ApiQuery({ name: 'keyword', required: false, type: String })
   @ApiOkResponseData(AssetImagePageResponseDto)
   listAllImages(@CurrentAdmin() admin: AdminJwtPayload, @Query() q: AssetImageQueryDto) {
-    return this.service.listImages(admin.sub, q);
+    return this.service.listImages(admin.sub, q).then(result => ({ ...result, items: result.items.map(item => ({ ...item, ownerId: item.createdByAdminId })) }));
   }
   @Post('images/batch')
   @RequirePermission(PermissionCode.ASSET_IMAGE_UPLOAD)
@@ -118,7 +118,10 @@ export class AssetController {
     @UploadedFiles() files?: UploadImageFile[]
   ) {
     if (!files?.length) throw new BadRequestException('请选择要上传的图片');
-    return this.service.upload(admin.sub, files, folderId);
+    return this.service.upload(admin.sub, files, folderId).then(result => ({
+      ...result,
+      success: (result.success ?? []).flatMap(item => (item ? [{ ...item, ownerId: item.createdByAdminId }] : []))
+    }));
   }
   @Patch('images/:id/folder')
   @RequirePermission(PermissionCode.ASSET_IMAGE_MOVE)
@@ -126,7 +129,7 @@ export class AssetController {
   @ApiBody({ type: MoveAssetImageDto })
   @ApiOkResponseData(AssetImageResponseDto)
   moveImage(@CurrentAdmin() admin: AdminJwtPayload, @Param('id') id: string, @Body() dto: MoveAssetImageDto) {
-    return this.service.moveImage(admin.sub, id, dto.folderId);
+    return this.service.moveImage(admin.sub, id, dto.folderId).then(item => ({ ...item, ownerId: item.createdByAdminId }));
   }
   @Delete('images/:id')
   @RequirePermission(PermissionCode.ASSET_IMAGE_DELETE)

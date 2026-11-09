@@ -24,7 +24,7 @@ export const REGISTERED_MENUS: readonly RegisteredMenu[] = [
         title: '素材管理',
         path: '/operation-management/asset',
         order: 1,
-        permissionCode: null,
+        permissionCode: PermissionCode.ASSET_FOLDER_READ,
         isRootOnly: false
       }
     ]
