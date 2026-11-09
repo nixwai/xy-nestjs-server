@@ -84,3 +84,35 @@ return { ...value, ...changes };
 - 单元测试放在 `test/unit`，端到端测试放在 `test/e2e`，测试初始化使用 `test/setup.ts`。
 - 测试框架使用 Vitest，HTTP 场景使用 Supertest；不要引入其他测试框架的 API 或配置。
 - 测试验证公开行为、边界条件、错误响应和不可变性，不只验证实现细节或注释文本。
+
+## 规范来源与执行前检查
+
+- 开始编码前先读取项目根目录 `AGENTS.md`、本目录 `.agents/skills/` 下全部相关 Skill、`package.json`、`tsconfig.json`、`.prettierrc`、`.oxlintrc.*` 及现有脚本；不得仅凭通用 TypeScript 经验推断项目规则。
+- 以项目实际配置和命令为准。若 Skill 文档与 `package.json`、OXC 配置或源码行为不一致，先修正文档或明确冲突，不得跳过验证。
+- OXC/Oxlint 是本项目实际 Lint 工具；Prettier 只负责格式化，不能代替 OXC 规则检查。
+- 修改导入、类型、异步调用或文件结构后，必须重新检查对应文件的 OXC 规则，而不是只观察格式化结果。
+- `AGENTS.md`、`SKILL.md` 等 Markdown 规范文件通常不在 TypeScript 的 Prettier、OXC 或 TypeScript 检查脚本范围内；修改它们时仍须人工检查标题层级、列表、代码块、空行和 UTF-8 编码，不能把未被工具扫描误认为格式正确。
+
+## 格式化与 OXC Lint 验证
+
+代码修改完成后，不能只运行 Prettier。必须同时执行项目实际配置的格式化、格式检查、OXC/Oxlint Lint 和 TypeScript 类型检查。
+
+### TypeScript 项目验证顺序
+
+1. 执行 `pnpm format`，或项目定义的等价格式化命令。
+2. 执行 `pnpm format:check`，确认全部 TypeScript 文件符合 Prettier 规范。
+3. 执行 `pnpm lint`，确认 `.oxlintrc.*` 中启用的规则全部通过。
+4. 执行 `pnpm typecheck`，或等价的 `tsc --noEmit`。
+5. 只有格式检查、Lint 和类型检查全部通过，才能报告编码规范验证通过；Lint 警告也必须审查，不能默认忽略。
+
+### OXC/Oxlint 重点规则
+
+- `import/newline-after-import`：最后一个 import 与业务代码之间保留一个空行；若存在多个连续 import，不在 import 组内部插入空行，只有 import 组结束后保留一个空行。
+- `typescript/consistent-type-imports`：仅用于类型的导入必须使用 `import type`。
+- 删除未使用的导入、变量和类型。
+- 异步调用必须正确等待并传播异常，不能留下未处理 Promise。
+- 不得通过关闭规则、降低规则级别或添加无依据的忽略注释规避问题。
+
+### 失败处理
+
+发现格式或 Lint 问题时，先修复新增或修改的文件，再重新执行完整验证。若自动格式化修改大量无关文件，应撤销无关变更，仅保留当前需求相关修改。

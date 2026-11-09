@@ -26,7 +26,7 @@ function createConfigService(oss: OssConfig | null = ossConfig) {
       if (key === 'image') return imageConfig;
       throw new Error(`unexpected key: ${key}`);
     }),
-    get: vi.fn((key: string) => key === 'oss' ? oss : undefined)
+    get: vi.fn((key: string) => (key === 'oss' ? oss : undefined))
   };
 }
 
@@ -44,15 +44,25 @@ function createFile(buffer: Buffer, overrides: Partial<UploadImageFile> = {}): U
 
 describe('UploadService', () => {
   it('rejects unsupported file types before contacting OSS', async () => {
-    const service = new UploadService(createConfigService() as never, { toPublicUrl: (key: string) => `https://cdn.example.com/${key}` } as never);
+    const service = new UploadService(
+      createConfigService() as never,
+      { toPublicUrl: (key: string) => `https://cdn.example.com/${key}` } as never
+    );
     const file = createFile(Buffer.from('not an image'), { mimetype: 'text/plain' });
 
-    await expect(service.uploadImage(file)).rejects.toMatchObject({ response: { message: '仅支持 JPEG、PNG、WebP、GIF 格式的图片' } });
+    await expect(service.uploadImage(file)).rejects.toMatchObject({
+      response: { message: '仅支持 JPEG、PNG、WebP、GIF 格式的图片' }
+    });
   });
 
   it('returns a public OSS URL after processing and uploading an image', async () => {
-    const service = new UploadService(createConfigService() as never, { toPublicUrl: (key: string) => `https://cdn.example.com/${key}` } as never);
-    const buffer = await sharp({ create: { width: 1, height: 1, channels: 3, background: 'red' } }).png().toBuffer();
+    const service = new UploadService(
+      createConfigService() as never,
+      { toPublicUrl: (key: string) => `https://cdn.example.com/${key}` } as never
+    );
+    const buffer = await sharp({ create: { width: 1, height: 1, channels: 3, background: 'red' } })
+      .png()
+      .toBuffer();
     const put = vi.fn().mockResolvedValue({});
     (service as unknown as { client: { put: typeof put } }).client = { put };
 
@@ -60,34 +70,49 @@ describe('UploadService', () => {
 
     expect(result).toMatchObject({
       category: 'article',
-      storageKey: expect.stringMatching(/^images\/article\/.+\.png$/),      url: expect.stringMatching(/^https:\/\/cdn\.example\.com\/images\/article\//)
+      storageKey: expect.stringMatching(/^images\/article\/.+\.png$/),
+      url: expect.stringMatching(/^https:\/\/cdn\.example\.com\/images\/article\//)
     });
-    expect(put).toHaveBeenCalledWith(
-      expect.stringMatching(/^images\/article\/.+\.png$/),
-      expect.any(Buffer),
-      { headers: { 'Content-Type': 'image/png' } }
-    );
+    expect(put).toHaveBeenCalledWith(expect.stringMatching(/^images\/article\/.+\.png$/), expect.any(Buffer), {
+      headers: { 'Content-Type': 'image/png' }
+    });
   });
 
   it('rejects a category containing path separators', async () => {
-    const service = new UploadService(createConfigService() as never, { toPublicUrl: (key: string) => `https://cdn.example.com/${key}` } as never);
+    const service = new UploadService(
+      createConfigService() as never,
+      { toPublicUrl: (key: string) => `https://cdn.example.com/${key}` } as never
+    );
     const file = createFile(Buffer.from('not an image'));
 
-    await expect(service.uploadImage(file, '../private')).rejects.toMatchObject({ response: { message: '图片分类格式无效' } });
+    await expect(service.uploadImage(file, '../private')).rejects.toMatchObject({
+      response: { message: '图片分类格式无效' }
+    });
   });
 
   it('rejects a batch larger than the configured limit', async () => {
-    const service = new UploadService(createConfigService() as never, { toPublicUrl: (key: string) => `https://cdn.example.com/${key}` } as never);
+    const service = new UploadService(
+      createConfigService() as never,
+      { toPublicUrl: (key: string) => `https://cdn.example.com/${key}` } as never
+    );
     const file = createFile(Buffer.from('not an image'));
 
-    await expect(service.batchUploadImages([file, file, file])).rejects.toMatchObject({ response: { message: '最多支持上传 2 张图片' } });
+    await expect(service.batchUploadImages([file, file, file])).rejects.toMatchObject({
+      response: { message: '最多支持上传 2 张图片' }
+    });
   });
 
   it('returns a service-unavailable error when OSS is not configured', async () => {
-    const service = new UploadService(createConfigService(null) as never, { toPublicUrl: (key: string) => key } as never);
-    const buffer = await sharp({ create: { width: 1, height: 1, channels: 3, background: 'red' } }).png().toBuffer();
+    const service = new UploadService(
+      createConfigService(null) as never,
+      { toPublicUrl: (key: string) => key } as never
+    );
+    const buffer = await sharp({ create: { width: 1, height: 1, channels: 3, background: 'red' } })
+      .png()
+      .toBuffer();
 
-    await expect(service.uploadImage(createFile(buffer))).rejects.toMatchObject({ response: { message: '图片存储服务未配置' } });
+    await expect(service.uploadImage(createFile(buffer))).rejects.toMatchObject({
+      response: { message: '图片存储服务未配置' }
+    });
   });
 });
-

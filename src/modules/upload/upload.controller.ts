@@ -46,10 +46,12 @@ export class UploadController {
 
   /** 批量上传图片。 */
   @Post('batch-images')
-  @UseInterceptors(FilesInterceptor('files', MAX_MULTIPART_FILES, {
-    storage: memoryStorage(),
-    limits: { fileSize: MAX_MULTIPART_FILE_SIZE, files: MAX_MULTIPART_FILES }
-  }))
+  @UseInterceptors(
+    FilesInterceptor('files', MAX_MULTIPART_FILES, {
+      storage: memoryStorage(),
+      limits: { fileSize: MAX_MULTIPART_FILE_SIZE, files: MAX_MULTIPART_FILES }
+    })
+  )
   @ApiOperation({ summary: '批量上传图片' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: BatchUploadImagesDto })

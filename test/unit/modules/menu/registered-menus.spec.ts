@@ -54,6 +54,8 @@ describe('flattenRegisteredMenus', () => {
   it('默认注册表应按深度优先展开系统管理菜单', () => {
     expect(flattenRegisteredMenus().map(entry => [entry.menuKey, entry.parentKey])).toEqual([
       ['home', null],
+      ['operation', null],
+      ['operation-asset', 'operation'],
       ['system', null],
       ['system-admin', 'system'],
       ['system-role', 'system'],

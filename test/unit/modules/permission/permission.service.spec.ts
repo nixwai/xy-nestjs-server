@@ -123,7 +123,8 @@ describe('PermissionService 启动同步', () => {
   it('重复初始化应把漂移的代码维护字段对齐到注册表', async () => {
     const { service, repository } = createSynchronizingService();
     await service.onModuleInit();
-    const [seeded] = await service.listPermissions();
+    const seeded = await service.findByCode(REGISTERED_PERMISSIONS[0].code);
+    if (!seeded) throw new Error('测试权限未初始化');
     await repository.updateDefinition(seeded.id, { name: '旧名称', isProtected: true, isAssignable: false });
     await repository.setActive(seeded.id, false);
 

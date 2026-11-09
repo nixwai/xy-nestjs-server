@@ -39,8 +39,8 @@ export class UploadService {
     const processed = await this.processImage(input.buffer, imageConfig);
     const key = `images/${normalizedCategory}/${Date.now()}-${randomUUID().slice(0, 8)}.${processed.extension}`;
 
-    const client = this.getClient();
     try {
+      const client = this.getClient();
       await client.put(key, processed.buffer, { headers: { 'Content-Type': processed.contentType } });
     } catch (error) {
       if (error instanceof HttpException) {
@@ -86,6 +86,11 @@ export class UploadService {
     return this.configService.getOrThrow<ImageConfig>(CONFIG_KEYS.image);
   }
 
+  /** 删除已上传的 OSS 对象，用于素材记录写入失败时的补偿清理。 */
+  async deleteObject(storageKey: string): Promise<void> {
+    await this.getClient().delete(storageKey);
+  }
+
   private getClient(): OSS {
     if (this.client) {
       return this.client;
@@ -129,7 +134,10 @@ export class UploadService {
     return value;
   }
 
-  private async processImage(buffer: Buffer, config: ImageConfig): Promise<{ buffer: Buffer; extension: string; contentType: string }> {
+  private async processImage(
+    buffer: Buffer,
+    config: ImageConfig
+  ): Promise<{ buffer: Buffer; extension: string; contentType: string }> {
     try {
       const pipeline = sharp(buffer);
       const metadata = await pipeline.metadata();
@@ -140,12 +148,24 @@ export class UploadService {
         pipeline.resize(config.maxWidth, config.maxHeight, { fit: 'inside', withoutEnlargement: true });
       }
       if (metadata.format === 'png') {
-        return { buffer: await pipeline.png({ quality: config.quality }).toBuffer(), extension: 'png', contentType: 'image/png' };
+        return {
+          buffer: await pipeline.png({ quality: config.quality }).toBuffer(),
+          extension: 'png',
+          contentType: 'image/png'
+        };
       }
       if (metadata.format === 'webp') {
-        return { buffer: await pipeline.webp({ quality: config.quality }).toBuffer(), extension: 'webp', contentType: 'image/webp' };
+        return {
+          buffer: await pipeline.webp({ quality: config.quality }).toBuffer(),
+          extension: 'webp',
+          contentType: 'image/webp'
+        };
       }
-      return { buffer: await pipeline.jpeg({ quality: config.quality }).toBuffer(), extension: 'jpg', contentType: 'image/jpeg' };
+      return {
+        buffer: await pipeline.jpeg({ quality: config.quality }).toBuffer(),
+        extension: 'jpg',
+        contentType: 'image/jpeg'
+      };
     } catch {
       throw new BadRequestException('图片处理失败，请检查文件格式');
     }
