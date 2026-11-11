@@ -31,16 +31,20 @@ import { AssetFolderEntity } from '../modules/asset/entities/asset-folder.entity
 import { AssetImageEntity } from '../modules/asset/entities/asset-image.entity.js';
 import {
   ASSET_FOLDER_REPOSITORY,
-  ASSET_IMAGE_REPOSITORY
+  ASSET_IMAGE_REPOSITORY,
+  ASSET_TRANSACTION_RUNNER
 } from '../modules/asset/repositories/asset-repository.port.js';
 import {
   InMemoryAssetFolderRepository,
-  InMemoryAssetImageRepository
+  InMemoryAssetImageRepository,
+  InMemoryAssetTransactionRunner
 } from '../modules/asset/repositories/in-memory-asset.repository.js';
 import {
   TypeOrmAssetFolderRepository,
   TypeOrmAssetImageRepository
 } from '../modules/asset/repositories/asset.repository.js';
+
+import { TypeOrmAssetTransactionRunner } from '../modules/asset/repositories/asset-transaction.runner.js';
 
 const databaseEnabled = shouldLoadDatabaseModule();
 const databaseEntities = [
@@ -93,6 +97,10 @@ const databaseEntities = [
       useClass: databaseEnabled ? TypeOrmAssetFolderRepository : InMemoryAssetFolderRepository
     },
     {
+      provide: ASSET_TRANSACTION_RUNNER,
+      useClass: databaseEnabled ? TypeOrmAssetTransactionRunner : InMemoryAssetTransactionRunner
+    },
+    {
       provide: ASSET_IMAGE_REPOSITORY,
       useClass: databaseEnabled ? TypeOrmAssetImageRepository : InMemoryAssetImageRepository
     }
@@ -105,7 +113,8 @@ const databaseEntities = [
     PERMISSION_REPOSITORY,
     MENU_REPOSITORY,
     ASSET_FOLDER_REPOSITORY,
-    ASSET_IMAGE_REPOSITORY
+    ASSET_IMAGE_REPOSITORY,
+    ASSET_TRANSACTION_RUNNER
   ]
 })
 export class PersistenceModule {}

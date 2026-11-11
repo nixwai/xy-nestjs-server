@@ -48,3 +48,22 @@ export class BatchAssetUploadResponseDto {
   @ApiProperty({ type: Number }) totalCount!: number;
   @ApiProperty({ type: Number }) successCount!: number;
 }
+
+/** 素材所有者的最小公开信息。 */
+export class AssetOwnerResponseDto {
+  @ApiProperty({ type: String }) id!: string;
+  @ApiProperty({ type: String }) username!: string;
+  @ApiProperty({ type: Boolean }) isActive!: boolean;
+}
+/** 可选素材所有者列表。 */
+export class AssetOwnerListResponseDto {
+  @ApiProperty({ type: [AssetOwnerResponseDto] }) items!: AssetOwnerResponseDto[];
+  @ApiProperty({ type: Number }) total!: number;
+}
+
+/** 上传约束来自服务端配置及请求内存预算。 */
+export class AssetUploadLimitsResponseDto {
+  @ApiProperty({ type: Number }) maxFiles!: number;
+  @ApiProperty({ type: Number }) maxFileSize!: number;
+  @ApiProperty({ type: Number }) maxBatchSize!: number;
+}

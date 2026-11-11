@@ -2,7 +2,7 @@ import type { ArgumentsHost, ExceptionFilter } from '@nestjs/common';
 import { Catch, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { HttpCode } from '../enums/index.js';
-import { DomainConflictError, DomainNotFoundError } from '../errors/index.js';
+import { DomainConflictError, DomainNotFoundError, PublicBusinessException } from '../errors/index.js';
 import { getMysqlDuplicateKey } from '../utils/index.js';
 import type { ApiErrorResponse } from '../types/index.js';
 /** 定义 ErrorResponseBody 数据结构。 */
@@ -84,6 +84,15 @@ export class GlobalExceptionFilter implements ExceptionFilter<unknown> {
         code: HttpCode.INTERNAL_SERVER_ERROR,
         message: '服务器内部错误',
         data: null
+      });
+      return;
+    }
+
+    if (exception instanceof PublicBusinessException) {
+      response.status(HttpStatus.OK).json({
+        code: exception.code,
+        message: this.getClientMessage(exception.getResponse(), status),
+        data: exception.data
       });
       return;
     }

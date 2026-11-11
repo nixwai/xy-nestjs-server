@@ -9,16 +9,12 @@ import {
   UseInterceptors
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { memoryStorage } from 'multer';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiCommonResponses, ApiOkResponseData } from '#/common/decorators/index.js';
 import { Authenticated } from '../authorization/decorators/index.js';
 import { BatchUploadImagesDto, BatchUploadResultDto, UploadImageDto, UploadImageResponseDto } from './dto/index.js';
 import { UploadService } from './upload.service.js';
 import type { UploadImageFile } from './types/upload-image-file.type.js';
-
-const MAX_MULTIPART_FILE_SIZE = 50 * 1024 * 1024;
-const MAX_MULTIPART_FILES = 50;
 
 /** 图片上传接口。 */
 @ApiTags('图片上传')
@@ -32,7 +28,7 @@ export class UploadController {
 
   /** 上传单张图片。 */
   @Post('image')
-  @UseInterceptors(FileInterceptor('file', { storage: memoryStorage(), limits: { fileSize: MAX_MULTIPART_FILE_SIZE } }))
+  @UseInterceptors(FileInterceptor('file', { limits: { files: 1 } }))
   @ApiOperation({ summary: '上传单张图片' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: UploadImageDto })
@@ -46,12 +42,7 @@ export class UploadController {
 
   /** 批量上传图片。 */
   @Post('batch-images')
-  @UseInterceptors(
-    FilesInterceptor('files', MAX_MULTIPART_FILES, {
-      storage: memoryStorage(),
-      limits: { fileSize: MAX_MULTIPART_FILE_SIZE, files: MAX_MULTIPART_FILES }
-    })
-  )
+  @UseInterceptors(FilesInterceptor('files'))
   @ApiOperation({ summary: '批量上传图片' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: BatchUploadImagesDto })

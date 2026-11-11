@@ -10,6 +10,18 @@ export class UploadImageResponseDto {
 
   @ApiProperty({ type: String, description: '图片分类。' })
   category!: string;
+
+  @ApiProperty({ type: String, description: '实际存储图片的 MIME 类型。' })
+  mimeType!: string;
+
+  @ApiProperty({ type: Number, description: '实际存储图片的字节数。' })
+  size!: number;
+
+  @ApiProperty({ type: Number, description: '处理后图片宽度。' })
+  width!: number;
+
+  @ApiProperty({ type: Number, description: '处理后图片高度。' })
+  height!: number;
 }
 
 /** 批量上传失败项。 */
