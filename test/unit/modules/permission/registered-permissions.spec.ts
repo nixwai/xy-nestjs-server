@@ -40,6 +40,20 @@ describe('REGISTERED_PERMISSION_GROUPS', () => {
   });
 });
 
+describe('素材管理权限', () => {
+  it('应注册素材管理页面查看权限', () => {
+    expect(REGISTERED_PERMISSIONS).toContainEqual(
+      expect.objectContaining({
+        code: 'asset.folder.read',
+        name: '查看文件夹',
+        category: 'asset',
+        isAssignable: true,
+        isProtected: false
+      })
+    );
+  });
+});
+
 describe('REGISTERED_PERMISSIONS', () => {
   it('uses stable business permission codes and explicit assignment boundaries', () => {
     for (const permission of REGISTERED_PERMISSIONS) {

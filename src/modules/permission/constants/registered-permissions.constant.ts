@@ -16,6 +16,19 @@ export const REGISTERED_PERMISSION_GROUPS: readonly RegisteredPermissionGroup[] 
         isProtected: false
       }
     ]
+  },
+  {
+    category: 'asset',
+    name: '素材管理',
+    permissions: [
+      {
+        code: PermissionCode.ASSET_FOLDER_READ,
+        name: '查看文件夹',
+        description: '查看素材文件夹',
+        isAssignable: true,
+        isProtected: false
+      }
+    ]
   }
 ];
 

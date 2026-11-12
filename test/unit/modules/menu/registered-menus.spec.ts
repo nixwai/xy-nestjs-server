@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { PermissionCode } from '#/modules/authorization/constants/index.js';
 import type { RegisteredMenu } from '#/modules/menu/types/registered-menu.types.js';
 import { flattenRegisteredMenus } from '#/modules/menu/utils/registered-menu.util.js';
 
@@ -52,8 +53,12 @@ describe('flattenRegisteredMenus', () => {
   });
 
   it('默认注册表应按深度优先展开系统管理菜单', () => {
-    expect(flattenRegisteredMenus().map(entry => [entry.menuKey, entry.parentKey])).toEqual([
+    const menus = flattenRegisteredMenus();
+
+    expect(menus.map(entry => [entry.menuKey, entry.parentKey])).toEqual([
       ['home', null],
+      ['operation', null],
+      ['operation-asset', 'operation'],
       ['system', null],
       ['system-admin', 'system'],
       ['system-role', 'system'],
@@ -61,5 +66,9 @@ describe('flattenRegisteredMenus', () => {
       ['system-menu', 'system'],
       ['system-permission', 'system']
     ]);
+    expect(menus.find(entry => entry.menuKey === 'operation-asset')).toMatchObject({
+      path: '/operation-management/asset',
+      permissionCode: PermissionCode.ASSET_FOLDER_READ
+    });
   });
 });

@@ -3,6 +3,7 @@ import 'reflect-metadata';
 import { describe, expect, it } from 'vitest';
 import { PERMISSION_KEY } from '#/modules/authorization/decorators/index.js';
 import { REGISTERED_PERMISSIONS } from '#/modules/permission/constants/registered-permissions.constant.js';
+import { flattenRegisteredMenus } from '#/modules/menu/utils/registered-menu.util.js';
 
 const controllerModules = import.meta.glob<Record<string, unknown>>('/src/**/*.controller.ts', {
   eager: true
@@ -44,8 +45,12 @@ function collectPermissionCode(codes: string[], target: object): void {
 
 const controllers = listControllers();
 const routeCodes = controllers.flatMap(listRoutePermissionCodes);
+const menuCodes = flattenRegisteredMenus()
+  .map(menu => menu.permissionCode)
+  .filter((code): code is NonNullable<typeof code> => Boolean(code));
+const usedCodes = [...routeCodes, ...menuCodes];
 
-describe('路由权限编码与注册表一致性', () => {
+describe('路由和菜单权限编码与注册表一致性', () => {
   it('应扫描到控制器路由', () => {
     expect(controllers.length).toBeGreaterThan(0);
     expect(routeCodes.length).toBeGreaterThan(0);
@@ -59,9 +64,9 @@ describe('路由权限编码与注册表一致性', () => {
     }
   });
 
-  it('注册的权限必须被至少一个路由使用', () => {
+  it('注册的权限必须被至少一个路由或菜单使用', () => {
     for (const permission of REGISTERED_PERMISSIONS) {
-      expect(routeCodes, `权限 ${permission.code} 已注册但没有任何路由使用`).toContain(permission.code);
+      expect(usedCodes, `权限 ${permission.code} 未被路由或菜单使用`).toContain(permission.code);
     }
   });
 });
