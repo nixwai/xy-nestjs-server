@@ -187,7 +187,7 @@ describe('processed image contract', () => {
       .toBuffer();
     await expect(service.uploadImage(createFile(buffer))).rejects.toThrow('图片上传失败');
     expect(client.delete).toHaveBeenCalledWith(client.put.mock.calls[0][0]);
-    expect(errorLog).toHaveBeenCalledWith(expect.stringContaining('公开地址构造失败'), expect.any(String));
+    expect(errorLog).toHaveBeenCalledWith(expect.stringContaining('图片上传失败'), expect.any(String));
     expect(warnLog).toHaveBeenCalledWith(expect.stringContaining('已补偿删除'));
   });
 

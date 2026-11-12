@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MulterModule } from '@nestjs/platform-express';
 import { RequestBoundedMemoryStorage } from './storage/bounded-memory.storage.js';
+import { AliOssObjectStorage } from './storage/ali-oss.object-storage.js';
+import { OBJECT_STORAGE } from './types/upload-result.type.js';
 import { CONFIG_KEYS } from '#/config/config.constants.js';
 import type { ImageConfig } from '#/config/config.types.js';
 import { UploadController } from './upload.controller.js';
@@ -24,7 +26,7 @@ import { ResourceUrlService } from '#/common/services/resource-url.service.js';
     })
   ],
   controllers: [UploadController],
-  providers: [UploadService, ResourceUrlService],
-  exports: [UploadService, ResourceUrlService]
+  providers: [UploadService, ResourceUrlService, { provide: OBJECT_STORAGE, useClass: AliOssObjectStorage }],
+  exports: [UploadService, ResourceUrlService, OBJECT_STORAGE]
 })
 export class UploadModule {}

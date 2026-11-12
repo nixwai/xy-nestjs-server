@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, Length, Matches, ValidateIf } from 'class-validator';
 
-/** 素材资源的可选归属筛选，仅接受正整数字符串。 */
+/** 素材资源的可选归属筛选。 */
 export class AssetOwnerQueryDto {
   @ApiPropertyOptional({ type: String, pattern: '^[1-9][0-9]*$' })
   @ValidateIf((_object, value: unknown) => value !== undefined)
@@ -10,7 +10,7 @@ export class AssetOwnerQueryDto {
   ownerId?: string;
 }
 
-/** 素材路径参数。 */
+/** 素材路径及请求体共用的正整数资源 ID。 */
 export class AssetIdParamDto {
   @ApiProperty({ type: String, pattern: '^[1-9][0-9]*$' })
   @IsString()
@@ -33,11 +33,26 @@ export class CreateAssetFolderDto extends AssetOwnerQueryDto {
   parentId?: string | null;
 }
 
-/** 重命名素材文件夹，不修改归属。 */
-export class UpdateAssetFolderDto extends AssetOwnerQueryDto {
+/** 更新素材文件夹。 */
+export class UpdateAssetFolderDto extends AssetIdParamDto {
+  @ApiPropertyOptional({ type: String, pattern: '^[1-9][0-9]*$' })
+  @ValidateIf((_object, value: unknown) => value !== undefined)
+  @IsString()
+  @Matches(/^[1-9][0-9]*$/, { message: 'ownerId 必须为正整数字符串' })
+  ownerId?: string;
+
   @ApiProperty({ type: String, minLength: 1, maxLength: 128 })
   @IsString()
   @Length(1, 128)
   @Matches(/\S/, { message: '文件夹名称不能为空白' })
   name!: string;
+}
+
+/** 删除素材文件夹。 */
+export class DeleteAssetFolderDto extends AssetIdParamDto {
+  @ApiPropertyOptional({ type: String, pattern: '^[1-9][0-9]*$' })
+  @ValidateIf((_object, value: unknown) => value !== undefined)
+  @IsString()
+  @Matches(/^[1-9][0-9]*$/, { message: 'ownerId 必须为正整数字符串' })
+  ownerId?: string;
 }

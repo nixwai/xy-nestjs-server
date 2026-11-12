@@ -50,7 +50,8 @@ describe('素材 HTTP 契约 (e2e)', () => {
         validateBatch: (files: unknown[]) => {
           if (!files.length) throw new BadRequestException('请选择要上传的图片');
         },
-        deleteObject: vi.fn().mockResolvedValue(undefined)
+        deleteObject: vi.fn().mockResolvedValue(undefined),
+        getMemoryBudget: () => 64 * 1024 * 1024
       })
       .compile();
     app = moduleRef.createNestApplication();
@@ -140,8 +141,8 @@ describe('素材 HTTP 契约 (e2e)', () => {
     expect((await api().get('/api/asset/folders')).body.code).toBe(40100);
     const other = await folder('他人', {}, rootToken);
     expect(
-      (await api().patch(`/api/asset/folders/${other.id}`).set('Authorization', auth()).send({ name: '越权' })).body
-        .code
+      (await api().post('/api/asset/folders/update').set('Authorization', auth()).send({ id: other.id, name: '越权' }))
+        .body.code
     ).toBe(40300);
     permissions.delete(PermissionCode.ASSET_FOLDER_CREATE);
     expect(
@@ -181,23 +182,32 @@ describe('素材 HTTP 契约 (e2e)', () => {
     const uploaded = await image(target.id);
     const loose = await image();
     const renamed = await api()
-      .patch(`/api/asset/folders/${target.id}`)
+      .post('/api/asset/folders/update')
       .set('Authorization', auth())
-      .send({ name: '新名称' });
+      .send({ id: target.id, name: '新名称' });
     expect(renamed.body.data.name).toBe('新名称');
     const unclassified = await api().get('/api/asset/images?unclassified=true').set('Authorization', auth());
     expect(unclassified.body.code).toBe(0);
     expect(unclassified.body.data.items.map((item: { id: string }) => item.id)).toEqual([loose.id]);
     const moved = await api()
-      .patch(`/api/asset/images/${loose.id}/folder`)
+      .post('/api/asset/images/move')
       .set('Authorization', auth())
-      .send({ folderId: target.id });
+      .send({ id: loose.id, folderId: target.id });
     expect(moved.body.data).toMatchObject({ id: loose.id, folderId: target.id, ownerId });
-    expect((await api().delete(`/api/asset/folders/${target.id}`).set('Authorization', auth())).body.code).toBe(0);
+    expect(
+      (await api().post('/api/asset/folders/soft-delete').set('Authorization', auth()).send({ id: target.id })).body
+        .code
+    ).toBe(0);
     const after = await api().get('/api/asset/images?unclassified=true').set('Authorization', auth());
     expect(after.body.data.items).toHaveLength(2);
-    expect((await api().delete(`/api/asset/images/${uploaded.id}`).set('Authorization', auth())).body.code).toBe(0);
-    expect((await api().delete(`/api/asset/images/${uploaded.id}`).set('Authorization', auth())).body.code).toBe(40400);
+    expect(
+      (await api().post('/api/asset/images/soft-delete').set('Authorization', auth()).send({ id: uploaded.id })).body
+        .code
+    ).toBe(0);
+    expect(
+      (await api().post('/api/asset/images/soft-delete').set('Authorization', auth()).send({ id: uploaded.id })).body
+        .code
+    ).toBe(40400);
   });
   it.each([
     '/api/asset/folders?ownerId=0',
@@ -209,7 +219,9 @@ describe('素材 HTTP 契约 (e2e)', () => {
     expect(result.body).toMatchObject({ code: 40001, data: null });
   });
   it('路径 id 和 multipart body 必须通过 DTO，不能注入创建者', async () => {
-    expect((await api().delete('/api/asset/images/abc').set('Authorization', auth())).body.code).toBe(40001);
+    expect(
+      (await api().post('/api/asset/images/soft-delete').send({ id: 'abc' }).set('Authorization', auth())).body.code
+    ).toBe(40001);
     for (const [field, value] of [
       ['createdByAdminId', rootId],
       ['ownerId', '0'],

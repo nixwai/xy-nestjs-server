@@ -28,7 +28,6 @@ export function toAssetImageResponse(item: AssetImageRecord): AssetImageResponse
     folderId: item.folderId,
     originalName: item.originalName,
     url: item.url,
-    storageKey: item.storageKey,
     mimeType: item.mimeType,
     size: item.size,
     width: item.width,

@@ -42,7 +42,11 @@ export class AssetFolderService {
     });
   }
 
-  async update(actorId: string, id: string, dto: UpdateAssetFolderDto): Promise<AssetFolderRecord> {
+  async update(
+    actorId: string,
+    id: string,
+    dto: Pick<UpdateAssetFolderDto, 'ownerId' | 'name'>
+  ): Promise<AssetFolderRecord> {
     const ownerId = dto.ownerId ?? actorId;
     await this.access.assertManage(actorId, ownerId, 'folder', PermissionCode.ASSET_FOLDER_UPDATE);
     const name = this.normalizeName(dto.name);

@@ -3,6 +3,7 @@ import type { CallHandler, ExecutionContext } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom, of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { UploadService } from '#/modules/upload/upload.service.js';
 import { AssetController } from '#/modules/asset/asset.controller.js';
 import type { AssetFolderService } from '#/modules/asset/asset-folder.service.js';
 import type { AssetImageService } from '#/modules/asset/asset-image.service.js';
@@ -122,6 +123,7 @@ describe('素材 controller 编排', () => {
   const service = { listOwners: vi.fn() };
   const folders = { list: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() };
   const images = { list: vi.fn(), upload: vi.fn(), move: vi.fn(), delete: vi.fn() };
+  const uploadService = { getMemoryBudget: vi.fn(() => 64 * 1024 * 1024) };
   let controller: AssetController;
   beforeEach(() => {
     vi.clearAllMocks();
@@ -138,6 +140,7 @@ describe('素材 controller 编排', () => {
       service as unknown as AssetService,
       folders as unknown as AssetFolderService,
       images as unknown as AssetImageService,
+      uploadService as unknown as UploadService,
       new ConfigService()
     );
   });
@@ -153,9 +156,9 @@ describe('素材 controller 编排', () => {
     const create = { name: '照片', ownerId: '2' };
     expect(await controller.createFolder(admin, create)).toEqual(toAssetFolderResponse(folder));
     expect(folders.create).toHaveBeenCalledWith('3', create);
-    expect(await controller.updateFolder(admin, { id: '1' }, create)).toEqual(toAssetFolderResponse(folder));
-    expect(folders.update).toHaveBeenCalledWith('3', '1', create);
-    expect(await controller.deleteFolder(admin, { id: '1' }, { ownerId: '2' })).toBeUndefined();
+    expect(await controller.updateFolder(admin, { ...create, id: '1' })).toEqual(toAssetFolderResponse(folder));
+    expect(folders.update).toHaveBeenCalledWith('3', '1', expect.objectContaining({ name: '照片', ownerId: '2' }));
+    expect(await controller.deleteFolder(admin, { id: '1', ownerId: '2' })).toBeUndefined();
     expect(folders.delete).toHaveBeenCalledWith('3', '1', '2');
   });
   it('图片本人和全量查询保留 DTO', async () => {
@@ -180,11 +183,11 @@ describe('素材 controller 编排', () => {
       toAssetUploadResponse(batch)
     );
     expect(images.upload).toHaveBeenCalledWith('3', files, '1', '2');
-    expect(await controller.moveImage(admin, { id: '10' }, { folderId: null, ownerId: '2' })).toEqual(
+    expect(await controller.moveImage(admin, { id: '10', folderId: null, ownerId: '2' })).toEqual(
       toAssetImageResponse(image)
     );
     expect(images.move).toHaveBeenCalledWith('3', '10', null, '2');
-    expect(await controller.deleteImage(admin, { id: '10' }, { ownerId: '2' })).toBeUndefined();
+    expect(await controller.deleteImage(admin, { id: '10', ownerId: '2' })).toBeUndefined();
     expect(images.delete).toHaveBeenCalledWith('3', '10', '2');
   });
   it.each([undefined, []])('没有文件不得调用上传服务', files => {
@@ -270,6 +273,7 @@ describe('素材上传限制契约', () => {
       {} as never,
       {} as never,
       {} as never,
+      { getMemoryBudget: () => 64 * 1024 * 1024 } as never,
       new ConfigService({ [CONFIG_KEYS.image]: { maxFiles: 7, maxFileSize: 123456 } })
     );
     expect(controller.uploadLimits()).toEqual({ maxFiles: 7, maxFileSize: 123456, maxBatchSize: 64 * 1024 * 1024 });

@@ -1,9 +1,9 @@
 import { BadRequestException } from '@nestjs/common';
 import type { Request } from 'express';
 import type { StorageEngine } from 'multer';
+import { UPLOAD_MEMORY_BUDGET } from '../upload.constants.js';
 
-/** 单请求所有文件共享的内存预算，不改变配置的文件数量或单文件大小。 */
-export const UPLOAD_MEMORY_BUDGET = 64 * 1024 * 1024;
+export { UPLOAD_MEMORY_BUDGET } from '../upload.constants.js';
 
 type FileCallback = (error?: Error | null, info?: Partial<Express.Multer.File>) => void;
 interface PendingFile {

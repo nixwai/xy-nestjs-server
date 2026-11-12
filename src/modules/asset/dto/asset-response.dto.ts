@@ -10,12 +10,13 @@ export class AssetFolderResponseDto {
   @ApiProperty({ type: Date }) createdAt!: Date;
   @ApiProperty({ type: Date }) updatedAt!: Date;
 }
+
+/** 图片素材公开响应，不暴露对象存储内部 Key。 */
 export class AssetImageResponseDto {
   @ApiProperty({ type: String }) id!: string;
   @ApiProperty({ type: String, nullable: true }) folderId!: string | null;
   @ApiProperty({ type: String }) originalName!: string;
   @ApiProperty({ type: String }) url!: string;
-  @ApiProperty({ type: String }) storageKey!: string;
   @ApiProperty({ type: String }) mimeType!: string;
   @ApiProperty({ type: Number }) size!: number;
   @ApiProperty({ type: Number, nullable: true }) width!: number | null;

@@ -1,17 +1,14 @@
 import { ConfigService } from '@nestjs/config';
 import { CONFIG_KEYS } from '#/config/config.constants.js';
 import type { ImageConfig } from '#/config/config.types.js';
-import { UPLOAD_MEMORY_BUDGET } from '../upload/storage/bounded-memory.storage.js';
+import { UploadService } from '../upload/upload.service.js';
 import { AssetUploadLimitsResponseDto } from './dto/asset-response.dto.js';
 import {
   BadRequestException,
   Body,
   Controller,
-  Delete,
   Get,
   Inject,
-  Param,
-  Patch,
   Post,
   Query,
   UploadedFiles,
@@ -42,6 +39,8 @@ import {
   AssetImageQueryDto,
   BatchAssetUploadDto,
   CreateAssetFolderDto,
+  DeleteAssetFolderDto,
+  DeleteAssetImageDto,
   MoveAssetImageDto,
   UpdateAssetFolderDto
 } from './dto/index.js';
@@ -63,6 +62,7 @@ export class AssetController {
     @Inject(AssetService) private readonly service: AssetService,
     @Inject(AssetFolderService) private readonly folders: AssetFolderService,
     @Inject(AssetImageService) private readonly images: AssetImageService,
+    @Inject(UploadService) private readonly uploadService: UploadService,
     @Inject(ConfigService) private readonly config: ConfigService
   ) {}
   @Get('upload-limits')
@@ -71,7 +71,11 @@ export class AssetController {
   @ApiOkResponseData(AssetUploadLimitsResponseDto)
   uploadLimits(): AssetUploadLimitsResponseDto {
     const image = this.config.getOrThrow<ImageConfig>(CONFIG_KEYS.image);
-    return { maxFiles: image.maxFiles, maxFileSize: image.maxFileSize, maxBatchSize: UPLOAD_MEMORY_BUDGET };
+    return {
+      maxFiles: image.maxFiles,
+      maxFileSize: image.maxFileSize,
+      maxBatchSize: this.uploadService.getMemoryBudget()
+    };
   }
 
   /** 所有者可见性由素材服务按动作权限判断，不依赖管理员列表权限。 */
@@ -112,29 +116,22 @@ export class AssetController {
     return this.folders.create(admin.sub, dto).then(toAssetFolderResponse);
   }
 
-  @Patch('folders/:id')
+  @Post('folders/update')
   @RequirePermission(PermissionCode.ASSET_FOLDER_UPDATE)
   @ApiOperation({ summary: '更新素材文件夹' })
   @ApiBody({ type: UpdateAssetFolderDto })
   @ApiOkResponseData(AssetFolderResponseDto)
-  updateFolder(
-    @CurrentAdmin() admin: AdminJwtPayload,
-    @Param() params: AssetIdParamDto,
-    @Body() dto: UpdateAssetFolderDto
-  ) {
-    return this.folders.update(admin.sub, params.id, dto).then(toAssetFolderResponse);
+  updateFolder(@CurrentAdmin() admin: AdminJwtPayload, @Body() dto: UpdateAssetFolderDto) {
+    return this.folders.update(admin.sub, dto.id, dto).then(toAssetFolderResponse);
   }
 
-  @Delete('folders/:id')
+  @Post('folders/soft-delete')
   @RequirePermission(PermissionCode.ASSET_FOLDER_DELETE)
   @ApiOperation({ summary: '删除素材文件夹' })
+  @ApiBody({ type: DeleteAssetFolderDto })
   @ApiOkResponseEmpty()
-  deleteFolder(
-    @CurrentAdmin() admin: AdminJwtPayload,
-    @Param() params: AssetIdParamDto,
-    @Query() query: AssetOwnerQueryDto
-  ) {
-    return this.folders.delete(admin.sub, params.id, query.ownerId);
+  deleteFolder(@CurrentAdmin() admin: AdminJwtPayload, @Body() dto: DeleteAssetFolderDto) {
+    return this.folders.delete(admin.sub, dto.id, dto.ownerId);
   }
 
   @Get('images')
@@ -183,24 +180,21 @@ export class AssetController {
     return this.images.upload(admin.sub, files, dto.folderId, dto.ownerId).then(toAssetUploadResponse);
   }
 
-  @Patch('images/:id/folder')
+  @Post('images/move')
   @RequirePermission(PermissionCode.ASSET_IMAGE_MOVE)
   @ApiOperation({ summary: '移动图片素材' })
   @ApiBody({ type: MoveAssetImageDto })
   @ApiOkResponseData(AssetImageResponseDto)
-  moveImage(@CurrentAdmin() admin: AdminJwtPayload, @Param() params: AssetIdParamDto, @Body() dto: MoveAssetImageDto) {
-    return this.images.move(admin.sub, params.id, dto.folderId, dto.ownerId).then(toAssetImageResponse);
+  moveImage(@CurrentAdmin() admin: AdminJwtPayload, @Body() dto: MoveAssetImageDto) {
+    return this.images.move(admin.sub, dto.id, dto.folderId, dto.ownerId).then(toAssetImageResponse);
   }
-  
-  @Delete('images/:id')
+
+  @Post('images/soft-delete')
   @RequirePermission(PermissionCode.ASSET_IMAGE_DELETE)
   @ApiOperation({ summary: '删除图片素材' })
+  @ApiBody({ type: DeleteAssetImageDto })
   @ApiOkResponseEmpty()
-  deleteImage(
-    @CurrentAdmin() admin: AdminJwtPayload,
-    @Param() params: AssetIdParamDto,
-    @Query() query: AssetOwnerQueryDto
-  ) {
-    return this.images.delete(admin.sub, params.id, query.ownerId);
+  deleteImage(@CurrentAdmin() admin: AdminJwtPayload, @Body() dto: DeleteAssetImageDto) {
+    return this.images.delete(admin.sub, dto.id, dto.ownerId);
   }
 }

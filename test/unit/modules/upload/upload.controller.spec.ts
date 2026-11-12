@@ -10,7 +10,7 @@ describe('UploadController multipart config', () => {
   let app: INestApplication;
   const uploadService = {
     uploadImage: vi.fn().mockResolvedValue({}),
-    batchUploadImages: vi.fn().mockResolvedValue({})
+    batchUploadImages: vi.fn().mockResolvedValue({ success: [], failed: [], totalCount: 0, successCount: 0 })
   };
 
   beforeEach(async () => {
@@ -88,7 +88,7 @@ describe('UploadController 请求聚合预算', () => {
   let app: INestApplication;
   const uploadService = {
     uploadImage: vi.fn().mockResolvedValue({}),
-    batchUploadImages: vi.fn().mockResolvedValue({})
+    batchUploadImages: vi.fn().mockResolvedValue({ success: [], failed: [], totalCount: 0, successCount: 0 })
   };
   beforeEach(async () => {
     const module = await Test.createTestingModule({
