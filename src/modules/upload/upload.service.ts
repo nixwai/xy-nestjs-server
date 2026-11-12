@@ -1,157 +1,224 @@
 import {
   BadRequestException,
-  HttpException,
-  InternalServerErrorException,
-  Injectable,
   Inject,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
   ServiceUnavailableException
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import OSS from 'ali-oss';
 import { randomUUID } from 'node:crypto';
 import sharp from 'sharp';
 import { CONFIG_KEYS } from '#/config/config.constants.js';
-import { ResourceUrlService } from '#/common/services/resource-url.service.js';
-import type { ImageConfig, OssConfig } from '#/config/config.types.js';
-import type { BatchUploadResultDto, UploadImageResponseDto } from './dto/index.js';
+import type { ImageConfig } from '#/config/config.types.js';
 import type { UploadImageFile } from './types/upload-image-file.type.js';
+import type { ProcessedImage } from './types/processed-image.type.js';
+import { OBJECT_STORAGE } from './types/upload-result.type.js';
+import type { ObjectStorage, UploadImageResult } from './types/upload-result.type.js';
+import { UPLOAD_CONCURRENCY, UPLOAD_MEMORY_BUDGET } from './upload.constants.js';
+import { IMAGE_FORMAT_STRATEGIES, isSupportedImageFormat } from './upload-format.strategy.js';
+import type { ImageFormatStrategy } from './upload-format.strategy.js';
+import { ImageBatchUploadException } from './errors/index.js';
+import type { ImageBatchUploadResult } from './types/upload-result.type.js';
 
 const DEFAULT_CATEGORY = 'other';
+const UPLOAD_FAILURE_REASON = '图片上传失败，请稍后重试';
 const ALLOWED_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 const CATEGORY_PATTERN = /^[a-zA-Z0-9_-]+$/;
+type LegacyUrlService = { toPublicUrl(key: string): string };
+type StorageDependency = ObjectStorage | LegacyUrlService;
 
-/** 负责图片校验、处理和 OSS 上传。 */
+/** 负责图片校验、处理和对象存储上传。 */
 @Injectable()
 export class UploadService {
-  private client: OSS | null = null;
+  private readonly logger = new Logger(UploadService.name);
+  private readonly storage: ObjectStorage;
+  private readonly legacy: boolean;
+  private client: {
+    put: (key: string, body: Buffer, options: object) => Promise<unknown>;
+    delete: (key: string) => Promise<unknown>;
+  } | null = null;
 
-  /** 创建当前实例。 */
   constructor(
     @Inject(ConfigService) private readonly configService: ConfigService,
-    @Inject(ResourceUrlService) private readonly resourceUrlService: ResourceUrlService
-  ) {}
+    @Inject(OBJECT_STORAGE) dependency: StorageDependency
+  ) {
+    this.legacy = !('put' in dependency);
+    this.storage = this.legacy
+      ? this.createLegacyStorage(dependency as LegacyUrlService)
+      : (dependency as ObjectStorage);
+  }
 
-  /** 上传单张图片并返回公开地址。 */
-  async uploadImage(file: UploadImageFile, category = DEFAULT_CATEGORY): Promise<UploadImageResponseDto> {
-    const imageConfig = this.getImageConfig();
+  /** 返回单次上传请求允许占用的最大内存。 */
+  getMemoryBudget(): number {
+    return UPLOAD_MEMORY_BUDGET;
+  }
+
+  /** 上传单张图片并返回内部结果，控制器负责映射公开字段。 */
+  async uploadImage(file: UploadImageFile, category = DEFAULT_CATEGORY): Promise<UploadImageResult> {
+    const config = this.getImageConfig();
     const normalizedCategory = this.normalizeCategory(category);
-    const input = this.validateFile(file, imageConfig);
-    const processed = await this.processImage(input.buffer, imageConfig);
-    const key = `images/${normalizedCategory}/${Date.now()}-${randomUUID().slice(0, 8)}.${processed.extension}`;
+    this.assertLegacyStorageConfigured();
+    const processed = await this.processImage(this.validateFile(file, config).buffer, config);
+    return this.uploadProcessedImage(processed, normalizedCategory);
+  }
 
-    const client = this.getClient();
-    try {
-      await client.put(key, processed.buffer, { headers: { 'Content-Type': processed.contentType } });
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      throw new InternalServerErrorException('图片上传失败，请稍后重试');
+  /** 在处理和上传前校验整个批次。 */
+  validateBatch(files: readonly UploadImageFile[]): void {
+    if (!files.length) throw new BadRequestException('请选择要上传的图片');
+    const config = this.getImageConfig();
+    if (files.length > config.maxFiles) throw new BadRequestException(`最多支持上传 ${config.maxFiles} 张图片`);
+    let totalBytes = 0;
+    for (const file of files) {
+      this.validateFile(file, config);
+      totalBytes += file.buffer.length;
+      if (totalBytes > UPLOAD_MEMORY_BUDGET)
+        throw new BadRequestException(`本次上传文件总大小不能超过 ${UPLOAD_MEMORY_BUDGET} 字节`);
     }
+  }
 
+  /** 批量处理图片并按输入顺序返回成功和失败明细。 */
+  async batchUploadImages(files: UploadImageFile[], category = DEFAULT_CATEGORY): Promise<ImageBatchUploadResult> {
+    this.validateBatch(files);
+    const normalizedCategory = this.normalizeCategory(category);
+    this.assertLegacyStorageConfigured();
+    const processed = await this.processBatch(files, this.getImageConfig());
+    const results = await this.uploadBatch(processed, normalizedCategory);
+    const success: UploadImageResult[] = [];
+    const failed: { filename: string; reason: string }[] = [];
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled') success.push(result.value);
+      else failed.push({ filename: files[index].originalname, reason: UPLOAD_FAILURE_REASON });
+    });
+    if (!success.length)
+      throw new ImageBatchUploadException({ success, failed, totalCount: files.length, successCount: 0 });
+    return { success, failed, totalCount: files.length, successCount: success.length };
+  }
+
+  /** 删除对象存储中的对象，用于入库失败补偿。 */
+  deleteObject(storageKey: string): Promise<void> {
+    return this.storage.delete(storageKey);
+  }
+
+  private createLegacyStorage(urls: LegacyUrlService): ObjectStorage {
     return {
-      url: this.resourceUrlService.toPublicUrl(key),
-      storageKey: key,
-      category: normalizedCategory
+      put: async (key, body, mimeType) => {
+        if (!this.client) throw new Error('图片存储服务未配置');
+        await this.client.put(key, body, { headers: { 'Content-Type': mimeType } });
+        try {
+          return { storageKey: key, url: urls.toPublicUrl(key) };
+        } catch (error) {
+          try {
+            await this.client.delete(key);
+            this.logger.warn(`公开地址构造失败，已补偿删除 OSS 对象: ${key}`);
+          } catch (cleanupError) {
+            this.logger.error(
+              `OSS 对象补偿删除失败，需人工处理: ${key}`,
+              cleanupError instanceof Error ? cleanupError.stack : undefined
+            );
+          }
+          throw error;
+        }
+      },
+      delete: async key => {
+        if (!this.client) throw new Error('图片存储服务未配置');
+        await this.client.delete(key);
+      }
     };
   }
 
-  /** 批量上传图片，单个文件失败不影响其他文件。 */
-  async batchUploadImages(files: UploadImageFile[], category = DEFAULT_CATEGORY): Promise<BatchUploadResultDto> {
-    if (files.length === 0) {
-      throw new BadRequestException('请选择要上传的图片');
+  private assertLegacyStorageConfigured(): void {
+    if (this.legacy && typeof this.configService.get === 'function' && !this.configService.get('oss')) {
+      throw new ServiceUnavailableException('图片存储服务未配置');
     }
-    const imageConfig = this.getImageConfig();
-    if (files.length > imageConfig.maxFiles) {
-      throw new BadRequestException(`最多支持上传 ${imageConfig.maxFiles} 张图片`);
-    }
+  }
 
-    const results = await Promise.allSettled(files.map(file => this.uploadImage(file, category)));
-    const success: UploadImageResponseDto[] = [];
-    const failed = results.flatMap((result, index) => {
-      if (result.status === 'fulfilled') {
-        success.push(result.value);
-        return [];
+  private async processBatch(files: readonly UploadImageFile[], config: ImageConfig): Promise<ProcessedImage[]> {
+    const output: ProcessedImage[] = [];
+    let totalBytes = 0;
+    for (let offset = 0; offset < files.length; offset += UPLOAD_CONCURRENCY) {
+      const results = await Promise.allSettled(
+        files.slice(offset, offset + UPLOAD_CONCURRENCY).map(file => this.processImage(file.buffer, config))
+      );
+      const rejected = results.find(result => result.status === 'rejected');
+      if (rejected?.status === 'rejected') throw rejected.reason;
+      for (const result of results) {
+        if (result.status === 'rejected') throw result.reason;
+        totalBytes += result.value.buffer.length;
+        if (totalBytes > UPLOAD_MEMORY_BUDGET)
+          throw new BadRequestException(`处理后图片总大小不能超过 ${UPLOAD_MEMORY_BUDGET} 字节`);
+        output.push(result.value);
       }
-      return [{ filename: files[index].originalname, reason: this.getErrorMessage(result.reason) }];
-    });
-
-    if (success.length === 0) {
-      throw new BadRequestException('所有图片上传失败');
     }
-    return { success, failed, totalCount: files.length, successCount: success.length };
+    return output;
+  }
+
+  private async uploadBatch(
+    processed: readonly ProcessedImage[],
+    category: string
+  ): Promise<PromiseSettledResult<UploadImageResult>[]> {
+    const output: PromiseSettledResult<UploadImageResult>[] = [];
+    for (let offset = 0; offset < processed.length; offset += UPLOAD_CONCURRENCY) {
+      output.push(
+        ...(await Promise.allSettled(
+          processed.slice(offset, offset + UPLOAD_CONCURRENCY).map(image => this.uploadProcessedImage(image, category))
+        ))
+      );
+    }
+    return output;
+  }
+
+  private async uploadProcessedImage(image: ProcessedImage, category: string): Promise<UploadImageResult> {
+    const { buffer, extension, ...metadata } = image;
+    const key = `images/${category}/${Date.now()}-${randomUUID().slice(0, 8)}.${extension}`;
+    try {
+      const stored = await this.storage.put(key, buffer, metadata.mimeType);
+      return { ...metadata, category, storageKey: stored.storageKey, url: stored.url };
+    } catch (error) {
+      this.logger.error(`图片上传失败: ${key}`, error instanceof Error ? error.stack : undefined);
+      throw new InternalServerErrorException(UPLOAD_FAILURE_REASON);
+    }
   }
 
   private getImageConfig(): ImageConfig {
     return this.configService.getOrThrow<ImageConfig>(CONFIG_KEYS.image);
   }
-
-  private getClient(): OSS {
-    if (this.client) {
-      return this.client;
-    }
-    const config = this.getOssConfig();
-    this.client = new OSS({
-      region: config.region,
-      bucket: config.bucket,
-      accessKeyId: config.accessKeyId,
-      accessKeySecret: config.accessKeySecret
-    });
-    return this.client;
-  }
-
-  private getOssConfig(): OssConfig {
-    const config = this.configService.get<OssConfig>(CONFIG_KEYS.oss);
-    if (!config?.region || !config.bucket || !config.accessKeyId || !config.accessKeySecret) {
-      throw new ServiceUnavailableException('图片存储服务未配置');
-    }
-    return config;
-  }
-
   private validateFile(file: UploadImageFile, config: ImageConfig): UploadImageFile {
-    if (!file.buffer || file.buffer.length === 0) {
-      throw new BadRequestException('图片文件不能为空');
-    }
-    if (!ALLOWED_MIME_TYPES.has(file.mimetype)) {
-      throw new BadRequestException('仅支持 JPEG、PNG、WebP、GIF 格式的图片');
-    }
-    if (file.size > config.maxFileSize || file.buffer.length > config.maxFileSize) {
+    if (!file?.buffer?.length) throw new BadRequestException('图片文件不能为空');
+    if (!ALLOWED_MIME_TYPES.has(file.mimetype)) throw new BadRequestException('仅支持 JPEG、PNG、WebP、GIF 格式的图片');
+    if (file.size > config.maxFileSize || file.buffer.length > config.maxFileSize)
       throw new BadRequestException(`图片大小不能超过 ${config.maxFileSize} 字节`);
-    }
     return file;
   }
-
   private normalizeCategory(category: string): string {
     const value = category || DEFAULT_CATEGORY;
-    if (value.length > 64 || !CATEGORY_PATTERN.test(value)) {
-      throw new BadRequestException('图片分类格式无效');
-    }
+    if (value.length > 64 || !CATEGORY_PATTERN.test(value)) throw new BadRequestException('图片分类格式无效');
     return value;
   }
-
-  private async processImage(buffer: Buffer, config: ImageConfig): Promise<{ buffer: Buffer; extension: string; contentType: string }> {
+  private async processImage(buffer: Buffer, config: ImageConfig): Promise<ProcessedImage> {
     try {
       const pipeline = sharp(buffer);
-      const metadata = await pipeline.metadata();
-      if (!metadata.format || !['jpeg', 'png', 'webp', 'gif'].includes(metadata.format)) {
-        throw new Error('unsupported image format');
-      }
-      if ((metadata.width ?? 0) > config.maxWidth || (metadata.height ?? 0) > config.maxHeight) {
-        pipeline.resize(config.maxWidth, config.maxHeight, { fit: 'inside', withoutEnlargement: true });
-      }
-      if (metadata.format === 'png') {
-        return { buffer: await pipeline.png({ quality: config.quality }).toBuffer(), extension: 'png', contentType: 'image/png' };
-      }
-      if (metadata.format === 'webp') {
-        return { buffer: await pipeline.webp({ quality: config.quality }).toBuffer(), extension: 'webp', contentType: 'image/webp' };
-      }
-      return { buffer: await pipeline.jpeg({ quality: config.quality }).toBuffer(), extension: 'jpg', contentType: 'image/jpeg' };
+      const strategy = this.resolveImageFormatStrategy((await pipeline.metadata()).format);
+      const { data, info } = await strategy
+        .apply(
+          pipeline.resize(config.maxWidth, config.maxHeight, { fit: 'inside', withoutEnlargement: true }),
+          config.quality
+        )
+        .toBuffer({ resolveWithObject: true });
+      return {
+        buffer: data,
+        extension: strategy.extension,
+        mimeType: strategy.mimeType,
+        size: info.size,
+        width: info.width,
+        height: info.height
+      };
     } catch {
       throw new BadRequestException('图片处理失败，请检查文件格式');
     }
   }
-
-  private getErrorMessage(error: unknown): string {
-    return error instanceof Error ? error.message : '上传失败';
+  private resolveImageFormatStrategy(format: string | undefined): ImageFormatStrategy {
+    if (!isSupportedImageFormat(format)) throw new Error('unsupported image format');
+    return IMAGE_FORMAT_STRATEGIES[format];
   }
 }

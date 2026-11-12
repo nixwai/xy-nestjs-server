@@ -1,1 +1,19 @@
-# 项目 Agent 规范## 开发前必读开始任何开发、修改、重构、调试或代码审查前，必须：1. 读取 `.agents/skills/` 下所有项目 Skill。2. 根据当前任务匹配并遵循相关 Skill。3. 若 Skill、项目事实和源码存在冲突，以本文件和实际源码为准；无法确认时不得猜测，必须先明确问题。4. 新增或修改 Skill 后，检查本文件是否出现重复规则，并将详细规范放回对应 Skill。## 项目定位本项目为服务端，采用 NestJS 模块化单体，提供通用管理能力 REST API。## 技术栈- NestJS 12、TypeScript、Node.js 24、pnpm- TypeORM + MySQL，生产使用 MySQL- 外部服务通过独立模块抽象- Vitest + Supertest；Vitest 是本项目对需求文档 Jest 方案的正式替代- Docker + CloudBase 云托管## 项目事实- 领域代码位于 `src/modules`，横切能力位于 `src/common`，配置位于 `src/config`，迁移位于 `src/database`，全局基础设施位于 `src/shared`。- `config/config.yaml` 是仓库内唯一 YAML 配置模板。- 单元测试位于 `test/unit`，E2E 测试位于 `test/e2e`，测试初始化位于 `test/setup.ts`。- 业务接口统一使用统一响应格式；健康检查和 Swagger 按现有代码提供基础设施接口。- 生产密钥、数据库密码、外部服务凭据和 JWT 密钥禁止写入仓库。## 开发命令```bashpnpm install --frozen-lockfilepnpm start:devpnpm typecheckpnpm lintpnpm testpnpm test:e2epnpm buildpnpm openapi:generate```## 交付要求- 修改后执行与变更相关的类型检查、Lint、单元测试、E2E 测试和构建；涉及 API 时同步检查 OpenAPI。- 提交前检查 `git diff --check`、敏感信息和无关文件。
+# 项目 Agent 指令
+
+## 技能优先
+
+每次处理用户请求开始时：
+
+1. 列出 `.claude/skills/` 目录下的 Markdown 文件。
+2. 在回答或编辑文件前，读取找到的每一个 `.md` 文件。
+3. 如果 `.cladue/skills/` 目录存在，也要读取其中的 `.md` 文件，用于兼容目录拼写错误。
+4. 将读取到的技能规则作为本项目编码、架构、测试和验证标准。
+
+每个用户回合都要从磁盘重新读取这些文件。
+
+## 安全规则
+
+- 修改范围只覆盖当前请求。
+- 不覆盖无关的用户修改。
+- 优先使用项目已有模式和 helper API。
+- 条件允许时，用最小可靠命令完成验证。

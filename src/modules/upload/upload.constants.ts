@@ -1,0 +1,2 @@
+export const UPLOAD_MEMORY_BUDGET = 64 * 1024 * 1024;
+export const UPLOAD_CONCURRENCY = 3;

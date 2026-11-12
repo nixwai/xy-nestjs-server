@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { HttpCode } from '#/common/enums/index.js';
 import { DomainConflictError, DomainNotFoundError } from '#/common/errors/index.js';
 import { GlobalExceptionFilter } from '#/common/filters/global-exception.filter.js';
+import { ImageBatchUploadException } from '#/modules/upload/errors/image-batch-upload.exception.js';
 /** 定义 ResponseMock 数据契约。 */
 interface ResponseMock {
   /** 当前状态。 */
@@ -63,6 +64,30 @@ function createQueryFailedError(
 }
 
 describe('GlobalExceptionFilter', () => {
+  it('应保留通用批量图片上传异常的脱敏明细', () => {
+    const { host, response } = createHost();
+    const exception = new ImageBatchUploadException({
+      success: [],
+      failed: [{ filename: 'C:\\tmp\\photo.png', reason: 'database secret' }],
+      totalCount: 1,
+      successCount: 0
+    });
+
+    new GlobalExceptionFilter().catch(exception, host);
+
+    expect(response.status).toHaveBeenCalledWith(HttpStatus.OK);
+    expect(response.json).toHaveBeenCalledWith({
+      code: HttpCode.BAD_REQUEST,
+      message: '所有图片上传失败',
+      data: {
+        success: [],
+        failed: [{ filename: 'photo.png', reason: '图片上传失败' }],
+        totalCount: 1,
+        successCount: 0
+      }
+    });
+  });
+
   it('应将客户端 HttpException 转换为 HTTP 200 业务错误响应', () => {
     const { host, response } = createHost();
 
