@@ -12,28 +12,10 @@ export const REGISTERED_MENUS: readonly RegisteredMenu[] = [
     isRootOnly: false
   },
   {
-    menuKey: 'operation',
-    title: '运营管理',
-    path: '/operation-management',
-    order: 1,
-    permissionCode: null,
-    isRootOnly: false,
-    children: [
-      {
-        menuKey: 'operation-asset',
-        title: '素材管理',
-        path: '/operation-management/asset',
-        order: 1,
-        permissionCode: PermissionCode.ASSET_FOLDER_READ,
-        isRootOnly: false
-      }
-    ]
-  },
-  {
     menuKey: 'system',
     title: '系统管理',
     path: '/system-management',
-    order: 1,
+    order: 2,
     permissionCode: null,
     isRootOnly: false,
     children: [

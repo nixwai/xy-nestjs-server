@@ -23,9 +23,14 @@ export interface UploadImageResult {
   height: number;
 }
 
-export interface UploadBatchResult {
-  success: UploadImageResult[];
-  failed: { filename: string; reason: string }[];
+export interface ImageBatchUploadFailure {
+  filename: string;
+  reason: string;
+}
+
+export interface ImageBatchUploadResult {
+  success: readonly UploadImageResult[];
+  failed: readonly ImageBatchUploadFailure[];
   totalCount: number;
   successCount: number;
 }

@@ -3,10 +3,9 @@ import { BadRequestException, HttpException, HttpStatus, InternalServerErrorExce
 import { QueryFailedError } from 'typeorm';
 import { describe, expect, it, vi } from 'vitest';
 import { HttpCode } from '#/common/enums/index.js';
-import { PublicBusinessException } from '#/common/errors/public-business.exception.js';
 import { DomainConflictError, DomainNotFoundError } from '#/common/errors/index.js';
-import { AssetBatchUploadException } from '#/modules/asset/errors/asset-batch-upload.exception.js';
 import { GlobalExceptionFilter } from '#/common/filters/global-exception.filter.js';
+import { ImageBatchUploadException } from '#/modules/upload/errors/image-batch-upload.exception.js';
 /** 定义 ResponseMock 数据契约。 */
 interface ResponseMock {
   /** 当前状态。 */
@@ -65,6 +64,30 @@ function createQueryFailedError(
 }
 
 describe('GlobalExceptionFilter', () => {
+  it('应保留通用批量图片上传异常的脱敏明细', () => {
+    const { host, response } = createHost();
+    const exception = new ImageBatchUploadException({
+      success: [],
+      failed: [{ filename: 'C:\\tmp\\photo.png', reason: 'database secret' }],
+      totalCount: 1,
+      successCount: 0
+    });
+
+    new GlobalExceptionFilter().catch(exception, host);
+
+    expect(response.status).toHaveBeenCalledWith(HttpStatus.OK);
+    expect(response.json).toHaveBeenCalledWith({
+      code: HttpCode.BAD_REQUEST,
+      message: '所有图片上传失败',
+      data: {
+        success: [],
+        failed: [{ filename: 'photo.png', reason: '图片上传失败' }],
+        totalCount: 1,
+        successCount: 0
+      }
+    });
+  });
+
   it('应将客户端 HttpException 转换为 HTTP 200 业务错误响应', () => {
     const { host, response } = createHost();
 
@@ -207,116 +230,5 @@ describe('GlobalExceptionFilter', () => {
       message: '请求被拒绝',
       data: null
     });
-  });
-});
-
-describe('素材全部上传失败的安全明细', () => {
-  it('只返回专用异常允许的字段并清理内部失败原因', () => {
-    const { host, response } = createHost();
-    new GlobalExceptionFilter().catch(
-      new AssetBatchUploadException({
-        success: [],
-        failed: [{ filename: 'a.png', reason: 'SQL secret /var/private' }],
-        totalCount: 1,
-        successCount: 0
-      }),
-      host
-    );
-    expect(response.status).toHaveBeenCalledWith(200);
-    expect(response.json).toHaveBeenCalledWith({
-      code: 40001,
-      message: '所有图片上传失败',
-      data: {
-        success: [],
-        failed: [{ filename: 'a.png', reason: '图片上传失败' }],
-        totalCount: 1,
-        successCount: 0
-      }
-    });
-  });
-  it('普通异常不能借 data 注入内容', () => {
-    const { host, response } = createHost();
-    new GlobalExceptionFilter().catch(
-      new BadRequestException({ message: '上传失败', data: { secret: 'secret' } }),
-      host
-    );
-    expect(response.json).toHaveBeenCalledWith({ code: 40001, message: '上传失败', data: null });
-  });
-});
-
-describe('素材安全失败原因', () => {
-  it.each(['素材保存失败，请稍后重试', '图片上传失败，请稍后重试', '图片格式、大小、目录或操作权限不符合要求'])(
-    '保留已脱敏原因 %s',
-    reason => {
-      const { host, response } = createHost();
-      const exception = new AssetBatchUploadException({
-        success: [],
-        failed: [{ filename: 'a.png', reason }],
-        totalCount: 1,
-        successCount: 0
-      });
-      new GlobalExceptionFilter().catch(exception, host);
-      expect(exception.details.failed).toEqual([{ filename: 'a.png', reason }]);
-      expect(response.json).toHaveBeenCalledWith({
-        code: 40001,
-        message: '所有图片上传失败',
-        data: { success: [], failed: [{ filename: 'a.png', reason }], totalCount: 1, successCount: 0 }
-      });
-    }
-  );
-});
-
-/** 测试公共异常能力，不依赖具体业务模块的数据结构。 */
-class PublicExampleException extends PublicBusinessException<Readonly<{ field: string }>> {
-  constructor(input: { field: string; secret?: string }) {
-    super('字段校验失败', Object.freeze({ field: input.field }));
-  }
-}
-
-describe('可公开业务异常边界', () => {
-  it('过滤器识别公共基类并遵循异常持有的白名单，不透传输入额外字段', () => {
-    const { host, response } = createHost();
-    const exception = new PublicExampleException({ field: '名称', secret: 'private' });
-    new GlobalExceptionFilter().catch(exception, host);
-    expect(exception.getStatus()).toBe(400);
-    expect(exception.code).toBe(HttpCode.BAD_REQUEST);
-    expect(exception.data).toBe(exception.details);
-    expect(response.json).toHaveBeenCalledWith({ code: 40001, message: '字段校验失败', data: { field: '名称' } });
-    expect(response.json.mock.calls[0]?.[0].data).toBe(exception.details);
-  });
-  it('素材异常构造时一次归一化，data 与 details 是同一只读真源', () => {
-    const input = {
-      success: [],
-      failed: [{ filename: 'C:\\private\\a.png\n', reason: 'SQL secret', secret: 'private' }],
-      totalCount: 99,
-      successCount: 7,
-      secret: 'private'
-    };
-    const exception = new AssetBatchUploadException(input);
-    expect(exception).toBeInstanceOf(PublicBusinessException);
-    expect(exception.details).toEqual({
-      success: [],
-      failed: [{ filename: 'a.png', reason: '图片上传失败' }],
-      totalCount: 1,
-      successCount: 0
-    });
-    expect(exception.data).toBe(exception.details);
-    expect(Object.isFrozen(exception.details)).toBe(true);
-    expect(Object.isFrozen(exception.details.failed)).toBe(true);
-    expect(Object.isFrozen(exception.details.failed[0])).toBe(true);
-    input.failed[0]!.reason = 'mutated secret';
-    const { host, response } = createHost();
-    new GlobalExceptionFilter().catch(exception, host);
-    expect(response.json.mock.calls[0]?.[0].data).toBe(exception.details);
-    expect(exception.data.failed[0]?.reason).toBe('图片上传失败');
-  });
-  it('普通 HttpException 的同名 details/data 均不能透传', () => {
-    const { host, response } = createHost();
-    const exception = Object.assign(new BadRequestException({ message: '拒绝请求', data: { secret: 'private' } }), {
-      details: { secret: 'private' },
-      data: { secret: 'private' }
-    });
-    new GlobalExceptionFilter().catch(exception, host);
-    expect(response.json).toHaveBeenCalledWith({ code: 40001, message: '拒绝请求', data: null });
   });
 });

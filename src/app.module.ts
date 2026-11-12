@@ -21,7 +21,6 @@ import { RoleModule } from './modules/role/role.module.js';
 import { AuthorizationModule } from './modules/authorization/authorization.module.js';
 import { AuditModule } from './modules/audit/audit.module.js';
 import { UploadModule } from './modules/upload/upload.module.js';
-import { AssetModule } from './modules/asset/asset.module.js';
 
 /** 注册应用模块和全局请求处理能力。 */
 @Module({
@@ -41,8 +40,7 @@ import { AssetModule } from './modules/asset/asset.module.js';
     RoleModule,
     AuthorizationModule,
     AuditModule,
-    UploadModule,
-    AssetModule
+    UploadModule
   ],
   providers: [
     { provide: APP_GUARD, useClass: RateLimitGuard },

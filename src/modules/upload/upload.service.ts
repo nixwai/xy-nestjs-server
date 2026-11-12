@@ -18,6 +18,8 @@ import type { ObjectStorage, UploadImageResult } from './types/upload-result.typ
 import { UPLOAD_CONCURRENCY, UPLOAD_MEMORY_BUDGET } from './upload.constants.js';
 import { IMAGE_FORMAT_STRATEGIES, isSupportedImageFormat } from './upload-format.strategy.js';
 import type { ImageFormatStrategy } from './upload-format.strategy.js';
+import { ImageBatchUploadException } from './errors/index.js';
+import type { ImageBatchUploadResult } from './types/upload-result.type.js';
 
 const DEFAULT_CATEGORY = 'other';
 const UPLOAD_FAILURE_REASON = '图片上传失败，请稍后重试';
@@ -76,7 +78,7 @@ export class UploadService {
   }
 
   /** 批量处理图片并按输入顺序返回成功和失败明细。 */
-  async batchUploadImages(files: UploadImageFile[], category = DEFAULT_CATEGORY) {
+  async batchUploadImages(files: UploadImageFile[], category = DEFAULT_CATEGORY): Promise<ImageBatchUploadResult> {
     this.validateBatch(files);
     const normalizedCategory = this.normalizeCategory(category);
     this.assertLegacyStorageConfigured();
@@ -88,7 +90,8 @@ export class UploadService {
       if (result.status === 'fulfilled') success.push(result.value);
       else failed.push({ filename: files[index].originalname, reason: UPLOAD_FAILURE_REASON });
     });
-    if (!success.length) throw new BadRequestException('所有图片上传失败');
+    if (!success.length)
+      throw new ImageBatchUploadException({ success, failed, totalCount: files.length, successCount: 0 });
     return { success, failed, totalCount: files.length, successCount: success.length };
   }
 

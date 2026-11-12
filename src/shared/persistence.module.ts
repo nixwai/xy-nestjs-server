@@ -27,24 +27,6 @@ import { MenuEntity } from '../modules/menu/entities/menu.entity.js';
 import { MENU_REPOSITORY } from '../modules/menu/repositories/menu-repository.port.js';
 import { InMemoryMenuRepository } from '../modules/menu/repositories/in-memory-menu.repository.js';
 import { TypeOrmMenuRepository } from '../modules/menu/repositories/typeorm-menu.repository.js';
-import { AssetFolderEntity } from '../modules/asset/entities/asset-folder.entity.js';
-import { AssetImageEntity } from '../modules/asset/entities/asset-image.entity.js';
-import {
-  ASSET_FOLDER_REPOSITORY,
-  ASSET_IMAGE_REPOSITORY,
-  ASSET_TRANSACTION_RUNNER
-} from '../modules/asset/repositories/asset-repository.port.js';
-import {
-  InMemoryAssetFolderRepository,
-  InMemoryAssetImageRepository,
-  InMemoryAssetTransactionRunner
-} from '../modules/asset/repositories/in-memory-asset.repository.js';
-import {
-  TypeOrmAssetFolderRepository,
-  TypeOrmAssetImageRepository
-} from '../modules/asset/repositories/asset.repository.js';
-
-import { TypeOrmAssetTransactionRunner } from '../modules/asset/repositories/asset-transaction.runner.js';
 
 const databaseEnabled = shouldLoadDatabaseModule();
 const databaseEntities = [
@@ -55,9 +37,7 @@ const databaseEntities = [
   PermissionEntity,
   RolePermissionAssignmentEntity,
   RoleEntity,
-  MenuEntity,
-  AssetFolderEntity,
-  AssetImageEntity
+  MenuEntity
 ];
 
 /** 统一装配数据库和内存持久化实现。 */
@@ -91,18 +71,6 @@ const databaseEntities = [
     {
       provide: MENU_REPOSITORY,
       useClass: databaseEnabled ? TypeOrmMenuRepository : InMemoryMenuRepository
-    },
-    {
-      provide: ASSET_FOLDER_REPOSITORY,
-      useClass: databaseEnabled ? TypeOrmAssetFolderRepository : InMemoryAssetFolderRepository
-    },
-    {
-      provide: ASSET_TRANSACTION_RUNNER,
-      useClass: databaseEnabled ? TypeOrmAssetTransactionRunner : InMemoryAssetTransactionRunner
-    },
-    {
-      provide: ASSET_IMAGE_REPOSITORY,
-      useClass: databaseEnabled ? TypeOrmAssetImageRepository : InMemoryAssetImageRepository
     }
   ],
   exports: [
@@ -111,10 +79,7 @@ const databaseEntities = [
     AUTH_SESSION_REPOSITORY,
     ROLE_REPOSITORY,
     PERMISSION_REPOSITORY,
-    MENU_REPOSITORY,
-    ASSET_FOLDER_REPOSITORY,
-    ASSET_IMAGE_REPOSITORY,
-    ASSET_TRANSACTION_RUNNER
+    MENU_REPOSITORY
   ]
 })
 export class PersistenceModule {}

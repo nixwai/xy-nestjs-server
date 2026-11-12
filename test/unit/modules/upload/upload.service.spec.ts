@@ -4,6 +4,7 @@ import sharp from 'sharp';
 import { UploadService } from '#/modules/upload/upload.service.js';
 import type { ImageConfig, OssConfig } from '#/config/config.types.js';
 import type { UploadImageFile } from '#/modules/upload/types/upload-image-file.type.js';
+import { ImageBatchUploadException } from '#/modules/upload/errors/image-batch-upload.exception.js';
 
 const imageConfig: ImageConfig = {
   quality: 80,
@@ -249,7 +250,7 @@ describe('OSS failure isolation', () => {
   it('reports total remote failure without falling back to local storage', async () => {
     const { service, client, file } = await setup();
     client.put.mockRejectedValue(new Error('OSS unavailable'));
-    await expect(service.batchUploadImages([file, file])).rejects.toThrow('所有图片上传失败');
+    await expect(service.batchUploadImages([file, file])).rejects.toBeInstanceOf(ImageBatchUploadException);
     expect(client.put).toHaveBeenCalledTimes(2);
     expect(client.delete).not.toHaveBeenCalled();
   });
