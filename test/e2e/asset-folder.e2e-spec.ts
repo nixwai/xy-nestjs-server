@@ -124,7 +124,8 @@ describe('素材文件夹管理 API (e2e)', () => {
       .get('/api/asset/folder/tree/all')
       .set('Authorization', `Bearer ${rootToken}`)
       .expect(200);
-    expect(all.body.data.owners.map((item: { owner: { id: string } }) => item.owner.id)).toContain(otherOwnerId);
+    const ownerIds = all.body.data.owners.map((item: { owner: { id: string } }) => item.owner.id);
+    expect(ownerIds).toEqual([otherOwnerId]);
     const otherOwnerTree = all.body.data.owners.find(
       (item: { owner: { id: string } }) => item.owner.id === otherOwnerId
     );

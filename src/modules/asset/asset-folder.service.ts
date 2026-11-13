@@ -7,8 +7,6 @@ import {
   NotFoundException
 } from '@nestjs/common';
 import { AdminService } from '../admin/admin.service.js';
-import { AdminListQueryDto } from '../admin/dto/index.js';
-import type { AdminPublicRecord } from '../admin/types/admin.types.js';
 import { AuthorizationService } from '../authorization/authorization.service.js';
 import { PermissionCode } from '../authorization/constants/index.js';
 import { ASSET_FOLDER_REPOSITORY } from './repositories/index.js';
@@ -23,9 +21,6 @@ import type {
   AssetFolderTreeResult,
   AssetFolderUpdateInput
 } from './types/index.js';
-
-/** 读取全部管理员账号时的分页大小，与账号列表接口的上限一致。 */
-const ACCOUNT_PAGE_SIZE = 100;
 
 /** 素材文件夹业务服务，统一处理层级、归属和数据范围。 */
 @Injectable()
@@ -48,15 +43,16 @@ export class AssetFolderService {
     if (all) await this.assertGlobalManagePermission(actorId);
 
     const scope: AssetFolderQueryScope = all ? { kind: 'all' } : { kind: 'owner', ownerId: actorId };
-    const [items, roots] = await Promise.all([this.folders.list(scope), this.listTreeRoots(actorId, all)]);
-    const accounts = await this.resolveAccounts(items, roots);
+    const items = await this.folders.list(scope);
+    const owners = await this.listTreeRoots(actorId, all, items);
+    const accounts = await this.resolveAccounts(items, owners);
     const foldersByOwner = new Map<string, AssetFolderRecord[]>();
     for (const item of items) {
       foldersByOwner.set(item.ownerId, [...(foldersByOwner.get(item.ownerId) ?? []), item]);
     }
 
     return {
-      owners: roots.map(owner => ({
+      owners: owners.map(owner => ({
         owner,
         children: this.buildNodes(owner, foldersByOwner.get(owner.id) ?? [], accounts)
       }))
@@ -124,23 +120,19 @@ export class AssetFolderService {
     return null;
   }
 
-  /** 树根账号：全部范围取所有在册账号，否则只取操作者本人。 */
-  private async listTreeRoots(actorId: string, all: boolean): Promise<AssetFolderOwnerRecord[]> {
+  /** 树根账号：全部范围只取实际拥有文件夹的账号，否则保留操作者本人。 */
+  private async listTreeRoots(
+    actorId: string,
+    all: boolean,
+    items: AssetFolderRecord[]
+  ): Promise<AssetFolderOwnerRecord[]> {
     if (!all) return [await this.requireAccount(actorId)];
-    return (await this.listAllAccounts()).map(account => this.toAccountRecord(account));
-  }
 
-  /** 逐页读取全部管理员账号，保证没有文件夹的账号也作为树根展示。 */
-  private async listAllAccounts(): Promise<AdminPublicRecord[]> {
-    const accounts: AdminPublicRecord[] = [];
-    let page = 1;
-    while (true) {
-      const query = Object.assign(new AdminListQueryDto(), { page, pageSize: ACCOUNT_PAGE_SIZE });
-      const result = await this.admins.listAdmins(query);
-      accounts.push(...result.items);
-      if (!result.hasNextPage) return accounts;
-      page += 1;
-    }
+    const ownerIds = [...new Set(items.map(item => item.ownerId))];
+    const accounts = await Promise.all(ownerIds.map(async id => await this.admins.findById(id)));
+    return accounts.map((account, index) =>
+      account ? this.toAccountRecord(account) : { id: ownerIds[index], username: ownerIds[index] }
+    );
   }
 
   /** 汇总记录涉及的拥有者与创建者账号，查不到的账号以 ID 兜底展示。 */

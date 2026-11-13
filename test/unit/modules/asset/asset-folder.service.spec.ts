@@ -44,8 +44,9 @@ function setup(granted: string[] = Object.values(PermissionCode), adminRecords =
     softDelete: vi.fn(async (id: string) => records.delete(id))
   };
   const admins = {
-    findById: vi.fn(async (id: string) => (id === '404' ? null : account(id))),
-    listAdmins: vi.fn(async () => ({ items: adminRecords, hasNextPage: false }))
+    findById: vi.fn(async (id: string) =>
+      id === '404' ? null : (adminRecords.find(item => item.id === id) ?? account(id))
+    )
   };
   const authorization = {
     hasPermission: vi.fn(async (_id: string, code: string) => granted.includes(code))
@@ -84,6 +85,30 @@ describe('AssetFolderService', () => {
     const otherOwner = tree.owners.find(item => item.owner.id === '2');
 
     expect(otherOwner?.children.map(item => item.name)).toEqual(['他人的目录']);
+  });
+
+  it('查看全部时只返回实际拥有文件夹的管理员', async () => {
+    const { service } = setup(Object.values(PermissionCode), [account('1'), account('2'), account('3')]);
+    await service.create('2', { name: '拥有者的目录' });
+    await service.create('2', { name: '拥有者的第二个目录' });
+
+    const tree = await service.getTree('1', true);
+
+    expect(tree.owners).toEqual([
+      {
+        owner: { id: '2', username: 'user-2' },
+        children: expect.any(Array)
+      }
+    ]);
+    expect(tree.owners[0].children.map(item => item.name).sort()).toEqual(['拥有者的目录', '拥有者的第二个目录']);
+  });
+
+  it('查看全部时没有文件夹返回空账号列表', async () => {
+    const { service } = setup();
+
+    const tree = await service.getTree('1', true);
+
+    expect(tree.owners).toEqual([]);
   });
 
   it('跨拥有者操作需要全局素材管理权限', async () => {
