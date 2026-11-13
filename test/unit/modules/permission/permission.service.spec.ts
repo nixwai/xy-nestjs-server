@@ -5,6 +5,7 @@ import type { PermissionRepository } from '#/modules/permission/repositories/per
 import { InMemoryPermissionRepository } from '#/modules/permission/repositories/in-memory-permission.repository.js';
 import type { AuditService } from '#/modules/audit/audit.service.js';
 import type { PermissionRecord } from '#/modules/authorization/types/permission.types.js';
+import { PermissionCode } from '#/modules/authorization/constants/index.js';
 import { REGISTERED_PERMISSIONS } from '#/modules/permission/constants/registered-permissions.constant.js';
 
 const permission: PermissionRecord = {
@@ -123,7 +124,8 @@ describe('PermissionService 启动同步', () => {
   it('重复初始化应把漂移的代码维护字段对齐到注册表', async () => {
     const { service, repository } = createSynchronizingService();
     await service.onModuleInit();
-    const [seeded] = await service.listPermissions();
+    const seeded = (await service.listPermissions()).find(item => item.code === PermissionCode.AUDIT_READ);
+    if (!seeded) throw new Error('测试权限不存在');
     await repository.updateDefinition(seeded.id, { name: '旧名称', isProtected: true, isAssignable: false });
     await repository.setActive(seeded.id, false);
 

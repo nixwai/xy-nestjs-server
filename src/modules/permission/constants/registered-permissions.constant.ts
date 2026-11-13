@@ -16,6 +16,47 @@ export const REGISTERED_PERMISSION_GROUPS: readonly RegisteredPermissionGroup[] 
         isProtected: false
       }
     ]
+  },
+  {
+    category: 'asset',
+    name: '素材管理',
+    permissions: [
+      {
+        code: PermissionCode.ASSET_FOLDER_ALL,
+        name: '全局素材管理',
+        description: '查看其他拥有者的素材文件夹，并允许跨拥有者操作',
+        isAssignable: true,
+        isProtected: false
+      },
+      {
+        code: PermissionCode.ASSET_FOLDER_READ,
+        name: '查看文件夹',
+        description: '查看自己拥有的素材文件夹',
+        isAssignable: true,
+        isProtected: false
+      },
+      {
+        code: PermissionCode.ASSET_FOLDER_CREATE,
+        name: '创建文件夹',
+        description: '创建素材文件夹',
+        isAssignable: true,
+        isProtected: false
+      },
+      {
+        code: PermissionCode.ASSET_FOLDER_UPDATE,
+        name: '编辑文件夹',
+        description: '重命名素材文件夹',
+        isAssignable: true,
+        isProtected: false
+      },
+      {
+        code: PermissionCode.ASSET_FOLDER_DELETE,
+        name: '删除文件夹',
+        description: '删除空素材文件夹',
+        isAssignable: true,
+        isProtected: false
+      }
+    ]
   }
 ];
 

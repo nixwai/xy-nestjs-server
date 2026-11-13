@@ -9,6 +9,8 @@ import { AuditLogEntity } from '../modules/audit/entities/audit-log.entity.js';
 import { PermissionEntity } from '../modules/permission/entities/permission.entity.js';
 import { RolePermissionAssignmentEntity } from '../modules/role/entities/role-permission-assignment.entity.js';
 import { RoleEntity } from '../modules/role/entities/role.entity.js';
+import { MenuEntity } from '../modules/menu/entities/menu.entity.js';
+import { AssetFolderEntity } from '../modules/asset/entities/asset-folder.entity.js';
 import { ADMIN_REPOSITORY, ADMIN_TRANSACTION_RUNNER } from '../modules/admin/repositories/admin-repository.port.js';
 import { InMemoryAdminRepository } from '../modules/admin/repositories/in-memory-admin.repository.js';
 import { TypeOrmAdminRepository } from '../modules/admin/repositories/typeorm-admin.repository.js';
@@ -23,10 +25,12 @@ import { TypeOrmRoleRepository } from '../modules/role/repositories/typeorm-role
 import { PERMISSION_REPOSITORY } from '../modules/permission/repositories/permission-repository.port.js';
 import { InMemoryPermissionRepository } from '../modules/permission/repositories/in-memory-permission.repository.js';
 import { TypeOrmPermissionRepository } from '../modules/permission/repositories/typeorm-permission.repository.js';
-import { MenuEntity } from '../modules/menu/entities/menu.entity.js';
 import { MENU_REPOSITORY } from '../modules/menu/repositories/menu-repository.port.js';
 import { InMemoryMenuRepository } from '../modules/menu/repositories/in-memory-menu.repository.js';
 import { TypeOrmMenuRepository } from '../modules/menu/repositories/typeorm-menu.repository.js';
+import { ASSET_FOLDER_REPOSITORY } from '../modules/asset/repositories/asset-repository.port.js';
+import { InMemoryAssetFolderRepository } from '../modules/asset/repositories/in-memory-asset.repository.js';
+import { TypeOrmAssetFolderRepository } from '../modules/asset/repositories/typeorm-asset.repository.js';
 
 const databaseEnabled = shouldLoadDatabaseModule();
 const databaseEntities = [
@@ -37,7 +41,8 @@ const databaseEntities = [
   PermissionEntity,
   RolePermissionAssignmentEntity,
   RoleEntity,
-  MenuEntity
+  MenuEntity,
+  AssetFolderEntity
 ];
 
 /** 统一装配数据库和内存持久化实现。 */
@@ -71,6 +76,10 @@ const databaseEntities = [
     {
       provide: MENU_REPOSITORY,
       useClass: databaseEnabled ? TypeOrmMenuRepository : InMemoryMenuRepository
+    },
+    {
+      provide: ASSET_FOLDER_REPOSITORY,
+      useClass: databaseEnabled ? TypeOrmAssetFolderRepository : InMemoryAssetFolderRepository
     }
   ],
   exports: [
@@ -79,7 +88,8 @@ const databaseEntities = [
     AUTH_SESSION_REPOSITORY,
     ROLE_REPOSITORY,
     PERMISSION_REPOSITORY,
-    MENU_REPOSITORY
+    MENU_REPOSITORY,
+    ASSET_FOLDER_REPOSITORY
   ]
 })
 export class PersistenceModule {}

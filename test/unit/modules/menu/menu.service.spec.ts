@@ -3,25 +3,24 @@ import { describe, expect, it, vi } from 'vitest';
 import { MenuService } from '#/modules/menu/menu.service.js';
 import { InMemoryMenuRepository } from '#/modules/menu/repositories/in-memory-menu.repository.js';
 import { PermissionCode } from '#/modules/authorization/constants/index.js';
+import { REGISTERED_PERMISSIONS } from '#/modules/permission/constants/registered-permissions.constant.js';
 import type { PermissionRecord } from '#/modules/authorization/types/permission.types.js';
 import { flattenRegisteredMenus } from '#/modules/menu/utils/registered-menu.util.js';
 /** 菜单注册表绑定的权限记录，启动校验要求它在权限目录中真实存在。 */
-const auditPermission: PermissionRecord = {
-  id: 'permission-1',
-  code: PermissionCode.AUDIT_READ,
-  name: '查看审计',
-  description: '查看管理员变更审计',
-  category: 'system',
-  isAssignable: true,
-  isProtected: false,
+const registeredPermissions: PermissionRecord[] = REGISTERED_PERMISSIONS.map((permission, index) => ({
+  id: `permission-${index + 1}`,
+  ...permission,
   isActive: true
-};
+}));
 /** 构造测试服务及其依赖 */
-function createService(permission: PermissionRecord | null = auditPermission) {
+function createService(permission: PermissionRecord | null = null) {
   const repository = new InMemoryMenuRepository();
   const audit = { record: vi.fn().mockResolvedValue(undefined) };
   const permissionService = {
-    findByCode: vi.fn(async (code: string) => (code === permission?.code ? permission : null))
+    findByCode: vi.fn(async (code: string) => {
+      if (permission) return code === permission.code ? permission : null;
+      return registeredPermissions.find(item => item.code === code) ?? null;
+    })
   };
   return { service: new MenuService(repository, audit as never, permissionService as never), repository, audit };
 }
@@ -50,7 +49,10 @@ describe('MenuService', () => {
   });
 
   it('注册表绑定的权限未入库时阻止启动', async () => {
-    const { service } = createService(null);
+    const { service } = createService({
+      ...registeredPermissions.find(item => item.code === PermissionCode.AUDIT_READ)!,
+      isActive: true
+    });
 
     await expect(service.onModuleInit()).rejects.toBeInstanceOf(BadRequestException);
   });
