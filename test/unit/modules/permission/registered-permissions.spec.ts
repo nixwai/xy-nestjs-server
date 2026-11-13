@@ -51,6 +51,15 @@ describe('素材管理权限', () => {
         isProtected: false
       })
     );
+    expect(REGISTERED_PERMISSIONS).toContainEqual(
+      expect.objectContaining({
+        code: 'asset.folder.all',
+        name: '全局素材管理',
+        category: 'asset',
+        isAssignable: true,
+        isProtected: false
+      })
+    );
   });
 });
 
