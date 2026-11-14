@@ -74,35 +74,35 @@ export class RoleController {
     return null;
   }
 
-  /** 为角色绑定权限。 */
+  /** 为角色批量绑定权限。 */
   @Post('permission-bind')
   @ApiOperation({
-    summary: '绑定角色权限',
-    description: '为指定角色增加一项权限。角色和权限必须已存在。'
+    summary: '批量绑定角色权限',
+    description: '为指定角色批量增加权限，所有权限必须存在且允许分配。'
   })
   @ApiBody({
     type: RolePermissionBindingRequestDto,
-    description: '角色和权限 ID。'
+    description: '角色 ID 和权限 ID 列表。'
   })
   @ApiOkResponseEmpty({ description: '绑定成功，data 固定为 null。' })
-  async bindPermission(@CurrentAdmin() admin: AdminJwtPayload, @Body() body: RolePermissionBindingRequestDto) {
-    await this.roleService.bindPermission(admin.sub, body.roleId, body.permissionId);
+  async bindPermissions(@CurrentAdmin() admin: AdminJwtPayload, @Body() body: RolePermissionBindingRequestDto) {
+    await this.roleService.bindPermissions(admin.sub, body.roleId, body.permissionIds);
     return null;
   }
 
-  /** 解除角色权限绑定。 */
+  /** 批量解除角色权限绑定。 */
   @Post('permission-unbind')
   @ApiOperation({
-    summary: '解绑角色权限',
-    description: '解除指定角色和权限之间的绑定关系。'
+    summary: '批量解绑角色权限',
+    description: '批量解除指定角色和权限之间的绑定关系，不校验权限目录是否仍存在。'
   })
   @ApiBody({
     type: RolePermissionBindingRequestDto,
-    description: '角色和权限 ID。'
+    description: '角色 ID 和权限 ID 列表。'
   })
   @ApiOkResponseEmpty({ description: '解绑成功，data 固定为 null。' })
-  async unbindPermission(@CurrentAdmin() admin: AdminJwtPayload, @Body() body: RolePermissionBindingRequestDto) {
-    await this.roleService.unbindPermission(admin.sub, body.roleId, body.permissionId);
+  async unbindPermissions(@CurrentAdmin() admin: AdminJwtPayload, @Body() body: RolePermissionBindingRequestDto) {
+    await this.roleService.unbindPermissions(admin.sub, body.roleId, body.permissionIds);
     return null;
   }
 }

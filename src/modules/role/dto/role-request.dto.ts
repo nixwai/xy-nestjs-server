@@ -1,6 +1,16 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { createValidationMessages } from '#/common/constants/index.js';
-import { IsBoolean, IsNotEmpty, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
+import {
+  ArrayNotEmpty,
+  ArrayUnique,
+  IsArray,
+  IsBoolean,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Matches,
+  MaxLength
+} from 'class-validator';
 
 const codeValidation = createValidationMessages('角色编码');
 const nameValidation = createValidationMessages('角色名称');
@@ -97,16 +107,19 @@ export class RoleSoftDeleteRequestDto {
   id!: string;
 }
 
-/** 角色权限绑定请求。 */
+/** 角色权限批量操作请求。 */
 export class RolePermissionBindingRequestDto {
   /** 角色唯一标识。 */
   @ApiProperty({ type: String, example: '1', description: '角色 ID。' })
   @IsString({ message: roleIdValidation.isString })
   @IsNotEmpty({ message: roleIdValidation.isNotEmpty })
   roleId!: string;
-  /** 权限唯一标识。 */
-  @ApiProperty({ type: String, example: '1', description: '权限 ID。' })
-  @IsString({ message: permissionIdValidation.isString })
-  @IsNotEmpty({ message: permissionIdValidation.isNotEmpty })
-  permissionId!: string;
+  /** 权限唯一标识列表。 */
+  @ApiProperty({ type: [String], example: ['1', '2'], description: '待批量处理的权限 ID 列表。' })
+  @IsArray({ message: '权限 ID 列表必须是数组' })
+  @ArrayNotEmpty({ message: '权限 ID 列表不能为空' })
+  @ArrayUnique({ message: '权限 ID 列表不能包含重复项' })
+  @IsString({ each: true, message: permissionIdValidation.isString })
+  @IsNotEmpty({ each: true, message: permissionIdValidation.isNotEmpty })
+  permissionIds!: string[];
 }

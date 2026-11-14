@@ -130,18 +130,23 @@ describe('TypeOrmRoleRepository', () => {
     await expect(repository.findByCode('missing')).resolves.toBeNull();
   });
 
-  it('应绑定、解绑权限并处理重复关系', async () => {
+  it('应批量绑定、解绑权限并处理重复关系', async () => {
     const { repository, rolePermissions } = createRepository();
+    rolePermissions.find.mockResolvedValueOnce([]);
 
-    await repository.bindPermission('role-1', 'permission-1');
-    await repository.unbindPermission('role-1', 'permission-1');
-    expect(rolePermissions.delete).toHaveBeenCalledWith({
-      roleId: 'role-1',
-      permissionId: 'permission-1'
-    });
+    await repository.bindPermissions('role-1', ['permission-1', 'permission-2']);
+    expect(rolePermissions.save).toHaveBeenCalledWith([
+      { roleId: 'role-1', permissionId: 'permission-1' },
+      { roleId: 'role-1', permissionId: 'permission-2' }
+    ]);
 
-    rolePermissions.findOne.mockResolvedValueOnce({ id: 'relation-1' });
-    await expect(repository.bindPermission('role-1', 'permission-1')).rejects.toMatchObject({
+    await repository.unbindPermissions('role-1', ['permission-1', 'permission-invalid']);
+    expect(rolePermissions.delete).toHaveBeenCalledWith(
+      expect.objectContaining({ roleId: 'role-1', permissionId: expect.anything() })
+    );
+
+    rolePermissions.find.mockResolvedValueOnce([{ id: 'relation-1', permissionId: 'permission-1' }]);
+    await expect(repository.bindPermissions('role-1', ['permission-1'])).rejects.toMatchObject({
       message: '角色权限关系已存在'
     });
   });

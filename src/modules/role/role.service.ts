@@ -73,44 +73,54 @@ export class RoleService {
     });
   }
 
-  /** 绑定权限。 */
-  async bindPermission(actorId: string, roleId: string, permissionId: string): Promise<void> {
-    if (!(await this.findById(roleId))) {
-      throw new NotFoundException('角色不存在');
+  /** 批量绑定权限。 */
+  async bindPermissions(actorId: string, roleId: string, permissionIds: string[]): Promise<void> {
+    await this.ensureRoleExists(roleId);
+    const uniquePermissionIds = [...new Set(permissionIds)];
+    if (uniquePermissionIds.length === 0) return;
+
+    const permissions = await this.permissionService.findByIds(uniquePermissionIds);
+    const permissionMap = new Map(permissions.map(permission => [permission.id, permission]));
+    for (const permissionId of uniquePermissionIds) {
+      const permission = permissionMap.get(permissionId);
+      if (!permission) {
+        throw new NotFoundException('权限不存在');
+      }
+      if (!permission.isActive || !permission.isAssignable || permission.isProtected) {
+        throw new ForbiddenException('该权限不可绑定给普通角色');
+      }
     }
-    const permission = await this.permissionService.findById(permissionId);
-    if (!permission) {
-      throw new NotFoundException('权限不存在');
-    }
-    if (!permission.isActive || !permission.isAssignable || permission.isProtected) {
-      throw new ForbiddenException('该权限不可绑定给普通角色');
-    }
-    await this.repository.bindPermission(roleId, permissionId);
+
+    await this.repository.bindPermissions(roleId, uniquePermissionIds);
     await this.auditService.record({
       actorAdminId: actorId,
       action: 'role.permission-bind',
       resourceType: 'role',
       targetId: roleId,
-      details: { permissionId }
+      details: { permissionIds: [...uniquePermissionIds] }
     });
   }
 
-  /** 解绑权限。 */
-  async unbindPermission(actorId: string, roleId: string, permissionId: string): Promise<void> {
-    if (!(await this.findById(roleId))) {
-      throw new NotFoundException('角色不存在');
-    }
-    const permission = await this.permissionService.findById(permissionId);
-    if (!permission) {
-      throw new NotFoundException('权限不存在');
-    }
-    await this.repository.unbindPermission(roleId, permissionId);
+  /** 批量解绑权限，不校验权限目录，允许清理已失效的权限关联。 */
+  async unbindPermissions(actorId: string, roleId: string, permissionIds: string[]): Promise<void> {
+    await this.ensureRoleExists(roleId);
+    const uniquePermissionIds = [...new Set(permissionIds)];
+    if (uniquePermissionIds.length === 0) return;
+
+    await this.repository.unbindPermissions(roleId, uniquePermissionIds);
     await this.auditService.record({
       actorAdminId: actorId,
       action: 'role.permission-unbind',
       resourceType: 'role',
       targetId: roleId,
-      details: { permissionId }
+      details: { permissionIds: [...uniquePermissionIds] }
     });
+  }
+
+  /** 确认角色仍存在。 */
+  private async ensureRoleExists(roleId: string): Promise<void> {
+    if (!(await this.findById(roleId))) {
+      throw new NotFoundException('角色不存在');
+    }
   }
 }

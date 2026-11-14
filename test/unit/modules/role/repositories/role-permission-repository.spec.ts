@@ -59,7 +59,7 @@ describe('InMemory role and permission repositories', () => {
     const roles = new InMemoryRoleRepository();
     const storedPermission = { id: 'permission-1', ...permission };
     const role = await roles.create({ code: 'operator', name: '普通管理员' });
-    await roles.bindPermission(role.id, storedPermission.id);
+    await roles.bindPermissions(role.id, [storedPermission.id]);
 
     const foundRoles = await roles.findByIds([role.id]);
     foundRoles[0].permissionIds.push('unexpected');

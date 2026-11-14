@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { In } from 'typeorm';
 import type { Repository } from 'typeorm';
 import { DomainConflictError, DomainNotFoundError } from '#/common/errors/index.js';
 import { RolePermissionAssignmentEntity } from '../entities/role-permission-assignment.entity.js';
@@ -112,14 +113,22 @@ export class TypeOrmRoleRepository implements RoleRepository {
     });
   }
 
-  /** 为角色绑定权限 */
-  async bindPermission(roleId: string, permissionId: string): Promise<void> {
+  /** 批量为角色绑定权限 */
+  async bindPermissions(roleId: string, permissionIds: string[]): Promise<void> {
     await this.findEntityOrThrow(roleId);
-    if (await this.rolePermissions.findOne({ where: { roleId, permissionId } })) {
+    const uniquePermissionIds = [...new Set(permissionIds)];
+    if (uniquePermissionIds.length === 0) return;
+
+    const existingRelations = await this.rolePermissions.find({ where: { roleId } });
+    const existing = new Set(existingRelations.map(item => String(item.permissionId)));
+    if (uniquePermissionIds.some(permissionId => existing.has(permissionId))) {
       throw new DomainConflictError('角色权限关系');
     }
+
     try {
-      await this.rolePermissions.save(this.rolePermissions.create({ roleId, permissionId }));
+      await this.rolePermissions.save(
+        uniquePermissionIds.map(permissionId => this.rolePermissions.create({ roleId, permissionId }))
+      );
     } catch (error: unknown) {
       if (this.isDuplicate(error)) {
         throw new DomainConflictError('角色权限关系');
@@ -128,10 +137,12 @@ export class TypeOrmRoleRepository implements RoleRepository {
     }
   }
 
-  /** 解除角色权限绑定 */
-  async unbindPermission(roleId: string, permissionId: string): Promise<void> {
+  /** 批量解除角色权限绑定，不检查权限目录是否仍存在 */
+  async unbindPermissions(roleId: string, permissionIds: string[]): Promise<void> {
     await this.findEntityOrThrow(roleId);
-    await this.rolePermissions.delete({ roleId, permissionId });
+    const uniquePermissionIds = [...new Set(permissionIds)];
+    if (uniquePermissionIds.length === 0) return;
+    await this.rolePermissions.delete({ roleId, permissionId: In(uniquePermissionIds) });
   }
 
   /** findEntityOrThrow。 */

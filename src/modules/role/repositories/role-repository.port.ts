@@ -19,8 +19,8 @@ export interface RoleRepository {
   update(id: string, input: RoleUpdateInput): Promise<RoleRecord>;
   /** 软删除记录 */
   softDelete(id: string): Promise<void>;
-  /** 为角色绑定权限 */
-  bindPermission(roleId: string, permissionId: string): Promise<void>;
-  /** 解除角色权限绑定 */
-  unbindPermission(roleId: string, permissionId: string): Promise<void>;
+  /** 批量为角色绑定权限 */
+  bindPermissions(roleId: string, permissionIds: string[]): Promise<void>;
+  /** 批量解除角色权限绑定 */
+  unbindPermissions(roleId: string, permissionIds: string[]): Promise<void>;
 }

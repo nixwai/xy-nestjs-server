@@ -82,24 +82,27 @@ export class InMemoryRoleRepository implements RoleRepository {
     this.roles.set(id, { ...item, deletedAt: new Date() });
   }
 
-  /** 为角色绑定权限 */
-  async bindPermission(roleId: string, permissionId: string): Promise<void> {
+  /** 批量为角色绑定权限 */
+  async bindPermissions(roleId: string, permissionIds: string[]): Promise<void> {
     const item = await this.findByIdOrThrow(roleId);
-    if (item.permissionIds.includes(permissionId)) {
+    const uniquePermissionIds = [...new Set(permissionIds)];
+    const existing = new Set(item.permissionIds);
+    if (uniquePermissionIds.some(permissionId => existing.has(permissionId))) {
       throw new DomainConflictError('角色权限关系');
     }
     this.roles.set(roleId, {
       ...item,
-      permissionIds: [...item.permissionIds, permissionId]
+      permissionIds: [...item.permissionIds, ...uniquePermissionIds]
     });
   }
 
-  /** 解除角色权限绑定 */
-  async unbindPermission(roleId: string, permissionId: string): Promise<void> {
+  /** 批量解除角色权限绑定，不检查权限目录是否仍存在 */
+  async unbindPermissions(roleId: string, permissionIds: string[]): Promise<void> {
     const item = await this.findByIdOrThrow(roleId);
+    const toRemove = new Set(permissionIds);
     this.roles.set(roleId, {
       ...item,
-      permissionIds: item.permissionIds.filter(id => id !== permissionId)
+      permissionIds: item.permissionIds.filter(id => !toRemove.has(id))
     });
   }
 

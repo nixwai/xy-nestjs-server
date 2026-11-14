@@ -64,12 +64,13 @@ function createService(
     create: vi.fn().mockResolvedValue(role),
     update: vi.fn().mockResolvedValue(role),
     softDelete: vi.fn().mockResolvedValue(undefined),
-    bindPermission: vi.fn().mockResolvedValue(undefined),
-    unbindPermission: vi.fn().mockResolvedValue(undefined),
+    bindPermissions: vi.fn().mockResolvedValue(undefined),
+    unbindPermissions: vi.fn().mockResolvedValue(undefined),
     ...options.repository
   };
   const permissionService: Partial<PermissionService> = {
     findById: vi.fn().mockResolvedValue(permission),
+    findByIds: vi.fn().mockResolvedValue([permission]),
     ...options.permissionService
   };
   const auditService: Partial<AuditService> = {
@@ -112,14 +113,14 @@ describe('RoleService', () => {
     const { service } = createService({
       repository: { findById: vi.fn().mockResolvedValue(null) }
     });
-    await expect(service.bindPermission('admin-1', 'missing', 'permission-1')).rejects.toBeInstanceOf(
+    await expect(service.bindPermissions('admin-1', 'missing', ['permission-1'])).rejects.toBeInstanceOf(
       NotFoundException
     );
 
     const { service: missingPermissionService } = createService({
-      permissionService: { findById: vi.fn().mockResolvedValue(null) }
+      permissionService: { findByIds: vi.fn().mockResolvedValue([]) }
     });
-    await expect(missingPermissionService.bindPermission('admin-1', 'role-1', 'missing')).rejects.toBeInstanceOf(
+    await expect(missingPermissionService.bindPermissions('admin-1', 'role-1', ['missing'])).rejects.toBeInstanceOf(
       NotFoundException
     );
   });
@@ -127,24 +128,39 @@ describe('RoleService', () => {
   it('拒绝将受保护权限绑定给普通角色', async () => {
     const { service } = createService({
       permissionService: {
-        findById: vi.fn().mockResolvedValue({ ...permission, isAssignable: false, isProtected: true })
+        findByIds: vi.fn().mockResolvedValue([{ ...permission, isAssignable: false, isProtected: true }])
       }
     });
 
-    await expect(service.bindPermission('admin-1', 'role-1', 'permission-1')).rejects.toBeInstanceOf(
+    await expect(service.bindPermissions('admin-1', 'role-1', ['permission-1'])).rejects.toBeInstanceOf(
       ForbiddenException
     );
   });
 
-  it('应绑定和解绑权限并记录审计', async () => {
-    const { service, repository, auditService } = createService();
+  it('应批量绑定和解绑权限并记录审计', async () => {
+    const { service, repository, auditService, permissionService } = createService({
+      permissionService: {
+        findByIds: vi.fn().mockResolvedValue([permission, { ...permission, id: 'permission-2', code: 'role.update' }])
+      }
+    });
 
-    await service.bindPermission('admin-1', 'role-1', 'permission-1');
-    await service.unbindPermission('admin-1', 'role-1', 'permission-1');
+    await service.bindPermissions('admin-1', 'role-1', ['permission-1', 'permission-2']);
+    await service.unbindPermissions('admin-1', 'role-1', ['permission-1', 'permission-invalid']);
 
-    expect(repository.bindPermission).toHaveBeenCalledWith('role-1', 'permission-1');
-    expect(repository.unbindPermission).toHaveBeenCalledWith('role-1', 'permission-1');
+    expect(permissionService.findByIds).toHaveBeenCalledWith(['permission-1', 'permission-2']);
+    expect(repository.bindPermissions).toHaveBeenCalledWith('role-1', ['permission-1', 'permission-2']);
+    expect(repository.unbindPermissions).toHaveBeenCalledWith('role-1', ['permission-1', 'permission-invalid']);
     expect(auditService.record).toHaveBeenCalledTimes(2);
+  });
+
+  it('解绑无效权限时不查询权限目录', async () => {
+    const { service, repository, permissionService } = createService();
+
+    await service.unbindPermissions('admin-1', 'role-1', ['permission-invalid']);
+
+    expect(permissionService.findById).not.toHaveBeenCalled();
+    expect(permissionService.findByIds).not.toHaveBeenCalled();
+    expect(repository.unbindPermissions).toHaveBeenCalledWith('role-1', ['permission-invalid']);
   });
 
   it('应透传角色查询结果', async () => {

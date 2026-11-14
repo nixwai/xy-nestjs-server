@@ -2,7 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { RoleController } from '#/modules/role/role.controller.js';
 
 const admin = { sub: 'admin-1' } as never;
-const body = {} as never;
+const permissionIds = ['permission-1', 'permission-invalid'];
+const body = { roleId: 'role-1', permissionIds } as never;
 
 describe('RoleController', () => {
   const service = {
@@ -10,8 +11,8 @@ describe('RoleController', () => {
     createRole: vi.fn().mockResolvedValue({ id: '1' }),
     updateRole: vi.fn().mockResolvedValue({ id: '1' }),
     softDeleteRole: vi.fn().mockResolvedValue(undefined),
-    bindPermission: vi.fn().mockResolvedValue(undefined),
-    unbindPermission: vi.fn().mockResolvedValue(undefined)
+    bindPermissions: vi.fn().mockResolvedValue(undefined),
+    unbindPermissions: vi.fn().mockResolvedValue(undefined)
   };
   const controller = new RoleController(service as never);
 
@@ -20,14 +21,14 @@ describe('RoleController', () => {
     await controller.create(admin, body);
     await controller.update(admin, body);
     await controller.softDelete(admin, body);
-    await controller.bindPermission(admin, body);
-    await controller.unbindPermission(admin, body);
+    await controller.bindPermissions(admin, body);
+    await controller.unbindPermissions(admin, body);
 
     expect(service.listRoles).toHaveBeenCalled();
     expect(service.createRole).toHaveBeenCalled();
     expect(service.updateRole).toHaveBeenCalled();
     expect(service.softDeleteRole).toHaveBeenCalled();
-    expect(service.bindPermission).toHaveBeenCalled();
-    expect(service.unbindPermission).toHaveBeenCalled();
+    expect(service.bindPermissions).toHaveBeenCalledWith('admin-1', 'role-1', permissionIds);
+    expect(service.unbindPermissions).toHaveBeenCalledWith('admin-1', 'role-1', permissionIds);
   });
 });
