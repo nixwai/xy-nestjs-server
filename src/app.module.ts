@@ -4,7 +4,7 @@ loadEnvironment();
 
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { JwtAuthGuard } from './modules/auth/shared/guards/jwt-auth.guard.js';
+import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard.js';
 import { RbacGuard } from './modules/authorization/guards/rbac.guard.js';
 import { ConfigModule } from '@nestjs/config';
 import { validateEnvironment } from './config/config.validation.js';

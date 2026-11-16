@@ -3,9 +3,9 @@ import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PUBLIC_ROUTE_KEY } from '#/modules/authorization/decorators/index.js';
 import { UserService } from '#/modules/user/user.service.js';
-import { AdminAuthService } from '../../admin/admin-auth.service.js';
-import { JwtTokenService } from '../tokens/jwt-token.service.js';
-import type { AuthenticatedRequest } from '../types/jwt.types.js';
+import { AdminAuthService } from '../admin/admin-auth.service.js';
+import { JwtTokenService } from '../shared/tokens/jwt-token.service.js';
+import type { AuthenticatedRequest } from '../shared/types/jwt.types.js';
 
 /** 校验访问令牌并将当前管理员或用户身份写入请求。 */
 @Injectable()

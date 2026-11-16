@@ -4,7 +4,7 @@ import dataSource from '../src/data-source.js';
 import { AdminEntity } from '../src/modules/admin/entities/admin.entity.js';
 import { AdminRoleAssignmentEntity } from '../src/modules/admin/entities/admin-role-assignment.entity.js';
 import { RoleEntity } from '../src/modules/role/entities/role.entity.js';
-import { hashPassword } from '../src/modules/auth/admin/utils/password.util.js';
+import { hashPassword } from '../src/common/utils/password-hash.util.js';
 
 const USERNAME_PATTERN = /^[A-Za-z0-9._-]{3,64}$/;
 const PASSWORD_PATTERN = /^(?=.*[A-Za-z])(?=.*\d).{8,72}$/;

@@ -10,7 +10,7 @@ import { AdminAuthService } from './admin/admin-auth.service.js';
 import { UserAuthController } from './user/user-auth.controller.js';
 import { UserAuthService } from './user/user-auth.service.js';
 import { JwtTokenService } from './shared/tokens/jwt-token.service.js';
-import { JwtAuthGuard } from './shared/guards/jwt-auth.guard.js';
+import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
 import type { AuthSessionRepository } from './admin/repositories/auth-session-repository.port.js';
 import { AUTH_SESSION_REPOSITORY } from './admin/repositories/auth-session-repository.port.js';
 import { UniWechatLoginProvider, WECHAT_LOGIN_PROVIDER } from './user/providers/wechat-login.provider.js';

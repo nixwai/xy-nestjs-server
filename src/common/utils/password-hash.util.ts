@@ -9,7 +9,7 @@ const SCRYPT_OPTIONS = {
   p: 1,
   maxmem: 32 * 1024 * 1024
 } as const;
-/** 生成管理员密码的随机盐和 scrypt 哈希。 */
+/** 生成密码的随机盐和 scrypt 哈希。 */
 export async function hashPassword(password: string): Promise<PasswordHash> {
   const salt = randomBytes(SALT_BYTES);
   const derivedKey = await deriveKey(password, salt);
@@ -27,7 +27,7 @@ export async function verifyPassword(password: string, hash: string, salt: strin
   }
 }
 
-/** deriveKey。 */
+/** 使用 scrypt 派生密钥。 */
 function deriveKey(password: string, salt: Buffer): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     nodeScrypt(password, salt, KEY_LENGTH, SCRYPT_OPTIONS, (error, derivedKey) => {

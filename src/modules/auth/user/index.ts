@@ -1,3 +1,4 @@
+export * from './decorators/index.js';
 export * from './dto/index.js';
 export * from './providers/index.js';
 export * from './repositories/index.js';

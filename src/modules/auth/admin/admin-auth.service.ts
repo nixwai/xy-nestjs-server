@@ -1,7 +1,6 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { addSeconds, validatePassword } from '#/common/utils/index.js';
-import { hashPassword, verifyPassword } from './utils/password.util.js';
+import { addSeconds, hashPassword, validatePassword, verifyPassword } from '#/common/utils/index.js';
 import { parseDuration } from '../shared/utils/jwt.util.js';
 import { createRefreshToken, hashRefreshToken } from '../shared/utils/refresh-token.util.js';
 import { JwtTokenService } from '../shared/tokens/jwt-token.service.js';

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { hashPassword, verifyPassword } from '#/modules/auth/admin/utils/password.util.js';
+import { hashPassword, verifyPassword } from '#/common/utils/password-hash.util.js';
 
 describe('password utilities', () => {
   it('uses a different salt for the same password', async () => {

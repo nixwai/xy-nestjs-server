@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Inject, Post, Query } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiCommonResponses, ApiPageQuery, ApiOkResponseData, ApiOkResponseEmpty } from '#/common/decorators/index.js';
-import { CurrentAdmin } from '../auth/shared/decorators/index.js';
-import type { AdminJwtPayload } from '../auth/shared/types/jwt.types.js';
+import { CurrentAdmin } from '../auth/admin/decorators/index.js';
+import type { AdminJwtPayload } from '../auth/admin/types/admin-jwt.types.js';
 import { RootOnly } from '../authorization/decorators/index.js';
 import {
   RoleCreateRequestDto,

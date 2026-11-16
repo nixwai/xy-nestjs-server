@@ -2,10 +2,15 @@ import type { CanActivate, ExecutionContext } from '@nestjs/common';
 import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { AuthenticatedRequest } from '#/modules/auth/shared/types/jwt.types.js';
-import { ADMIN_ROLE_KEY } from '#/modules/auth/shared/decorators/admin-only.decorator.js';
-import { USER_ROLE_KEY } from '#/modules/auth/shared/decorators/user-only.decorator.js';
 import { AuthorizationService } from '../authorization.service.js';
-import { AUTHENTICATED_ROUTE_KEY, PERMISSION_KEY, PUBLIC_ROUTE_KEY, ROOT_ONLY_KEY } from '../decorators/index.js';
+import {
+  ADMIN_ROLE_KEY,
+  AUTHENTICATED_ROUTE_KEY,
+  PERMISSION_KEY,
+  PUBLIC_ROUTE_KEY,
+  ROOT_ONLY_KEY,
+  USER_ROLE_KEY
+} from '../decorators/index.js';
 
 /** 对业务路由执行统一授权判断。 */
 @Injectable()

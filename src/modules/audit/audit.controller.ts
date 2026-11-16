@@ -1,8 +1,8 @@
 import { Controller, Get, Inject, Query } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ApiCommonResponses, ApiOkResponseData } from '#/common/decorators/index.js';
-import { CurrentAdmin } from '../auth/shared/decorators/index.js';
-import type { AdminJwtPayload } from '../auth/shared/types/jwt.types.js';
+import { CurrentAdmin } from '../auth/admin/decorators/index.js';
+import type { AdminJwtPayload } from '../auth/admin/types/admin-jwt.types.js';
 import { RequirePermission } from '../authorization/decorators/index.js';
 import { AuditLogListQueryDto, AuditLogListResponseDto } from './dto/index.js';
 import { PermissionCode } from '../authorization/constants/index.js';

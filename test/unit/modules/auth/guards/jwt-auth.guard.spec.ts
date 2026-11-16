@@ -6,8 +6,7 @@ import { InMemoryAdminRepository } from '#/modules/admin/repositories/in-memory-
 import { InMemoryAdminTransactionRunner } from '#/modules/admin/repositories/in-memory-admin-transaction-runner.js';
 import { AuditService } from '#/modules/audit/audit.service.js';
 import { AdminAuthService } from '#/modules/auth/admin/admin-auth.service.js';
-import { AdminRoleGuard } from '#/modules/auth/shared/guards/admin-role.guard.js';
-import { JwtAuthGuard } from '#/modules/auth/shared/guards/jwt-auth.guard.js';
+import { JwtAuthGuard } from '#/modules/auth/guards/jwt-auth.guard.js';
 import { InMemoryAuthSessionRepository } from '#/modules/auth/admin/repositories/in-memory-auth-session.repository.js';
 import { JwtTokenService } from '#/modules/auth/shared/tokens/jwt-token.service.js';
 import { InMemoryUserRepository } from '#/modules/user/repositories/in-memory-user.repository.js';
@@ -58,6 +57,11 @@ function createUserService() {
 }
 
 describe('JwtAuthGuard', () => {
+  it('缺少 Bearer 令牌时应拒绝请求', async () => {
+    const guard = new JwtAuthGuard(createAdminAuthService(), new JwtTokenService(config), createUserService().service);
+    await expect(guard.canActivate(contextFor())).rejects.toThrow('请先登录');
+  });
+
   it('应放行标记为公共接口的路由', async () => {
     const reflector = {
       getAllAndOverride: vi.fn().mockReturnValue(true)
@@ -118,35 +122,5 @@ describe('JwtAuthGuard', () => {
     const guard = new JwtAuthGuard(createAdminAuthService(), tokenService, userService);
 
     await expect(guard.canActivate(contextFor(`Bearer ${token}`))).rejects.toThrow('登录状态无效');
-  });
-});
-
-describe('AdminRoleGuard', () => {
-  it('未标记管理员路由时应放行', () => {
-    const reflector = { getAllAndOverride: vi.fn().mockReturnValue(false) };
-    const guard = new AdminRoleGuard(reflector as never);
-
-    expect(guard.canActivate(contextFor())).toBe(true);
-  });
-
-  it('标记管理员路由但缺少身份时应拒绝', () => {
-    const reflector = { getAllAndOverride: vi.fn().mockReturnValue(true) };
-    const guard = new AdminRoleGuard(reflector as never);
-
-    expect(() => guard.canActivate(contextFor())).toThrow('无权访问');
-  });
-
-  it('标记管理员路由但携带用户身份时应拒绝', () => {
-    const reflector = { getAllAndOverride: vi.fn().mockReturnValue(true) };
-    const guard = new AdminRoleGuard(reflector as never);
-
-    expect(() => guard.canActivate(contextFor(undefined, { sub: '1', role: 'user' }))).toThrow('无权访问');
-  });
-
-  it('标记管理员路由但管理员身份缺少主体 ID 时应拒绝', () => {
-    const reflector = { getAllAndOverride: vi.fn().mockReturnValue(true) };
-    const guard = new AdminRoleGuard(reflector as never);
-
-    expect(() => guard.canActivate(contextFor(undefined, { role: 'admin' }))).toThrow('无权访问');
   });
 });

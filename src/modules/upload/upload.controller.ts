@@ -11,7 +11,7 @@ import {
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiCommonResponses, ApiOkResponseData } from '#/common/decorators/index.js';
-import { AdminOnly } from '../auth/shared/decorators/index.js';
+import { AdminOnly } from '../authorization/decorators/index.js';
 import { Authenticated } from '../authorization/decorators/index.js';
 import { BatchUploadImagesDto, BatchUploadResultDto, UploadImageDto, UploadImageResponseDto } from './dto/index.js';
 import { UploadService } from './upload.service.js';

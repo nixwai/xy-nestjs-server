@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createTestModule } from './create-test-module.js';
 import { ADMIN_REPOSITORY } from '#/modules/admin/repositories/admin-repository.port.js';
 import type { AdminRepository } from '#/modules/admin/repositories/admin-repository.port.js';
-import { hashPassword } from '#/modules/auth/admin/utils/password.util.js';
+import { hashPassword } from '#/common/utils/password-hash.util.js';
 import { flattenRegisteredMenus } from '#/modules/menu/utils/registered-menu.util.js';
 import { createStrictValidationPipe } from '#/common/pipes/index.js';
 import { encryptPassword } from './password-transport.js';

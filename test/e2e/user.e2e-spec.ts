@@ -6,7 +6,7 @@ import { createStrictValidationPipe } from '#/common/pipes/index.js';
 import { encryptPassword } from './password-transport.js';
 import { ADMIN_REPOSITORY } from '#/modules/admin/repositories/admin-repository.port.js';
 import type { AdminRepository } from '#/modules/admin/repositories/admin-repository.port.js';
-import { hashPassword } from '#/modules/auth/admin/utils/password.util.js';
+import { hashPassword } from '#/common/utils/password-hash.util.js';
 import { WECHAT_LOGIN_PROVIDER } from '#/modules/auth/user/providers/wechat-login.provider.js';
 import type { WechatLoginProvider } from '#/modules/auth/user/providers/wechat-login.provider.js';
 

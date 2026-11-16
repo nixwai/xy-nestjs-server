@@ -3,6 +3,7 @@ export * from './cursor.util.js';
 export * from './date.util.js';
 export * from './object.util.js';
 export * from './pagination.util.js';
+export * from './password-hash.util.js';
 export * from './password-rule.util.js';
 export * from './registry-error.util.js';
 export * from './type-guard.util.js';

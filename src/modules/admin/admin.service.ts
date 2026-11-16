@@ -1,6 +1,5 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { omitUndefined, validatePassword } from '#/common/utils/index.js';
-import { hashPassword, verifyPassword } from '../auth/admin/utils/password.util.js';
+import { hashPassword, omitUndefined, validatePassword, verifyPassword } from '#/common/utils/index.js';
 import type { AdminRepository, AdminTransactionRunner } from './repositories/admin-repository.port.js';
 import { ADMIN_REPOSITORY, ADMIN_TRANSACTION_RUNNER } from './repositories/admin-repository.port.js';
 import type { AdminCreateInput, AdminRecord, AdminPublicRecord, AdminUpdateInput } from './types/admin.types.js';
