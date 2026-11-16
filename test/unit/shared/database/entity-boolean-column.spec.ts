@@ -5,6 +5,7 @@ import { AuditLogEntity } from '#/modules/audit/entities/audit-log.entity.js';
 import { MenuEntity } from '#/modules/menu/entities/menu.entity.js';
 import { PermissionEntity } from '#/modules/permission/entities/permission.entity.js';
 import { RoleEntity } from '#/modules/role/entities/role.entity.js';
+import { UserEntity } from '#/modules/user/entities/user.entity.js';
 import '#/shared/persistence.module.js';
 /** 具备布尔语义的实体列，列类型必须能被 MySQL 驱动水合为真布尔值。 */
 const BOOLEAN_COLUMNS = [
@@ -12,7 +13,8 @@ const BOOLEAN_COLUMNS = [
   { entity: AuditLogEntity, propertyNames: ['succeeded'] },
   { entity: MenuEntity, propertyNames: ['isRootOnly', 'isActive'] },
   { entity: PermissionEntity, propertyNames: ['isAssignable', 'isProtected', 'isActive'] },
-  { entity: RoleEntity, propertyNames: ['isActive', 'isSystem', 'isProtected'] }
+  { entity: RoleEntity, propertyNames: ['isActive', 'isSystem', 'isProtected'] },
+  { entity: UserEntity, propertyNames: ['isActive'] }
 ] as const;
 /** 布尔语义实体列的类型联合，用于按实体定位元数据。 */
 type EntityClass = (typeof BOOLEAN_COLUMNS)[number]['entity'];

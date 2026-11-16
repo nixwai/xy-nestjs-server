@@ -7,7 +7,7 @@ import { ADMIN_REPOSITORY } from '#/modules/admin/repositories/admin-repository.
 import type { AdminRepository } from '#/modules/admin/repositories/admin-repository.port.js';
 import { AuthorizationService } from '#/modules/authorization/authorization.service.js';
 import { PermissionCode } from '#/modules/authorization/constants/index.js';
-import { hashPassword } from '#/modules/auth/utils/password.util.js';
+import { hashPassword } from '#/modules/auth/admin/utils/password.util.js';
 import { encryptPassword } from './password-transport.js';
 
 describe('素材文件夹管理 API (e2e)', () => {

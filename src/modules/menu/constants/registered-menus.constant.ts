@@ -54,6 +54,14 @@ export const REGISTERED_MENUS: readonly RegisteredMenu[] = [
         isRootOnly: true
       },
       {
+        menuKey: 'system-user',
+        title: '用户管理',
+        path: '/system-management/user',
+        order: 2,
+        permissionCode: PermissionCode.USER_READ,
+        isRootOnly: false
+      },
+      {
         menuKey: 'system-audit',
         title: '审计日志',
         path: '/system-management/audit',

@@ -1,5 +1,6 @@
 import { createPrivateKey } from 'node:crypto';
 import Joi from 'joi';
+
 /**
  * 创建原始环境变量校验器。
  *
@@ -29,6 +30,9 @@ export function createConfigValidationSchema(): Joi.ObjectSchema {
         }
         return value;
       }),
+    WECHAT_LOGIN_ENABLED: Joi.boolean().truthy('true').falsy('false'),
+    WECHAT_APP_ID: Joi.string().allow(''),
+    WECHAT_APP_SECRET: Joi.string().allow(''),
     SWAGGER_ENABLED: Joi.boolean().truthy('true').falsy('false'),
     OSS_REGION: Joi.string().allow(''),
     OSS_BUCKET: Joi.string().allow(''),
@@ -60,6 +64,11 @@ export function createConfigValidationSchema(): Joi.ObjectSchema {
             custom: '生产环境禁止使用占位或测试 JWT 密钥'
           });
         }
+      }
+      if (value.WECHAT_LOGIN_ENABLED === true && (!value.WECHAT_APP_ID || !value.WECHAT_APP_SECRET)) {
+        return helpers.message({
+          custom: '启用微信登录时必须提供 WECHAT_APP_ID 和 WECHAT_APP_SECRET'
+        });
       }
       return value;
     })
@@ -107,6 +116,20 @@ export function createApplicationConfigSchema(): Joi.ObjectSchema {
     auth: Joi.object({
       rsaPrivateKey: Joi.string().min(1).required()
     }).required(),
+    wechat: Joi.object({
+      enabled: Joi.boolean().required(),
+      appId: Joi.string().allow('').required(),
+      appSecret: Joi.string().allow('').required()
+    })
+      .custom((value, helpers) => {
+        if (value.enabled && (!value.appId || !value.appSecret)) {
+          return helpers.message({
+            custom: '启用微信登录时必须提供完整 AppID 和 AppSecret'
+          });
+        }
+        return value;
+      })
+      .required(),
     swagger: Joi.object({
       enabled: Joi.boolean().required(),
       path: Joi.string().min(1).required()

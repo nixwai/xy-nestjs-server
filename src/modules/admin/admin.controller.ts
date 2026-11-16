@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Inject, Post, Query } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiCommonResponses, ApiPageQuery, ApiOkResponseData, ApiOkResponseEmpty } from '#/common/decorators/index.js';
-import { CurrentAdmin } from '../auth/decorators/index.js';
-import type { AdminJwtPayload } from '../auth/types/jwt.types.js';
+import { AdminOnly, CurrentAdmin } from '../auth/shared/decorators/index.js';
+import type { AdminJwtPayload } from '../auth/shared/types/jwt.types.js';
 import { Authenticated, RootOnly } from '../authorization/decorators/index.js';
 import {
   AdminListResponseDto,
@@ -22,6 +22,7 @@ import { PasswordTransportService } from '#/common/security/index.js';
 @ApiTags('管理员管理')
 @ApiCommonResponses()
 @Controller()
+@AdminOnly()
 export class AdminController {
   /** 创建当前实例。 */
   constructor(

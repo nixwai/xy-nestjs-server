@@ -4,6 +4,7 @@ import { isRecord } from '../common/utils/type-guard.util.js';
 import { loadEnvironment } from './environment.js';
 import { createApplicationConfigSchema, validateEnvironment } from './config.validation.js';
 import type { ApplicationConfig } from './config.types.js';
+
 /**
  * 构建并校验最终应用配置。
  *
@@ -83,6 +84,11 @@ export function applyEnvironmentOverrides(baseConfig: ConfigRecord, environment:
         environment.AUTH_RSA_PRIVATE_KEY,
         baseConfigValue(baseConfig, ['auth', 'rsaPrivateKey'], '')
       )
+    },
+    wechat: {
+      enabled: readBoolean(environment.WECHAT_LOGIN_ENABLED, baseConfigValue(baseConfig, ['wechat', 'enabled'], false)),
+      appId: readString(environment.WECHAT_APP_ID, baseConfigValue(baseConfig, ['wechat', 'appId'], '')),
+      appSecret: readString(environment.WECHAT_APP_SECRET, baseConfigValue(baseConfig, ['wechat', 'appSecret'], ''))
     },
     swagger: {
       enabled: readBoolean(environment.SWAGGER_ENABLED, baseConfigValue(baseConfig, ['swagger', 'enabled'], true))

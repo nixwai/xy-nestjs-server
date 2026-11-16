@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Inject, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiCommonResponses, ApiOkResponseData, ApiOkResponseEmpty } from '#/common/decorators/index.js';
-import { CurrentAdmin } from '../auth/decorators/index.js';
-import type { AdminJwtPayload } from '../auth/types/jwt.types.js';
+import { CurrentAdmin } from '../auth/shared/decorators/index.js';
+import type { AdminJwtPayload } from '../auth/shared/types/jwt.types.js';
 import { PermissionCode } from '../authorization/constants/index.js';
 import { RequirePermission } from '../authorization/decorators/index.js';
 import { AssetFolderService } from './asset-folder.service.js';

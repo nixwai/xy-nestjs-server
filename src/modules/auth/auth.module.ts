@@ -1,35 +1,44 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
-import { AdminModule } from '../admin/admin.module.js';
 import { SecurityModule } from '#/common/security/index.js';
+import { AdminModule } from '../admin/admin.module.js';
 import { AdminService } from '../admin/admin.service.js';
-import { AuthController } from './auth.controller.js';
-import { AuthService } from './auth.service.js';
-import { JwtTokenService } from './tokens/jwt-token.service.js';
-import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
-import type { AuthSessionRepository } from './repositories/auth-session-repository.port.js';
-import { AUTH_SESSION_REPOSITORY } from './repositories/auth-session-repository.port.js';
+import { UserModule } from '../user/user.module.js';
+import { AdminAuthController } from './admin/admin-auth.controller.js';
+import { AdminAuthService } from './admin/admin-auth.service.js';
+import { UserAuthController } from './user/user-auth.controller.js';
+import { UserAuthService } from './user/user-auth.service.js';
+import { JwtTokenService } from './shared/tokens/jwt-token.service.js';
+import { JwtAuthGuard } from './shared/guards/jwt-auth.guard.js';
+import type { AuthSessionRepository } from './admin/repositories/auth-session-repository.port.js';
+import { AUTH_SESSION_REPOSITORY } from './admin/repositories/auth-session-repository.port.js';
+import { UniWechatLoginProvider, WECHAT_LOGIN_PROVIDER } from './user/providers/wechat-login.provider.js';
 
-/** 提供管理员认证、令牌会话和身份校验能力。 */
+/** 提供管理端认证、用户端认证、令牌会话和身份校验能力。 */
 @Module({
-  imports: [AdminModule, SecurityModule],
-  controllers: [AuthController],
+  imports: [AdminModule, UserModule, SecurityModule],
+  controllers: [AdminAuthController, UserAuthController],
   providers: [
     Reflector,
     JwtTokenService,
     JwtAuthGuard,
+    UserAuthService,
     {
-      provide: AuthService,
+      provide: WECHAT_LOGIN_PROVIDER,
+      useClass: UniWechatLoginProvider
+    },
+    {
+      provide: AdminAuthService,
       inject: [AdminService, AUTH_SESSION_REPOSITORY, ConfigService, JwtTokenService],
       useFactory: (
         adminService: AdminService,
         sessionRepository: AuthSessionRepository,
         config: ConfigService,
         jwt: JwtTokenService
-      ) => new AuthService(adminService, sessionRepository, config, jwt)
+      ) => new AdminAuthService(adminService, sessionRepository, config, jwt)
     }
   ],
-  exports: [AuthService, JwtAuthGuard, JwtTokenService]
+  exports: [AdminAuthService, UserAuthService, JwtAuthGuard, JwtTokenService]
 })
 export class AuthModule {}

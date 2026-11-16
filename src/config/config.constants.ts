@@ -15,6 +15,9 @@ export const CONFIG_KEYS = {
   /** 管理员认证配置键。 */
   auth: 'auth',
 
+  /** 微信小程序登录配置键。 */
+  wechat: 'wechat',
+
   /** Swagger 配置键。 */
   swagger: 'swagger',
 

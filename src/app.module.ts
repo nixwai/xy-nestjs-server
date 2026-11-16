@@ -4,7 +4,7 @@ loadEnvironment();
 
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard.js';
+import { JwtAuthGuard } from './modules/auth/shared/guards/jwt-auth.guard.js';
 import { RbacGuard } from './modules/authorization/guards/rbac.guard.js';
 import { ConfigModule } from '@nestjs/config';
 import { validateEnvironment } from './config/config.validation.js';
@@ -15,6 +15,7 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter.
 import { SharedModule } from './shared/database/shared.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
+import { UserModule } from './modules/user/user.module.js';
 import { AdminModule } from './modules/admin/admin.module.js';
 import { PermissionModule } from './modules/permission/permission.module.js';
 import { RoleModule } from './modules/role/role.module.js';
@@ -36,6 +37,7 @@ import { AssetModule } from './modules/asset/asset.module.js';
     SharedModule,
     HealthModule,
     AuthModule,
+    UserModule,
     AdminModule,
     PermissionModule,
     RoleModule,

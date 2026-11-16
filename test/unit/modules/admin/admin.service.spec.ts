@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { AdminService } from '#/modules/admin/admin.service.js';
 import type { AdminRepository, AdminTransactionRunner } from '#/modules/admin/repositories/admin-repository.port.js';
 import type { AdminRecord } from '#/modules/admin/types/admin.types.js';
-import { hashPassword } from '#/modules/auth/utils/password.util.js';
+import { hashPassword } from '#/modules/auth/admin/utils/password.util.js';
 import type { RoleService } from '#/modules/role/role.service.js';
 import type { AuditService } from '#/modules/audit/audit.service.js';
 

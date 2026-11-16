@@ -3,12 +3,16 @@ import { AppModule } from '#/app.module.js';
 import { ADMIN_REPOSITORY, ADMIN_TRANSACTION_RUNNER } from '#/modules/admin/repositories/admin-repository.port.js';
 import { InMemoryAdminRepository } from '#/modules/admin/repositories/in-memory-admin.repository.js';
 import { InMemoryAdminTransactionRunner } from '#/modules/admin/repositories/in-memory-admin-transaction-runner.js';
-import { AUTH_SESSION_REPOSITORY } from '#/modules/auth/repositories/auth-session-repository.port.js';
-import { InMemoryAuthSessionRepository } from '#/modules/auth/repositories/in-memory-auth-session.repository.js';
+import { AUTH_SESSION_REPOSITORY } from '#/modules/auth/admin/repositories/auth-session-repository.port.js';
+import { InMemoryAuthSessionRepository } from '#/modules/auth/admin/repositories/in-memory-auth-session.repository.js';
+import { USER_AUTH_SESSION_REPOSITORY } from '#/modules/auth/user/repositories/user-auth-session-repository.port.js';
+import { InMemoryUserAuthSessionRepository } from '#/modules/auth/user/repositories/in-memory-user-auth-session.repository.js';
 import { ROLE_REPOSITORY } from '#/modules/role/repositories/role-repository.port.js';
 import { InMemoryRoleRepository } from '#/modules/role/repositories/in-memory-role.repository.js';
 import { PERMISSION_REPOSITORY } from '#/modules/permission/repositories/permission-repository.port.js';
 import { InMemoryPermissionRepository } from '#/modules/permission/repositories/in-memory-permission.repository.js';
+import { USER_REPOSITORY } from '#/modules/user/repositories/user-repository.port.js';
+import { InMemoryUserRepository } from '#/modules/user/repositories/in-memory-user.repository.js';
 
 /** 创建不依赖数据库的端到端测试模块。 */
 export function createTestModule(): TestingModuleBuilder {
@@ -20,6 +24,10 @@ export function createTestModule(): TestingModuleBuilder {
     .useValue(new InMemoryAdminTransactionRunner(adminRepository))
     .overrideProvider(AUTH_SESSION_REPOSITORY)
     .useValue(new InMemoryAuthSessionRepository())
+    .overrideProvider(USER_AUTH_SESSION_REPOSITORY)
+    .useValue(new InMemoryUserAuthSessionRepository())
+    .overrideProvider(USER_REPOSITORY)
+    .useValue(new InMemoryUserRepository())
     .overrideProvider(ROLE_REPOSITORY)
     .useValue(new InMemoryRoleRepository())
     .overrideProvider(PERMISSION_REPOSITORY)

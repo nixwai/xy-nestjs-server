@@ -119,4 +119,28 @@ describe('config validation', () => {
     };
     expect(createApplicationConfigSchema().validate(config).error).toBeDefined();
   });
+  it('微信登录关闭时允许省略凭据', () => {
+    expect(
+      validateEnvironment({
+        NODE_ENV: 'test',
+        DB_ENABLED: 'false',
+        JWT_SECRET: 'test-only-secret-with-at-least-32-chars',
+        AUTH_RSA_PRIVATE_KEY: TEST_RSA_PRIVATE_KEY,
+        WECHAT_LOGIN_ENABLED: 'false'
+      })
+    ).toMatchObject({ WECHAT_LOGIN_ENABLED: false });
+  });
+
+  it('微信登录开启时必须同时提供 AppID 和 AppSecret', () => {
+    expect(() =>
+      validateEnvironment({
+        NODE_ENV: 'test',
+        DB_ENABLED: 'false',
+        JWT_SECRET: 'test-only-secret-with-at-least-32-chars',
+        AUTH_RSA_PRIVATE_KEY: TEST_RSA_PRIVATE_KEY,
+        WECHAT_LOGIN_ENABLED: 'true',
+        WECHAT_APP_ID: 'wx-app-id'
+      })
+    ).toThrow('启用微信登录时必须提供 WECHAT_APP_ID 和 WECHAT_APP_SECRET');
+  });
 });
