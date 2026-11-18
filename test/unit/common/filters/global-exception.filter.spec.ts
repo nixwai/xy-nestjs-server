@@ -1,10 +1,18 @@
 import type { ArgumentsHost } from '@nestjs/common';
-import { BadRequestException, HttpException, HttpStatus, InternalServerErrorException, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  InternalServerErrorException,
+  Logger,
+  UnauthorizedException
+} from '@nestjs/common';
 import { QueryFailedError } from 'typeorm';
 import { describe, expect, it, vi } from 'vitest';
 import { HttpCode } from '#/common/enums/index.js';
 import { DomainConflictError, DomainNotFoundError } from '#/common/errors/index.js';
 import { GlobalExceptionFilter } from '#/common/filters/global-exception.filter.js';
+import type { ApiErrorResponse } from '#/common/types/index.js';
 import { ImageBatchUploadException } from '#/modules/upload/errors/image-batch-upload.exception.js';
 /** 定义 ResponseMock 数据契约。 */
 interface ResponseMock {
@@ -47,6 +55,11 @@ function createHost(
   } as unknown as ArgumentsHost;
 
   return { host, response };
+}
+
+/** 读取响应写入的统一错误负载。 */
+function readPayload(response: ResponseMock): ApiErrorResponse {
+  return response.json.mock.calls[0]?.[0] as ApiErrorResponse;
 }
 
 /** 构造数据库查询异常 */
@@ -161,7 +174,49 @@ describe('GlobalExceptionFilter', () => {
 
     expect(response.json).toHaveBeenCalledWith({
       code: HttpCode.UNAUTHORIZED,
-      message: '请先登录',
+      message: '登录状态已失效，请重新登录',
+      data: null
+    });
+    expect(readPayload(response).message).not.toContain('Unauthorized');
+  });
+
+  it('应对缺失消息和框架默认英文消息的未认证异常返回同一文案', () => {
+    const filter = new GlobalExceptionFilter();
+    const withoutMessage = createHost();
+    const withDefaultMessage = createHost();
+    const expected = {
+      code: HttpCode.UNAUTHORIZED,
+      message: '登录状态已失效，请重新登录',
+      data: null
+    };
+
+    filter.catch(new UnauthorizedException(), withoutMessage.host);
+    filter.catch(new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED), withDefaultMessage.host);
+
+    expect(withoutMessage.response.json).toHaveBeenCalledWith(expected);
+    expect(withDefaultMessage.response.json).toHaveBeenCalledWith(expected);
+  });
+
+  it('应为未收录消息的请求内容过大异常返回状态默认文案', () => {
+    const { host, response } = createHost();
+
+    new GlobalExceptionFilter().catch(new HttpException('Payload Too Large', HttpStatus.PAYLOAD_TOO_LARGE), host);
+
+    expect(response.json).toHaveBeenCalledWith({
+      code: HttpCode.BAD_REQUEST,
+      message: '请求内容过大',
+      data: null
+    });
+  });
+
+  it('应为请求方法不被允许异常返回状态默认文案', () => {
+    const { host, response } = createHost();
+
+    new GlobalExceptionFilter().catch(new HttpException('Method Not Allowed', HttpStatus.METHOD_NOT_ALLOWED), host);
+
+    expect(response.json).toHaveBeenCalledWith({
+      code: HttpCode.BAD_REQUEST,
+      message: '请求方法不被允许',
       data: null
     });
   });

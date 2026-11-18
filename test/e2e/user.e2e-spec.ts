@@ -73,6 +73,28 @@ describe('Wechat user API (e2e)', () => {
     });
   });
 
+  it('退出登录会撤销用户刷新令牌', async () => {
+    const login = await request(app.getHttpServer())
+      .post('/api/auth/wechat/login')
+      .send({ code: 'wechat-code', nickname: '微信用户' })
+      .expect(200);
+    const refreshToken = login.body.data.refreshToken as string;
+
+    await request(app.getHttpServer())
+      .post('/api/auth/user/logout')
+      .send({ refreshToken })
+      .expect(200)
+      .expect(response => {
+        expect(response.body).toMatchObject({ code: 0, data: null });
+      });
+
+    const refresh = await request(app.getHttpServer())
+      .post('/api/auth/user/refresh')
+      .send({ refreshToken })
+      .expect(200);
+    expect(refresh.body).toMatchObject({ code: 40100, data: null });
+  });
+
   it('拒绝微信用户访问后台用户管理接口，并允许管理员停用用户', async () => {
     const login = await request(app.getHttpServer())
       .post('/api/auth/wechat/login')
