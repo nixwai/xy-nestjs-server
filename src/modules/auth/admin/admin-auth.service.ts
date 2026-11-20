@@ -4,6 +4,7 @@ import { addSeconds, hashPassword, validatePassword, verifyPassword } from '#/co
 import { parseDuration } from '../shared/utils/jwt.util.js';
 import { createRefreshToken, hashRefreshToken } from '../shared/utils/refresh-token.util.js';
 import { JwtTokenService } from '../shared/tokens/jwt-token.service.js';
+import { RefreshTokenInvalidException } from '../shared/errors/index.js';
 import type { AdminRecord } from '../../admin/types/admin.types.js';
 import { AdminService } from '../../admin/admin.service.js';
 import type { AuthSessionRepository } from './repositories/auth-session-repository.port.js';
@@ -35,12 +36,12 @@ export class AdminAuthService {
   async refresh(refreshToken: string): Promise<AuthTokenResponseDto> {
     const current = await this.sessionRepository.findByTokenHash(hashRefreshToken(refreshToken));
     if (!current) {
-      throw new UnauthorizedException('刷新令牌无效');
+      throw new RefreshTokenInvalidException();
     }
     const admin = await this.findAdminById(current.adminId);
     if (!admin || !admin.isActive) {
       await this.sessionRepository.revokeChain(current.id, new Date());
-      throw new UnauthorizedException('刷新令牌无效');
+      throw new RefreshTokenInvalidException();
     }
     const now = new Date();
     const next = createRefreshToken();
@@ -60,7 +61,7 @@ export class AdminAuthService {
     if (rotation.status === 'replayed') {
       await this.sessionRepository.revokeChain(current.id, now);
     }
-    throw new UnauthorizedException('刷新令牌无效');
+    throw new RefreshTokenInvalidException();
   }
   /** 撤销 Refresh Token。 */
   async logout(refreshToken: string): Promise<null> {

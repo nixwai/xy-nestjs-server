@@ -70,6 +70,6 @@ describe('Admin authentication API (e2e)', () => {
       .post('/api/auth/refresh')
       .send({ refreshToken: refresh.body.data.refreshToken })
       .expect(200);
-    expect(afterLogout.body).toMatchObject({ code: 40100, data: null });
+    expect(afterLogout.body).toMatchObject({ code: 40101, data: null });
   });
 });

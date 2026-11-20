@@ -92,7 +92,7 @@ describe('Wechat user API (e2e)', () => {
       .post('/api/auth/user/refresh')
       .send({ refreshToken })
       .expect(200);
-    expect(refresh.body).toMatchObject({ code: 40100, data: null });
+    expect(refresh.body).toMatchObject({ code: 40101, data: null });
   });
 
   it('拒绝微信用户访问后台用户管理接口，并允许管理员停用用户', async () => {

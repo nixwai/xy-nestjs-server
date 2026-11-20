@@ -2,6 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException } from '@nestjs/common';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { AdminService } from '#/modules/admin/admin.service.js';
+import { HttpCode } from '#/common/enums/index.js';
 import { InMemoryAdminRepository } from '#/modules/admin/repositories/in-memory-admin.repository.js';
 import { InMemoryAdminTransactionRunner } from '#/modules/admin/repositories/in-memory-admin-transaction-runner.js';
 import { AuditService } from '#/modules/audit/audit.service.js';
@@ -65,13 +66,19 @@ describe('AdminAuthService', () => {
     const second = await service.refresh(first.refreshToken);
     expect(second.refreshToken).not.toBe(first.refreshToken);
 
-    await expect(service.refresh(first.refreshToken)).rejects.toBeInstanceOf(UnauthorizedException);
-    await expect(service.refresh(second.refreshToken)).rejects.toBeInstanceOf(UnauthorizedException);
+    await expect(service.refresh(first.refreshToken)).rejects.toMatchObject({
+      response: { code: HttpCode.REFRESH_TOKEN_INVALID, message: '刷新令牌无效' }
+    });
+    await expect(service.refresh(second.refreshToken)).rejects.toMatchObject({
+      response: { code: HttpCode.REFRESH_TOKEN_INVALID, message: '刷新令牌无效' }
+    });
   });
 
   it('revokes a refresh session on logout', async () => {
     const result = await service.login('admin', 'Admin1234');
     await expect(service.logout(result.refreshToken)).resolves.toBeNull();
-    await expect(service.refresh(result.refreshToken)).rejects.toBeInstanceOf(UnauthorizedException);
+    await expect(service.refresh(result.refreshToken)).rejects.toMatchObject({
+      response: { code: HttpCode.REFRESH_TOKEN_INVALID, message: '刷新令牌无效' }
+    });
   });
 });

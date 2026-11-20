@@ -4,6 +4,7 @@ import { addSeconds } from '#/common/utils/index.js';
 import { parseDuration } from '../shared/utils/jwt.util.js';
 import { createRefreshToken, hashRefreshToken } from '../shared/utils/refresh-token.util.js';
 import { JwtTokenService } from '../shared/tokens/jwt-token.service.js';
+import { RefreshTokenInvalidException } from '../shared/errors/index.js';
 import type { UserAuthSessionRepository } from './repositories/user-auth-session-repository.port.js';
 import { USER_AUTH_SESSION_REPOSITORY } from './repositories/user-auth-session-repository.port.js';
 import type { UserAuthTokenResponseDto } from './dto/index.js';
@@ -55,12 +56,12 @@ export class UserAuthService {
   async refresh(refreshToken: string): Promise<UserAuthTokenResponseDto> {
     const current = await this.sessionRepository.findByTokenHash(hashRefreshToken(refreshToken));
     if (!current) {
-      throw new UnauthorizedException('刷新令牌无效');
+      throw new RefreshTokenInvalidException();
     }
     const user = await this.userService.findById(current.userId);
     if (!user || !user.isActive) {
       await this.sessionRepository.revokeChain(current.id, new Date());
-      throw new UnauthorizedException('刷新令牌无效');
+      throw new RefreshTokenInvalidException();
     }
     const now = new Date();
     const next = createRefreshToken();
@@ -79,7 +80,7 @@ export class UserAuthService {
     if (rotation.status === 'replayed') {
       await this.sessionRepository.revokeChain(current.id, now);
     }
-    throw new UnauthorizedException('刷新令牌无效');
+    throw new RefreshTokenInvalidException();
   }
 
   /** 撤销用户 Refresh Token。 */

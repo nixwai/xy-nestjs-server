@@ -1,4 +1,5 @@
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { HttpCode } from '#/common/enums/index.js';
 import { ConfigService } from '@nestjs/config';
 import { describe, expect, it, vi } from 'vitest';
 import { UserAuthService } from '#/modules/auth/user/user-auth.service.js';
@@ -79,5 +80,13 @@ describe('UserAuthService', () => {
     await repository.update(user.id, { isActive: false });
 
     await expect(service.login('valid-code')).rejects.toBeInstanceOf(UnauthorizedException);
+  });
+
+  it('刷新令牌失效时返回独立业务码', async () => {
+    const { service } = createService({ exchangeCode: vi.fn() });
+
+    await expect(service.refresh('missing-refresh-token')).rejects.toMatchObject({
+      response: { code: HttpCode.REFRESH_TOKEN_INVALID, message: '刷新令牌无效' }
+    });
   });
 });
