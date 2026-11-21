@@ -11,6 +11,7 @@ import { UserAuthController } from './user/user-auth.controller.js';
 import { UserAuthService } from './user/user-auth.service.js';
 import { JwtTokenService } from './shared/tokens/jwt-token.service.js';
 import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
+import { AuthSessionCleanupService } from './session-cleanup.service.js';
 import type { AuthSessionRepository } from './admin/repositories/auth-session-repository.port.js';
 import { AUTH_SESSION_REPOSITORY } from './admin/repositories/auth-session-repository.port.js';
 import { UniWechatLoginProvider, WECHAT_LOGIN_PROVIDER } from './user/providers/wechat-login.provider.js';
@@ -23,6 +24,7 @@ import { UniWechatLoginProvider, WECHAT_LOGIN_PROVIDER } from './user/providers/
     Reflector,
     JwtTokenService,
     JwtAuthGuard,
+    AuthSessionCleanupService,
     UserAuthService,
     {
       provide: WECHAT_LOGIN_PROVIDER,

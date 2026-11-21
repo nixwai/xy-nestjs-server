@@ -1,4 +1,5 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
 import { ConfigService } from '@nestjs/config';
 import { addSeconds, hashPassword, validatePassword, verifyPassword } from '#/common/utils/index.js';
 import { parseDuration } from '../shared/utils/jwt.util.js';
@@ -40,7 +41,7 @@ export class AdminAuthService {
     }
     const admin = await this.findAdminById(current.adminId);
     if (!admin || !admin.isActive) {
-      await this.sessionRepository.revokeChain(current.id, new Date());
+      await this.sessionRepository.revokeBySessionFamilyId(current.sessionFamilyId, new Date());
       throw new RefreshTokenInvalidException();
     }
     const now = new Date();
@@ -49,6 +50,7 @@ export class AdminAuthService {
       current.id,
       {
         adminId: admin.id,
+        sessionFamilyId: current.sessionFamilyId,
         tokenHash: hashRefreshToken(next),
         expiresAt: addSeconds(now, this.refreshTokenExpiresIn)
       },
@@ -59,7 +61,7 @@ export class AdminAuthService {
     }
 
     if (rotation.status === 'replayed') {
-      await this.sessionRepository.revokeChain(current.id, now);
+      await this.sessionRepository.revokeBySessionFamilyId(current.sessionFamilyId, now);
     }
     throw new RefreshTokenInvalidException();
   }
@@ -104,6 +106,7 @@ export class AdminAuthService {
     const refreshToken = createRefreshToken();
     await this.sessionRepository.create({
       adminId: admin.id,
+      sessionFamilyId: randomUUID(),
       tokenHash: hashRefreshToken(refreshToken),
       expiresAt: addSeconds(new Date(), this.refreshTokenExpiresIn)
     });

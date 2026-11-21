@@ -74,6 +74,22 @@ describe('AdminAuthService', () => {
     });
   });
 
+  it('revokes the whole session family without affecting another login', async () => {
+    const first = await service.login('admin', 'Admin1234');
+    const otherLogin = await service.login('admin', 'Admin1234');
+    const rotated = await service.refresh(first.refreshToken);
+
+    await expect(service.refresh(first.refreshToken)).rejects.toMatchObject({
+      response: { code: HttpCode.REFRESH_TOKEN_INVALID, message: '刷新令牌无效' }
+    });
+    await expect(service.refresh(rotated.refreshToken)).rejects.toMatchObject({
+      response: { code: HttpCode.REFRESH_TOKEN_INVALID, message: '刷新令牌无效' }
+    });
+    await expect(service.refresh(otherLogin.refreshToken)).resolves.toMatchObject({
+      admin: { id: '1' }
+    });
+  });
+
   it('revokes a refresh session on logout', async () => {
     const result = await service.login('admin', 'Admin1234');
     await expect(service.logout(result.refreshToken)).resolves.toBeNull();

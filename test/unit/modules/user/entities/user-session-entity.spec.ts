@@ -21,6 +21,9 @@ describe('UserSessionEntity 元数据', () => {
     expect(table?.name).toBe('user_session');
     expect(tokenIndex?.unique).toBe(true);
     expect(tokenIndex?.columns).toEqual(['tokenHash']);
+    expect(entityIndices.find(item => item.name === 'idx_user_session_family_id')?.columns).toEqual([
+      'sessionFamilyId'
+    ]);
   });
 
   it('用户主键和会话链路字段使用无符号 bigint', () => {
@@ -30,6 +33,14 @@ describe('UserSessionEntity 元数据', () => {
       expect(options.type, propertyName).toBe('bigint');
       expect(options.unsigned, propertyName).toBe(true);
     }
+  });
+
+  it('会话族标识使用固定长度字符串', () => {
+    const options = columnOf('sessionFamilyId').options;
+
+    expect(options.type).toBe('char');
+    expect(options.length).toBe(36);
+    expect(options.nullable).not.toBe(true);
   });
 
   it('撤销和替换字段允许为空', () => {

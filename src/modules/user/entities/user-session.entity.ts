@@ -4,6 +4,7 @@ import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, Update
 @Entity({ name: 'user_session' })
 @Index('uk_user_session_token_hash', ['tokenHash'], { unique: true })
 @Index('idx_user_session_user_id', ['userId'])
+@Index('idx_user_session_family_id', ['sessionFamilyId'])
 @Index('idx_user_session_expires_at', ['expiresAt'])
 @Index('idx_user_session_replaced_by_session_id', ['replacedBySessionId'])
 export class UserSessionEntity {
@@ -18,6 +19,10 @@ export class UserSessionEntity {
   /** 会话归属用户。 */
   @Column({ name: 'user_id', type: 'bigint', unsigned: true })
   userId!: string;
+
+  /** 所属会话族标识。 */
+  @Column({ name: 'session_family_id', type: 'char', length: 36 })
+  sessionFamilyId!: string;
 
   /** 刷新令牌摘要。 */
   @Column({ name: 'token_hash', type: 'char', length: 64 })

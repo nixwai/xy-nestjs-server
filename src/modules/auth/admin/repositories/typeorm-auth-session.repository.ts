@@ -84,21 +84,44 @@ export class TypeOrmAuthSessionRepository implements AuthSessionRepository {
     return true;
   }
 
-  /** revokeChain。 */
-  async revokeChain(sessionId: string, now: Date): Promise<void> {
-    let item = await this.sessions.findOne({ where: { id: sessionId } });
-    while (item) {
-      if (!item.revokedAt) {
-        item.revokedAt = now;
-        item.lastUsedAt = now;
-        await this.sessions.save(item);
-      }
-      item = item.replacedBySessionId
-        ? await this.sessions.findOne({
-            where: { id: item.replacedBySessionId }
-          })
-        : null;
+  /** 按会话族撤销所有刷新会话。 */
+  async revokeBySessionFamilyId(sessionFamilyId: string, now: Date): Promise<void> {
+    await this.sessions.manager.transaction(async manager => {
+      await manager
+        .getRepository(AdminSessionEntity)
+        .createQueryBuilder()
+        .update(AdminSessionEntity)
+        .set({ revokedAt: now, lastUsedAt: now })
+        .where('session_family_id = :sessionFamilyId', { sessionFamilyId })
+        .andWhere('revoked_at IS NULL')
+        .execute();
+    });
+  }
+
+  /** 删除已失效且超过保留期的会话族。 */
+  async deleteExpiredFamilies(now: Date, cutoff: Date, limit: number): Promise<number> {
+    if (limit <= 0) {
+      return 0;
     }
+    const families = await this.sessions
+      .createQueryBuilder('session')
+      .select('session.sessionFamilyId', 'sessionFamilyId')
+      .groupBy('session.sessionFamilyId')
+      .having('MAX(session.expiresAt) <= :cutoff', { cutoff })
+      .andHaving('SUM(CASE WHEN session.revokedAt IS NULL AND session.expiresAt > :now THEN 1 ELSE 0 END) = 0', { now })
+      .limit(limit)
+      .getRawMany<{ sessionFamilyId: string }>();
+    const familyIds = families.map(item => item.sessionFamilyId).filter(Boolean);
+    if (familyIds.length === 0) {
+      return 0;
+    }
+    const result = await this.sessions
+      .createQueryBuilder()
+      .delete()
+      .from(AdminSessionEntity)
+      .where('session_family_id IN (:...familyIds)', { familyIds })
+      .execute();
+    return result.affected ?? 0;
   }
 
   /** 将实体转换为领域记录 */
@@ -106,6 +129,7 @@ export class TypeOrmAuthSessionRepository implements AuthSessionRepository {
     return {
       id: String(item.id),
       adminId: String(item.adminId),
+      sessionFamilyId: item.sessionFamilyId,
       tokenHash: item.tokenHash,
       expiresAt: item.expiresAt,
       revokedAt: item.revokedAt,

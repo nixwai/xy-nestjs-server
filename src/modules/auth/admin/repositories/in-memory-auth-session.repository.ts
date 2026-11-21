@@ -65,18 +65,42 @@ export class InMemoryAuthSessionRepository implements AuthSessionRepository {
     return true;
   }
 
-  /** revokeChain。 */
-  async revokeChain(sessionId: string, now: Date): Promise<void> {
-    let item = this.sessions.get(sessionId);
-    while (item) {
-      if (!item.revokedAt) {
-        this.sessions.set(item.id, {
-          ...item,
-          revokedAt: now,
-          lastUsedAt: now
-        });
+  /** 按会话族撤销所有刷新会话。 */
+  async revokeBySessionFamilyId(sessionFamilyId: string, now: Date): Promise<void> {
+    for (const item of this.sessions.values()) {
+      if (item.sessionFamilyId === sessionFamilyId && !item.revokedAt) {
+        this.sessions.set(item.id, { ...item, revokedAt: now, lastUsedAt: now });
       }
-      item = item.replacedBySessionId ? this.sessions.get(item.replacedBySessionId) : undefined;
     }
+  }
+
+  /** 删除已失效且超过保留期的会话族。 */
+  async deleteExpiredFamilies(now: Date, cutoff: Date, limit: number): Promise<number> {
+    if (limit <= 0) {
+      return 0;
+    }
+    const families = new Map<string, AdminSessionRecord[]>();
+    for (const item of this.sessions.values()) {
+      const family = families.get(item.sessionFamilyId) ?? [];
+      families.set(item.sessionFamilyId, [...family, item]);
+    }
+    let deleted = 0;
+    for (const items of families.values()) {
+      const hasActiveSession = items.some(item => !item.revokedAt && item.expiresAt > now);
+      const lastExpiry = items.reduce(
+        (latest, item) => (item.expiresAt > latest ? item.expiresAt : latest),
+        new Date(0)
+      );
+      if (!hasActiveSession && lastExpiry <= cutoff) {
+        for (const item of items) {
+          this.sessions.delete(item.id);
+          deleted += 1;
+        }
+        if (--limit === 0) {
+          break;
+        }
+      }
+    }
+    return deleted;
   }
 }

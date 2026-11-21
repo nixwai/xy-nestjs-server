@@ -4,6 +4,8 @@ export interface AdminSessionRecord {
   id: string;
   /** 目标管理员的唯一标识。 */
   adminId: string;
+  /** 会话族标识。 */
+  sessionFamilyId: string;
   /** 令牌Hash 值。 */
   tokenHash: string;
   /** 会话过期时间。 */
@@ -22,6 +24,8 @@ export interface AdminSessionRecord {
 export interface AuthSessionInput {
   /** 会话归属的管理员 ID。 */
   adminId: string;
+  /** 会话族标识。 */
+  sessionFamilyId: string;
   /** 刷新令牌的不可逆存储摘要。 */
   tokenHash: string;
   /** 会话过期时间。 */

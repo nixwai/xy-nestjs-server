@@ -4,6 +4,8 @@ export interface UserSessionRecord {
   id: string;
   /** 目标用户主键。 */
   userId: string;
+  /** 会话族标识。 */
+  sessionFamilyId: string;
   /** 刷新令牌摘要。 */
   tokenHash: string;
   /** 会话过期时间。 */
@@ -22,6 +24,8 @@ export interface UserSessionRecord {
 export interface UserAuthSessionInput {
   /** 会话归属用户主键。 */
   userId: string;
+  /** 会话族标识。 */
+  sessionFamilyId: string;
   /** 刷新令牌摘要。 */
   tokenHash: string;
   /** 会话过期时间。 */

@@ -82,6 +82,23 @@ describe('UserAuthService', () => {
     await expect(service.login('valid-code')).rejects.toBeInstanceOf(UnauthorizedException);
   });
 
+  it('重放刷新令牌时撤销整个会话族但保留其他登录', async () => {
+    const { service } = createService({ exchangeCode: vi.fn() });
+    const first = await service.loginForDevelopment('第一会话');
+    const otherLogin = await service.loginForDevelopment('第二会话');
+    const rotated = await service.refresh(first.refreshToken);
+
+    await expect(service.refresh(first.refreshToken)).rejects.toMatchObject({
+      response: { code: HttpCode.REFRESH_TOKEN_INVALID, message: '刷新令牌无效' }
+    });
+    await expect(service.refresh(rotated.refreshToken)).rejects.toMatchObject({
+      response: { code: HttpCode.REFRESH_TOKEN_INVALID, message: '刷新令牌无效' }
+    });
+    await expect(service.refresh(otherLogin.refreshToken)).resolves.toMatchObject({
+      user: { nickname: '第二会话' }
+    });
+  });
+
   it('刷新令牌失效时返回独立业务码', async () => {
     const { service } = createService({ exchangeCode: vi.fn() });
 

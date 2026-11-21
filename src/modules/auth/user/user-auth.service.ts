@@ -1,4 +1,5 @@
 import { Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
 import { ConfigService } from '@nestjs/config';
 import { addSeconds } from '#/common/utils/index.js';
 import { parseDuration } from '../shared/utils/jwt.util.js';
@@ -46,7 +47,7 @@ export class UserAuthService {
     const user = await this.userService.createUser({
       openId: null,
       unionId: null,
-      nickname: this.normalizeOptionalText(nickname) ?? 'H5开发用户',
+      nickname: this.normalizeOptionalText(nickname) ?? '开发用户',
       lastLoginAt: new Date()
     });
     return this.issueTokens(user);
@@ -60,7 +61,7 @@ export class UserAuthService {
     }
     const user = await this.userService.findById(current.userId);
     if (!user || !user.isActive) {
-      await this.sessionRepository.revokeChain(current.id, new Date());
+      await this.sessionRepository.revokeBySessionFamilyId(current.sessionFamilyId, new Date());
       throw new RefreshTokenInvalidException();
     }
     const now = new Date();
@@ -69,6 +70,7 @@ export class UserAuthService {
       current.id,
       {
         userId: user.id,
+        sessionFamilyId: current.sessionFamilyId,
         tokenHash: hashRefreshToken(next),
         expiresAt: addSeconds(now, this.refreshTokenExpiresIn)
       },
@@ -78,7 +80,7 @@ export class UserAuthService {
       return this.buildTokenResponse(user, next);
     }
     if (rotation.status === 'replayed') {
-      await this.sessionRepository.revokeChain(current.id, now);
+      await this.sessionRepository.revokeBySessionFamilyId(current.sessionFamilyId, now);
     }
     throw new RefreshTokenInvalidException();
   }
@@ -98,6 +100,7 @@ export class UserAuthService {
     const refreshToken = createRefreshToken();
     await this.sessionRepository.create({
       userId: user.id,
+      sessionFamilyId: randomUUID(),
       tokenHash: hashRefreshToken(refreshToken),
       expiresAt: addSeconds(new Date(), this.refreshTokenExpiresIn)
     });

@@ -4,6 +4,7 @@ import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, Update
 @Entity({ name: 'admin_session' })
 @Index('uk_admin_session_token_hash', ['tokenHash'], { unique: true })
 @Index('idx_admin_session_admin_id', ['adminId'])
+@Index('idx_admin_session_family_id', ['sessionFamilyId'])
 @Index('idx_admin_session_expires_at', ['expiresAt'])
 @Index('idx_admin_session_replaced_by_session_id', ['replacedBySessionId'])
 export class AdminSessionEntity {
@@ -18,6 +19,10 @@ export class AdminSessionEntity {
   /** 所属管理员主键。 */
   @Column({ name: 'admin_id', type: 'bigint', unsigned: true })
   adminId!: string;
+
+  /** 所属会话族标识。 */
+  @Column({ name: 'session_family_id', type: 'char', length: 36 })
+  sessionFamilyId!: string;
 
   /** 刷新令牌哈希。 */
   @Column({ type: 'char', length: 64 })
