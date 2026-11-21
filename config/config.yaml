@@ -18,6 +18,10 @@ jwt:
   refreshTokenExpiresIn: 7d
 auth:
   rsaPrivateKey: ''
+wechat:
+  enabled: false
+  appId: ''
+  appSecret: ''
 swagger:
   enabled: true
   path: docs

@@ -15,6 +15,7 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter.
 import { SharedModule } from './shared/database/shared.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
+import { UserModule } from './modules/user/user.module.js';
 import { AdminModule } from './modules/admin/admin.module.js';
 import { PermissionModule } from './modules/permission/permission.module.js';
 import { RoleModule } from './modules/role/role.module.js';
@@ -36,6 +37,7 @@ import { AssetModule } from './modules/asset/asset.module.js';
     SharedModule,
     HealthModule,
     AuthModule,
+    UserModule,
     AdminModule,
     PermissionModule,
     RoleModule,

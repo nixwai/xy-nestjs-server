@@ -14,6 +14,20 @@ export const REGISTERED_PERMISSION_GROUPS: readonly RegisteredPermissionGroup[] 
         description: '查看管理员变更审计',
         isAssignable: true,
         isProtected: false
+      },
+      {
+        code: PermissionCode.USER_READ,
+        name: '查看用户',
+        description: '查看微信用户列表和公开资料',
+        isAssignable: true,
+        isProtected: false
+      },
+      {
+        code: PermissionCode.USER_UPDATE,
+        name: '编辑用户',
+        description: '更新微信用户展示资料和启用状态',
+        isAssignable: true,
+        isProtected: false
       }
     ]
   },

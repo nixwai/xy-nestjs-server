@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createTestModule } from './create-test-module.js';
 import { ADMIN_REPOSITORY } from '#/modules/admin/repositories/admin-repository.port.js';
 import type { AdminRepository } from '#/modules/admin/repositories/admin-repository.port.js';
-import { hashPassword } from '#/modules/auth/utils/password.util.js';
+import { hashPassword } from '#/common/utils/password-hash.util.js';
 import { encryptPassword } from './password-transport.js';
 
 describe('Admin authentication API (e2e)', () => {
@@ -70,6 +70,6 @@ describe('Admin authentication API (e2e)', () => {
       .post('/api/auth/refresh')
       .send({ refreshToken: refresh.body.data.refreshToken })
       .expect(200);
-    expect(afterLogout.body).toMatchObject({ code: 40100, data: null });
+    expect(afterLogout.body).toMatchObject({ code: 40101, data: null });
   });
 });

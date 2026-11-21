@@ -1,10 +1,10 @@
 import { BadRequestException } from '@nestjs/common';
-/** 管理员密码最小长度。 */
+/** 密码最小长度。 */
 const PASSWORD_MIN_LENGTH = 8;
-/** 管理员密码最大长度。 */
+/** 密码最大长度。 */
 const PASSWORD_MAX_LENGTH = 72;
 /**
- * 校验解密后的管理员密码规则。
+ * 校验密码规则。
  *
  * @param password - 待校验的明文密码。
  * @param label - 错误消息中使用的字段名称。

@@ -1,5 +1,6 @@
 /** 应用运行环境。 */
 export type AppEnvironment = 'development' | 'test' | 'production';
+
 /** 应用配置。 */
 export interface AppConfig {
   /** 当前运行环境。 */
@@ -48,6 +49,16 @@ export interface JwtConfig {
 export interface AuthConfig {
   /** Base64 编码的 PKCS#8 RSA 私钥 DER。 */
   rsaPrivateKey: string;
+}
+
+/** 微信小程序登录配置。 */
+export interface WechatConfig {
+  /** 是否启用微信统一登录。 */
+  enabled: boolean;
+  /** 微信小程序 AppID。 */
+  appId: string;
+  /** 微信小程序 AppSecret。 */
+  appSecret: string;
 }
 
 /** 阿里 OSS 配置。 */
@@ -104,8 +115,16 @@ export interface ApplicationConfig {
   database: DatabaseConfig;
   /** JWT 令牌配置。 */
   jwt: JwtConfig;
+  /** 管理员认证配置。 */
+  auth: AuthConfig;
+  /** 微信小程序登录配置。 */
+  wechat: WechatConfig;
   /** Swagger 文档配置。 */
   swagger: SwaggerConfig;
+  /** 阿里 OSS 配置。 */
+  oss: OssConfig;
+  /** 图片处理配置。 */
+  image: ImageConfig;
   /** 请求限流配置。 */
   throttler: ThrottlerConfig;
 }

@@ -7,26 +7,30 @@ import { getMysqlDuplicateKey } from '../utils/index.js';
 import type { ApiErrorResponse } from '../types/index.js';
 /** 定义 ErrorResponseBody 数据结构。 */
 type ErrorResponseBody = Record<string, unknown>;
+/** 定义客户端 HTTP 状态对应的业务码与默认中文文案。 */
+interface HttpStatusMeta {
+  /** 对外业务错误码。 */
+  readonly code: HttpCode;
+  /** 面向客户端的默认中文文案。 */
+  readonly message: string;
+}
 
-const HTTP_STATUS_TO_BUSINESS_CODE: Readonly<Record<number, HttpCode>> = Object.freeze({
-  [HttpStatus.BAD_REQUEST]: HttpCode.BAD_REQUEST,
-  [HttpStatus.UNAUTHORIZED]: HttpCode.UNAUTHORIZED,
-  [HttpStatus.FORBIDDEN]: HttpCode.FORBIDDEN,
-  [HttpStatus.NOT_FOUND]: HttpCode.NOT_FOUND,
-  [HttpStatus.CONFLICT]: HttpCode.CONFLICT,
-  [HttpStatus.UNPROCESSABLE_ENTITY]: HttpCode.UNPROCESSABLE_ENTITY,
-  [HttpStatus.TOO_MANY_REQUESTS]: HttpCode.TOO_MANY_REQUESTS
+const HTTP_STATUS_META: Readonly<Record<number, HttpStatusMeta>> = Object.freeze({
+  [HttpStatus.BAD_REQUEST]: { code: HttpCode.BAD_REQUEST, message: '请求参数错误' },
+  [HttpStatus.UNAUTHORIZED]: { code: HttpCode.UNAUTHORIZED, message: '登录状态已失效，请重新登录' },
+  [HttpStatus.FORBIDDEN]: { code: HttpCode.FORBIDDEN, message: '无权访问' },
+  [HttpStatus.NOT_FOUND]: { code: HttpCode.NOT_FOUND, message: '请求的资源不存在' },
+  [HttpStatus.CONFLICT]: { code: HttpCode.CONFLICT, message: '请求与当前资源冲突' },
+  [HttpStatus.METHOD_NOT_ALLOWED]: { code: HttpCode.BAD_REQUEST, message: '请求方法不被允许' },
+  [HttpStatus.UNPROCESSABLE_ENTITY]: { code: HttpCode.UNPROCESSABLE_ENTITY, message: '请求参数校验失败' },
+  [HttpStatus.PAYLOAD_TOO_LARGE]: { code: HttpCode.BAD_REQUEST, message: '请求内容过大' },
+  [HttpStatus.UNSUPPORTED_MEDIA_TYPE]: { code: HttpCode.BAD_REQUEST, message: '请求格式不受支持' },
+  [HttpStatus.TOO_MANY_REQUESTS]: { code: HttpCode.TOO_MANY_REQUESTS, message: '请求过于频繁，请稍后重试' }
 });
 
-const HTTP_STATUS_TO_DEFAULT_MESSAGE: Readonly<Record<number, string>> = Object.freeze({
-  [HttpStatus.BAD_REQUEST]: '请求参数错误',
-  [HttpStatus.UNAUTHORIZED]: '请先登录',
-  [HttpStatus.FORBIDDEN]: '无权访问',
-  [HttpStatus.NOT_FOUND]: '请求的资源不存在',
-  [HttpStatus.CONFLICT]: '请求与当前资源冲突',
-  [HttpStatus.UNPROCESSABLE_ENTITY]: '请求参数校验失败',
-  [HttpStatus.TOO_MANY_REQUESTS]: '请求过于频繁，请稍后重试',
-  [HttpStatus.UNSUPPORTED_MEDIA_TYPE]: '请求格式不受支持'
+const UNKNOWN_CLIENT_STATUS_META: HttpStatusMeta = Object.freeze({
+  code: HttpCode.BAD_REQUEST,
+  message: '请求处理失败'
 });
 
 const DUPLICATE_KEY_LABELS: Readonly<Record<string, string>> = Object.freeze({
@@ -37,17 +41,6 @@ const DUPLICATE_KEY_LABELS: Readonly<Record<string, string>> = Object.freeze({
   permissionCode: '权限编码',
   rolePermission: '角色权限关系',
   uniqueKey: '唯一字段'
-});
-
-const DEFAULT_ENGLISH_MESSAGES: Readonly<Record<string, string>> = Object.freeze({
-  'bad request': '请求参数错误',
-  unauthorized: '请先登录',
-  forbidden: '无权访问',
-  'not found': '请求的资源不存在',
-  conflict: '请求与当前资源冲突',
-  'unprocessable entity': '请求参数校验失败',
-  'too many requests': '请求过于频繁，请稍后重试',
-  'unsupported media type': '请求格式不受支持'
 });
 /** 将异常转换为项目统一的 API 错误响应。 */
 @Catch()
@@ -88,10 +81,12 @@ export class GlobalExceptionFilter implements ExceptionFilter<unknown> {
       return;
     }
 
+    const meta = this.getStatusMeta(status);
+
     if (exception instanceof PublicBusinessException) {
       response.status(HttpStatus.OK).json({
         code: exception.code,
-        message: this.getClientMessage(exception.getResponse(), status),
+        message: this.getClientMessage(exception.getResponse(), meta),
         data: exception.data
       });
       return;
@@ -99,8 +94,8 @@ export class GlobalExceptionFilter implements ExceptionFilter<unknown> {
 
     const body = this.getExceptionBody(exception);
     const payload: ApiErrorResponse = {
-      code: this.getBusinessCode(body, status),
-      message: this.getClientMessage(body, status),
+      code: this.getBusinessCode(body, meta),
+      message: this.getClientMessage(body, meta),
       data: null
     };
 
@@ -132,14 +127,18 @@ export class GlobalExceptionFilter implements ExceptionFilter<unknown> {
     return undefined;
   }
 
+  /** 获取客户端状态对应的业务码与默认中文文案。 */
+  private getStatusMeta(status: number): HttpStatusMeta {
+    return HTTP_STATUS_META[status] ?? UNKNOWN_CLIENT_STATUS_META;
+  }
+
   /** 从异常响应体中提取并安全转换客户端可见消息。 */
-  private getClientMessage(body: unknown, status: number): string {
-    const fallback = HTTP_STATUS_TO_DEFAULT_MESSAGE[status] ?? '请求处理失败';
+  private getClientMessage(body: unknown, meta: HttpStatusMeta): string {
     const messages = this.extractMessages(body);
     if (messages.length === 0) {
-      return fallback;
+      return meta.message;
     }
-    return messages.map(message => this.translateClientMessage(message, status)).join('; ');
+    return messages.map(message => this.translateClientMessage(message, meta)).join('; ');
   }
 
   /** 提取异常响应中的一条或多条消息。 */
@@ -159,21 +158,16 @@ export class GlobalExceptionFilter implements ExceptionFilter<unknown> {
     return [];
   }
 
-  /** 将框架默认英文消息转换为中文，未知英文消息使用安全兜底。 */
-  private translateClientMessage(message: string, status: number): string {
-    const normalized = message.trim().toLowerCase();
-    const knownMessage = DEFAULT_ENGLISH_MESSAGES[normalized];
-    if (knownMessage) {
-      return knownMessage;
-    }
+  /** 透传中文业务消息，非中文消息统一替换为状态默认中文文案。 */
+  private translateClientMessage(message: string, meta: HttpStatusMeta): string {
     if (/[\u4e00-\u9fff]/.test(message)) {
       return message;
     }
-    return HTTP_STATUS_TO_DEFAULT_MESSAGE[status] ?? '请求处理失败';
+    return meta.message;
   }
 
-  /** 从异常响应体中提取显式业务码，未提供时按 HTTP 状态码映射。 */
-  private getBusinessCode(body: unknown, status: number): number {
+  /** 从异常响应体中提取显式业务码，未提供时使用状态默认业务码。 */
+  private getBusinessCode(body: unknown, meta: HttpStatusMeta): number {
     if (this.isErrorResponseBody(body)) {
       const code = body.code;
       if (typeof code === 'number' && Number.isSafeInteger(code) && code > 0) {
@@ -181,7 +175,7 @@ export class GlobalExceptionFilter implements ExceptionFilter<unknown> {
       }
     }
 
-    return HTTP_STATUS_TO_BUSINESS_CODE[status] ?? HttpCode.BAD_REQUEST;
+    return meta.code;
   }
 
   /** 返回不包含异常消息和堆栈的日志标识，避免记录敏感内容。 */

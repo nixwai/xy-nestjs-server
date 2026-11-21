@@ -9,6 +9,9 @@ export enum HttpCode {
   /** 请求未通过身份认证。 */
   UNAUTHORIZED = 40100,
 
+  /** 刷新令牌已失效，客户端应结束当前会话。 */
+  REFRESH_TOKEN_INVALID = 40101,
+
   /** 当前身份无权执行请求。 */
   FORBIDDEN = 40300,
 

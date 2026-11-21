@@ -62,6 +62,7 @@ describe('flattenRegisteredMenus', () => {
       ['system', null],
       ['system-admin', 'system'],
       ['system-role', 'system'],
+      ['system-user', 'system'],
       ['system-audit', 'system'],
       ['system-menu', 'system'],
       ['system-permission', 'system']

@@ -11,14 +11,19 @@ import { RolePermissionAssignmentEntity } from '../modules/role/entities/role-pe
 import { RoleEntity } from '../modules/role/entities/role.entity.js';
 import { MenuEntity } from '../modules/menu/entities/menu.entity.js';
 import { AssetFolderEntity } from '../modules/asset/entities/asset-folder.entity.js';
+import { UserEntity } from '../modules/user/entities/user.entity.js';
+import { UserSessionEntity } from '../modules/user/entities/user-session.entity.js';
 import { ADMIN_REPOSITORY, ADMIN_TRANSACTION_RUNNER } from '../modules/admin/repositories/admin-repository.port.js';
 import { InMemoryAdminRepository } from '../modules/admin/repositories/in-memory-admin.repository.js';
 import { TypeOrmAdminRepository } from '../modules/admin/repositories/typeorm-admin.repository.js';
 import { InMemoryAdminTransactionRunner } from '../modules/admin/repositories/in-memory-admin-transaction-runner.js';
 import { TypeOrmAdminTransactionRunner } from '../modules/admin/repositories/typeorm-admin-transaction-runner.js';
-import { AUTH_SESSION_REPOSITORY } from '../modules/auth/repositories/auth-session-repository.port.js';
-import { InMemoryAuthSessionRepository } from '../modules/auth/repositories/in-memory-auth-session.repository.js';
-import { TypeOrmAuthSessionRepository } from '../modules/auth/repositories/typeorm-auth-session.repository.js';
+import { AUTH_SESSION_REPOSITORY } from '../modules/auth/admin/repositories/auth-session-repository.port.js';
+import { InMemoryAuthSessionRepository } from '../modules/auth/admin/repositories/in-memory-auth-session.repository.js';
+import { TypeOrmAuthSessionRepository } from '../modules/auth/admin/repositories/typeorm-auth-session.repository.js';
+import { USER_AUTH_SESSION_REPOSITORY } from '../modules/auth/user/repositories/user-auth-session-repository.port.js';
+import { InMemoryUserAuthSessionRepository } from '../modules/auth/user/repositories/in-memory-user-auth-session.repository.js';
+import { TypeOrmUserAuthSessionRepository } from '../modules/auth/user/repositories/typeorm-user-auth-session.repository.js';
 import { ROLE_REPOSITORY } from '../modules/role/repositories/role-repository.port.js';
 import { InMemoryRoleRepository } from '../modules/role/repositories/in-memory-role.repository.js';
 import { TypeOrmRoleRepository } from '../modules/role/repositories/typeorm-role.repository.js';
@@ -31,6 +36,9 @@ import { TypeOrmMenuRepository } from '../modules/menu/repositories/typeorm-menu
 import { ASSET_FOLDER_REPOSITORY } from '../modules/asset/repositories/asset-repository.port.js';
 import { InMemoryAssetFolderRepository } from '../modules/asset/repositories/in-memory-asset.repository.js';
 import { TypeOrmAssetFolderRepository } from '../modules/asset/repositories/typeorm-asset.repository.js';
+import { USER_REPOSITORY } from '../modules/user/repositories/user-repository.port.js';
+import { InMemoryUserRepository } from '../modules/user/repositories/in-memory-user.repository.js';
+import { TypeOrmUserRepository } from '../modules/user/repositories/typeorm-user.repository.js';
 
 const databaseEnabled = shouldLoadDatabaseModule();
 const databaseEntities = [
@@ -42,7 +50,9 @@ const databaseEntities = [
   RolePermissionAssignmentEntity,
   RoleEntity,
   MenuEntity,
-  AssetFolderEntity
+  AssetFolderEntity,
+  UserEntity,
+  UserSessionEntity
 ];
 
 /** 统一装配数据库和内存持久化实现。 */
@@ -66,6 +76,14 @@ const databaseEntities = [
       useClass: databaseEnabled ? TypeOrmAuthSessionRepository : InMemoryAuthSessionRepository
     },
     {
+      provide: USER_AUTH_SESSION_REPOSITORY,
+      useClass: databaseEnabled ? TypeOrmUserAuthSessionRepository : InMemoryUserAuthSessionRepository
+    },
+    {
+      provide: USER_REPOSITORY,
+      useClass: databaseEnabled ? TypeOrmUserRepository : InMemoryUserRepository
+    },
+    {
       provide: ROLE_REPOSITORY,
       useClass: databaseEnabled ? TypeOrmRoleRepository : InMemoryRoleRepository
     },
@@ -86,6 +104,8 @@ const databaseEntities = [
     ADMIN_REPOSITORY,
     ADMIN_TRANSACTION_RUNNER,
     AUTH_SESSION_REPOSITORY,
+    USER_AUTH_SESSION_REPOSITORY,
+    USER_REPOSITORY,
     ROLE_REPOSITORY,
     PERMISSION_REPOSITORY,
     MENU_REPOSITORY,
