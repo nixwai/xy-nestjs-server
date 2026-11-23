@@ -15,7 +15,7 @@ export const REGISTERED_MENUS: readonly RegisteredMenu[] = [
     menuKey: 'operation',
     title: '运营管理',
     path: '/operation-management',
-    order: 3,
+    order: 1,
     permissionCode: null,
     isRootOnly: false,
     children: [
@@ -33,10 +33,18 @@ export const REGISTERED_MENUS: readonly RegisteredMenu[] = [
     menuKey: 'system',
     title: '系统管理',
     path: '/system-management',
-    order: 2,
+    order: 1,
     permissionCode: null,
     isRootOnly: false,
     children: [
+      {
+        menuKey: 'system-user',
+        title: '用户管理',
+        path: '/system-management/user',
+        order: 1,
+        permissionCode: PermissionCode.USER_READ,
+        isRootOnly: false
+      },
       {
         menuKey: 'system-admin',
         title: '系统管理员',
@@ -52,23 +60,7 @@ export const REGISTERED_MENUS: readonly RegisteredMenu[] = [
         order: 1,
         permissionCode: null,
         isRootOnly: true
-      },
-      {
-        menuKey: 'system-user',
-        title: '用户管理',
-        path: '/system-management/user',
-        order: 2,
-        permissionCode: PermissionCode.USER_READ,
-        isRootOnly: false
-      },
-      {
-        menuKey: 'system-audit',
-        title: '审计日志',
-        path: '/system-management/audit',
-        order: 1,
-        permissionCode: PermissionCode.AUDIT_READ,
-        isRootOnly: false
-      },
+      }, 
       {
         menuKey: 'system-menu',
         title: '菜单管理',
@@ -84,7 +76,15 @@ export const REGISTERED_MENUS: readonly RegisteredMenu[] = [
         order: 1,
         permissionCode: null,
         isRootOnly: true
-      }
+      },
+       {
+        menuKey: 'system-audit',
+        title: '审计日志',
+        path: '/system-management/audit',
+        order: 1,
+        permissionCode: PermissionCode.AUDIT_READ,
+        isRootOnly: false
+      },
     ]
   }
 ];
