@@ -1,6 +1,6 @@
 import { DomainConflictError, DomainNotFoundError } from '#/common/errors/index.js';
+import { AdminListQueryDto } from '../dto/index.js';
 import type { AdminRepository } from './admin-repository.port.js';
-import { PageQueryDto } from '#/common/dto/index.js';
 import type { PageResult } from '#/common/types/index.js';
 import type { AdminCreateInput, AdminRecord, AdminUpdateInput } from '../types/admin.types.js';
 /** 在单元测试中保存管理员账户和角色关系。 */
@@ -23,9 +23,18 @@ export class InMemoryAdminRepository implements AdminRepository {
   }
 
   /** 查询记录列表 */
-  async list(query: PageQueryDto = new PageQueryDto()): Promise<PageResult<AdminRecord>> {
+  async list(query: AdminListQueryDto = new AdminListQueryDto()): Promise<PageResult<AdminRecord>> {
+    const id = query.id?.trim().toLocaleLowerCase();
+    const username = query.username?.trim().toLocaleLowerCase();
     const items = [...this.admins.values()]
       .filter(item => item.deletedAt === null)
+      .filter(item => {
+        if (id && !item.id.toLocaleLowerCase().includes(id)) return false;
+        if (username && !item.username.toLocaleLowerCase().includes(username)) return false;
+        if (query.isActive !== undefined && item.isActive !== query.isActive) return false;
+        if (query.isRoot !== undefined && item.isRoot !== query.isRoot) return false;
+        return true;
+      })
       .sort((left, right) => Number(BigInt(right.id) - BigInt(left.id)));
     const total = items.length;
     const totalPages = total === 0 ? 0 : Math.ceil(total / query.pageSize);

@@ -30,7 +30,10 @@ export class TypeOrmUserRepository implements UserRepository {
     page: number;
     pageSize: number;
     skip: number;
-    keyword?: string;
+    id?: string;
+    openId?: string;
+    unionId?: string;
+    nickname?: string;
     isActive?: boolean;
   }): Promise<PageResult<UserRecord>> {
     const page = Number(query.page) || 1;
@@ -43,13 +46,14 @@ export class TypeOrmUserRepository implements UserRepository {
       .skip(skip)
       .take(pageSize);
 
-    const keyword = query.keyword?.trim();
-    if (keyword) {
-      builder.andWhere(
-        '(user.id LIKE :keyword OR user.openId LIKE :keyword OR user.unionId LIKE :keyword OR user.nickname LIKE :keyword)',
-        { keyword: `%${keyword}%` }
-      );
-    }
+    const id = query.id?.trim();
+    const openId = query.openId?.trim();
+    const unionId = query.unionId?.trim();
+    const nickname = query.nickname?.trim();
+    if (id) builder.andWhere('user.id LIKE :id', { id: `%${id}%` });
+    if (openId) builder.andWhere('user.openId LIKE :openId', { openId: `%${openId}%` });
+    if (unionId) builder.andWhere('user.unionId LIKE :unionId', { unionId: `%${unionId}%` });
+    if (nickname) builder.andWhere('user.nickname LIKE :nickname', { nickname: `%${nickname}%` });
     if (query.isActive !== undefined) {
       builder.andWhere('user.isActive = :isActive', { isActive: query.isActive });
     }

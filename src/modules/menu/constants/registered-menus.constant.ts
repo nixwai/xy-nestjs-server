@@ -60,7 +60,7 @@ export const REGISTERED_MENUS: readonly RegisteredMenu[] = [
         order: 1,
         permissionCode: null,
         isRootOnly: true
-      }, 
+      },
       {
         menuKey: 'system-menu',
         title: '菜单管理',
@@ -77,14 +77,14 @@ export const REGISTERED_MENUS: readonly RegisteredMenu[] = [
         permissionCode: null,
         isRootOnly: true
       },
-       {
+      {
         menuKey: 'system-audit',
         title: '审计日志',
         path: '/system-management/audit',
         order: 1,
         permissionCode: PermissionCode.AUDIT_READ,
         isRootOnly: false
-      },
+      }
     ]
   }
 ];

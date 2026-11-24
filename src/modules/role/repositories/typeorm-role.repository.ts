@@ -6,7 +6,7 @@ import { DomainConflictError, DomainNotFoundError } from '#/common/errors/index.
 import { RolePermissionAssignmentEntity } from '../entities/role-permission-assignment.entity.js';
 import { AdminRoleAssignmentEntity } from '#/modules/admin/entities/admin-role-assignment.entity.js';
 import { RoleEntity } from '../entities/role.entity.js';
-import { PageQueryDto } from '#/common/dto/index.js';
+import { RoleListQueryDto } from '../dto/index.js';
 import type { PageResult } from '#/common/types/index.js';
 import type { RoleCreateInput, RoleRecord, RoleUpdateInput } from '../types/role.types.js';
 import type { RoleRepository } from './role-repository.port.js';
@@ -24,12 +24,24 @@ export class TypeOrmRoleRepository implements RoleRepository {
   ) {}
 
   /** 查询记录列表 */
-  async list(query: PageQueryDto = new PageQueryDto()): Promise<PageResult<RoleRecord>> {
-    const [items, total] = await this.roles.findAndCount({
-      order: { createdAt: 'DESC', id: 'DESC' },
-      skip: query.skip,
-      take: query.pageSize
-    });
+  async list(query: RoleListQueryDto = new RoleListQueryDto()): Promise<PageResult<RoleRecord>> {
+    const builder = this.roles
+      .createQueryBuilder('role')
+      .orderBy('role.createdAt', 'DESC')
+      .addOrderBy('role.id', 'DESC')
+      .skip(query.skip)
+      .take(query.pageSize);
+    const code = query.code?.trim();
+    const name = query.name?.trim();
+    if (code) builder.andWhere('role.code LIKE :code', { code: `%${code}%` });
+    if (name) builder.andWhere('role.name LIKE :name', { name: `%${name}%` });
+    if (query.isActive !== undefined) {
+      builder.andWhere('role.isActive = :isActive', { isActive: query.isActive });
+    }
+    if (query.isSystem !== undefined) {
+      builder.andWhere('role.isSystem = :isSystem', { isSystem: query.isSystem });
+    }
+    const [items, total] = await builder.getManyAndCount();
     const pageItems = await this.toRecords(items);
     const totalPages = total === 0 ? 0 : Math.ceil(total / query.pageSize);
     return {
@@ -51,7 +63,7 @@ export class TypeOrmRoleRepository implements RoleRepository {
 
   /** 按标识批量查询记录 */
   async findByIds(ids: string[]): Promise<RoleRecord[]> {
-    if (ids.length === 0) {
+    if (!ids.length) {
       return [];
     }
     const items = await this.roles.createQueryBuilder('role').where('role.id IN (:...ids)', { ids }).getMany();
@@ -117,7 +129,7 @@ export class TypeOrmRoleRepository implements RoleRepository {
   async bindPermissions(roleId: string, permissionIds: string[]): Promise<void> {
     await this.findEntityOrThrow(roleId);
     const uniquePermissionIds = [...new Set(permissionIds)];
-    if (uniquePermissionIds.length === 0) return;
+    if (!uniquePermissionIds.length) return;
 
     const existingRelations = await this.rolePermissions.find({ where: { roleId } });
     const existing = new Set(existingRelations.map(item => String(item.permissionId)));
@@ -141,7 +153,7 @@ export class TypeOrmRoleRepository implements RoleRepository {
   async unbindPermissions(roleId: string, permissionIds: string[]): Promise<void> {
     await this.findEntityOrThrow(roleId);
     const uniquePermissionIds = [...new Set(permissionIds)];
-    if (uniquePermissionIds.length === 0) return;
+    if (!uniquePermissionIds.length) return;
     await this.rolePermissions.delete({ roleId, permissionId: In(uniquePermissionIds) });
   }
 
@@ -156,7 +168,7 @@ export class TypeOrmRoleRepository implements RoleRepository {
 
   /** toRecords。 */
   private async toRecords(items: RoleEntity[]): Promise<RoleRecord[]> {
-    if (items.length === 0) {
+    if (!items.length) {
       return [];
     }
     const relations = await this.rolePermissions.find({

@@ -52,7 +52,7 @@ export function collectDefinitionChanges(
     ...(current.isAssignable === expected.isAssignable ? {} : { isAssignable: expected.isAssignable }),
     ...(current.isProtected === expected.isProtected ? {} : { isProtected: expected.isProtected })
   };
-  return Object.keys(patch).length === 0 ? null : patch;
+  return !Object.keys(patch).length ? null : patch;
 }
 
 /**

@@ -19,7 +19,7 @@ export function buildMenuTree(items: MenuListItem[], isRoot: boolean, permission
       .sort((left, right) => left.order - right.order || Number(left.id) - Number(right.id))
       .flatMap(item => {
         const children = build(item.menuKey);
-        if (directoryKeys.has(item.menuKey) && children.length === 0) return [];
+        if (directoryKeys.has(item.menuKey) && !children.length) return [];
         return [
           {
             id: item.id,

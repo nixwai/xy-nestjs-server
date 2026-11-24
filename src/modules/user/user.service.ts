@@ -81,7 +81,7 @@ export class UserService {
       avatarUrl: body.avatarUrl === undefined ? undefined : this.normalizeNullableText(body.avatarUrl),
       isActive: body.isActive
     });
-    if (Object.keys(input).length === 0) {
+    if (!Object.keys(input).length) {
       throw new BadRequestException('至少需要更新一个用户字段');
     }
 

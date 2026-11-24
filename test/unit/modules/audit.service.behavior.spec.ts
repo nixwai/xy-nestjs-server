@@ -2,6 +2,19 @@ import { describe, expect, it } from 'vitest';
 import { AuditService } from '#/modules/audit/audit.service.js';
 
 describe('审计日志游标查询', () => {
+  it('返回与审计标签注册表一致的筛选项', () => {
+    const service = new AuditService();
+
+    expect(service.getOptions()).toEqual({
+      actions: expect.arrayContaining([{ value: 'admin.create', label: '创建管理员' }]),
+      resources: expect.arrayContaining([{ value: 'admin', label: '管理员' }]),
+      results: [
+        { value: 'succeeded', label: '成功' },
+        { value: 'failed', label: '失败' }
+      ]
+    });
+  });
+
   it('记录成功和失败操作，并按游标分页返回稳定响应', async () => {
     const service = new AuditService();
     await service.record({ actorAdminId: 'admin-1', action: 'admin.create', resourceType: 'admin', targetId: '1' });

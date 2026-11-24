@@ -19,6 +19,19 @@ export interface AuditRecordInput {
   succeeded?: boolean;
 }
 
+/** 审计筛选项。 */
+export interface AuditOption {
+  label: string;
+  value: string;
+}
+
+/** 审计筛选项响应。 */
+export interface AuditOptionsResponse {
+  actions: AuditOption[];
+  resources: AuditOption[];
+  results: AuditOption[];
+}
+
 /** 审计记录游标分页的定位信息。 */
 export interface AuditLogCursor {
   /** 游标指向的创建时间。 */

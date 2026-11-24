@@ -3,7 +3,7 @@ import { ROLE_REPOSITORY } from './repositories/role-repository.port.js';
 import type { RoleRepository } from './repositories/role-repository.port.js';
 import { PermissionService } from '../permission/permission.service.js';
 import { AuditService } from '../audit/audit.service.js';
-import { PageQueryDto } from '#/common/dto/index.js';
+import { RoleListQueryDto } from './dto/index.js';
 import type { PageResult } from '#/common/types/index.js';
 import type { RoleCreateInput, RoleRecord, RoleUpdateInput } from './types/role.types.js';
 /** 角色及角色授权关系应用服务。 */
@@ -17,7 +17,7 @@ export class RoleService {
   ) {}
 
   /** 查询角色。 */
-  listRoles(query: PageQueryDto = new PageQueryDto()): Promise<PageResult<RoleRecord>> {
+  listRoles(query: RoleListQueryDto = new RoleListQueryDto()): Promise<PageResult<RoleRecord>> {
     return this.repository.list(query);
   }
 
@@ -77,7 +77,7 @@ export class RoleService {
   async bindPermissions(actorId: string, roleId: string, permissionIds: string[]): Promise<void> {
     await this.ensureRoleExists(roleId);
     const uniquePermissionIds = [...new Set(permissionIds)];
-    if (uniquePermissionIds.length === 0) return;
+    if (!uniquePermissionIds.length) return;
 
     const permissions = await this.permissionService.findByIds(uniquePermissionIds);
     const permissionMap = new Map(permissions.map(permission => [permission.id, permission]));
@@ -105,7 +105,7 @@ export class RoleService {
   async unbindPermissions(actorId: string, roleId: string, permissionIds: string[]): Promise<void> {
     await this.ensureRoleExists(roleId);
     const uniquePermissionIds = [...new Set(permissionIds)];
-    if (uniquePermissionIds.length === 0) return;
+    if (!uniquePermissionIds.length) return;
 
     await this.repository.unbindPermissions(roleId, uniquePermissionIds);
     await this.auditService.record({

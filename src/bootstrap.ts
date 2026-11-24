@@ -16,7 +16,7 @@ import type { AppConfig, CorsConfig, SwaggerConfig } from './config/config.types
  * @returns 有来源时返回副本，没有来源时禁用 CORS。
  */
 export function resolveCorsOrigin(origins: readonly string[]): false | string[] {
-  if (origins.length === 0) {
+  if (!origins.length) {
     return false;
   }
 

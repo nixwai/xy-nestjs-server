@@ -1,18 +1,18 @@
 import { Body, Controller, Get, Inject, Post, Query } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ApiCommonResponses, ApiPageQuery, ApiOkResponseData, ApiOkResponseEmpty } from '#/common/decorators/index.js';
 import { CurrentAdmin } from '../auth/admin/decorators/index.js';
 import type { AdminJwtPayload } from '../auth/admin/types/admin-jwt.types.js';
 import { RootOnly } from '../authorization/decorators/index.js';
 import {
   RoleCreateRequestDto,
+  RoleListQueryDto,
   RoleListResponseDto,
   RolePermissionBindingRequestDto,
   RoleResponseDto,
   RoleSoftDeleteRequestDto,
   RoleUpdateRequestDto
 } from './dto/index.js';
-import { PageQueryDto } from '#/common/dto/index.js';
 import { RoleService } from './role.service.js';
 /** 提供角色和角色权限关系管理接口。 */
 @ApiTags('角色管理')
@@ -26,6 +26,10 @@ export class RoleController {
   /** 查询未软删除的角色列表。 */
   @Get('list')
   @ApiPageQuery()
+  @ApiQuery({ name: 'code', required: false, type: String, description: '按角色编码搜索。' })
+  @ApiQuery({ name: 'name', required: false, type: String, description: '按角色名称搜索。' })
+  @ApiQuery({ name: 'isActive', required: false, type: Boolean, description: '是否只返回启用或停用角色。' })
+  @ApiQuery({ name: 'isSystem', required: false, type: Boolean, description: '是否只返回系统角色。' })
   @ApiOperation({
     summary: '查询角色列表',
     description: '返回未软删除的角色分页列表及其权限 ID，按创建时间和 ID 倒序排列。'
@@ -33,7 +37,7 @@ export class RoleController {
   @ApiOkResponseData(RoleListResponseDto, {
     description: '角色分页列表和分页元数据。'
   })
-  async list(@Query() query: PageQueryDto = new PageQueryDto()) {
+  async list(@Query() query: RoleListQueryDto = new RoleListQueryDto()) {
     return this.roleService.listRoles(query);
   }
 

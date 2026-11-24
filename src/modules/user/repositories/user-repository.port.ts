@@ -12,7 +12,9 @@ export interface UserRepository {
   /** 按微信 openId 查询用户。 */
   findByOpenId(openId: string): Promise<UserRecord | null>;
   /** 按条件分页查询用户。 */
-  list(query: PageQueryDto & { keyword?: string; isActive?: boolean }): Promise<PageResult<UserRecord>>;
+  list(
+    query: PageQueryDto & { id?: string; openId?: string; unionId?: string; nickname?: string; isActive?: boolean }
+  ): Promise<PageResult<UserRecord>>;
   /** 创建用户，可不绑定外部登录身份。
    */
   create(input: UserCreateInput): Promise<UserRecord>;
