@@ -7,7 +7,7 @@ import { AdminEntity } from '../entities/admin.entity.js';
 import { AdminRoleAssignmentEntity } from '../entities/admin-role-assignment.entity.js';
 import { AdminSessionEntity } from '../entities/admin-session.entity.js';
 import type { AdminRepository } from './admin-repository.port.js';
-import { PageQueryDto } from '#/common/dto/index.js';
+import { AdminListQueryDto } from '../dto/index.js';
 import type { PageResult } from '#/common/types/index.js';
 import type { AdminCreateInput, AdminRecord, AdminUpdateInput } from '../types/admin.types.js';
 /** 使用 TypeORM 保存管理员账户和角色关系。 */
@@ -40,12 +40,24 @@ export class TypeOrmAdminRepository implements AdminRepository {
   }
 
   /** 查询记录列表 */
-  async list(query: PageQueryDto = new PageQueryDto()): Promise<PageResult<AdminRecord>> {
-    const [items, total] = await this.admins.findAndCount({
-      order: { createdAt: 'DESC', id: 'DESC' },
-      skip: query.skip,
-      take: query.pageSize
-    });
+  async list(query: AdminListQueryDto = new AdminListQueryDto()): Promise<PageResult<AdminRecord>> {
+    const builder = this.admins
+      .createQueryBuilder('admin')
+      .orderBy('admin.createdAt', 'DESC')
+      .addOrderBy('admin.id', 'DESC')
+      .skip(query.skip)
+      .take(query.pageSize);
+    const id = query.id?.trim();
+    const username = query.username?.trim();
+    if (id) builder.andWhere('admin.id LIKE :id', { id: `%${id}%` });
+    if (username) builder.andWhere('admin.username LIKE :username', { username: `%${username}%` });
+    if (query.isActive !== undefined) {
+      builder.andWhere('admin.isActive = :isActive', { isActive: query.isActive });
+    }
+    if (query.isRoot !== undefined) {
+      builder.andWhere('admin.isRoot = :isRoot', { isRoot: query.isRoot });
+    }
+    const [items, total] = await builder.getManyAndCount();
     const totalPages = total === 0 ? 0 : Math.ceil(total / query.pageSize);
     return {
       items: items.map(item => this.toRecord(item)),
@@ -121,7 +133,7 @@ export class TypeOrmAdminRepository implements AdminRepository {
   /** listRoleIdsByAdminIds。 */
   async listRoleIdsByAdminIds(adminIds: string[]): Promise<Map<string, string[]>> {
     const result = new Map<string, string[]>(adminIds.map(id => [id, []]));
-    if (adminIds.length === 0) {
+    if (!adminIds.length) {
       return result;
     }
     const items = await this.adminRoles

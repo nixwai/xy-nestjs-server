@@ -71,7 +71,7 @@ export class PasswordTransportService {
         encrypted
       );
       const decoded = plaintext.toString('utf8');
-      if (decoded.length === 0) {
+      if (!decoded.length) {
         throw new Error('empty plaintext');
       }
 

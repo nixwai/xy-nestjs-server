@@ -72,7 +72,7 @@ export class UniWechatLoginProvider implements WechatLoginProvider {
     if (!isWechatSessionResponse(payload) || (payload.errcode !== undefined && payload.errcode !== 0)) {
       throw new UnauthorizedException('微信登录凭证无效');
     }
-    if (typeof payload.openid !== 'string' || payload.openid.length === 0) {
+    if (typeof payload.openid !== 'string' || !payload.openid.length) {
       throw new BadGatewayException('微信登录服务返回数据无效');
     }
     return {

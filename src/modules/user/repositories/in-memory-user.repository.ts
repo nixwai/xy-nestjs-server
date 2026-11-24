@@ -25,21 +25,28 @@ export class InMemoryUserRepository implements UserRepository {
 
   /** 按条件分页查询用户。 */
   async list(
-    query: PageQueryDto & { keyword?: string; isActive?: boolean } = new PageQueryDto()
+    query: PageQueryDto & {
+      id?: string;
+      openId?: string;
+      unionId?: string;
+      nickname?: string;
+      isActive?: boolean;
+    } = new PageQueryDto()
   ): Promise<PageResult<UserRecord>> {
     const page = Number(query.page) || 1;
     const pageSize = Number(query.pageSize) || 20;
     const skip = (page - 1) * pageSize;
-    const keyword = query.keyword?.trim().toLocaleLowerCase();
+    const id = query.id?.trim().toLocaleLowerCase();
+    const openId = query.openId?.trim().toLocaleLowerCase();
+    const unionId = query.unionId?.trim().toLocaleLowerCase();
+    const nickname = query.nickname?.trim().toLocaleLowerCase();
     const items = [...this.users.values()]
       .filter(item => item.deletedAt === null)
       .filter(item => query.isActive === undefined || item.isActive === query.isActive)
-      .filter(item => {
-        if (!keyword) return true;
-        return [item.id, item.openId, item.unionId, item.nickname]
-          .filter((value): value is string => Boolean(value))
-          .some(value => value.toLocaleLowerCase().includes(keyword));
-      })
+      .filter(item => !id || item.id.toLocaleLowerCase().includes(id))
+      .filter(item => !openId || item.openId?.toLocaleLowerCase().includes(openId) === true)
+      .filter(item => !unionId || item.unionId?.toLocaleLowerCase().includes(unionId) === true)
+      .filter(item => !nickname || item.nickname?.toLocaleLowerCase().includes(nickname) === true)
       .sort((left, right) => Number(BigInt(right.id) - BigInt(left.id)));
     const total = items.length;
     const totalPages = total === 0 ? 0 : Math.ceil(total / pageSize);

@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Inject, Post, Query } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ApiCommonResponses, ApiPageQuery, ApiOkResponseData, ApiOkResponseEmpty } from '#/common/decorators/index.js';
 import { CurrentAdmin } from '../auth/admin/decorators/index.js';
 import { AdminOnly } from '../authorization/decorators/index.js';
@@ -51,6 +51,10 @@ export class AdminController {
   /** 查询管理员列表。 */
   @Get('admin/list')
   @ApiPageQuery()
+  @ApiQuery({ name: 'id', required: false, type: String, description: '按管理员 ID 搜索。' })
+  @ApiQuery({ name: 'username', required: false, type: String, description: '按登录用户名搜索。' })
+  @ApiQuery({ name: 'isActive', required: false, type: Boolean, description: '是否只返回启用或停用管理员。' })
+  @ApiQuery({ name: 'isRoot', required: false, type: Boolean, description: '是否只返回根管理员。' })
   @ApiOperation({
     summary: '查询管理员列表',
     description: '返回未软删除的管理员分页列表，按创建时间和 ID 倒序排列。'

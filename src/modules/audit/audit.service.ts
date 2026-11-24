@@ -1,11 +1,16 @@
 import { BadRequestException, Inject, Injectable, Optional } from '@nestjs/common';
 import { DataSource } from 'typeorm';
+import type { SelectQueryBuilder } from 'typeorm';
 import { decodeCursor, encodeCursor } from '#/common/utils/index.js';
 import type { CursorPageResult } from '#/common/types/index.js';
-import { CursorPageQueryDto } from '#/common/dto/index.js';
-import type { AuditLogCursor, AuditLogResponse, AuditRecordInput } from './types/audit.types.js';
-import { getAuditActionLabel, getAuditResourceLabel } from './constants/audit-labels.constant.js';
-import type { AuditLogListQueryDto } from './dto/index.js';
+import type { AuditLogCursor, AuditLogResponse, AuditOptionsResponse, AuditRecordInput } from './types/audit.types.js';
+import {
+  AUDIT_ACTION_LABELS,
+  AUDIT_RESOURCE_LABELS,
+  getAuditActionLabel,
+  getAuditResourceLabel
+} from './constants/audit-labels.constant.js';
+import { AuditLogListQueryDto } from './dto/index.js';
 import { AuditLogEntity } from './entities/audit-log.entity.js';
 /** 记录和查询管理员操作审计。 */
 @Injectable()
@@ -14,6 +19,18 @@ export class AuditService {
   private readonly memory: AuditLogEntity[] = [];
   /** 创建当前实例。 */
   constructor(@Optional() @Inject(DataSource) private readonly dataSource?: DataSource) {}
+
+  /** 返回审计查询使用的动作、资源和结果选项。 */
+  getOptions(): AuditOptionsResponse {
+    return {
+      actions: Object.entries(AUDIT_ACTION_LABELS).map(([value, label]) => ({ value, label })),
+      resources: Object.entries(AUDIT_RESOURCE_LABELS).map(([value, label]) => ({ value, label })),
+      results: [
+        { value: 'succeeded', label: '成功' },
+        { value: 'failed', label: '失败' }
+      ]
+    };
+  }
 
   /** 写入不包含敏感字段的审计记录。 */
   async record(input: AuditRecordInput): Promise<void> {
@@ -39,7 +56,7 @@ export class AuditService {
   }
 
   /** 按创建时间和 ID 倒序查询审计记录。 */
-  async list(query: AuditLogListQueryDto = new CursorPageQueryDto()): Promise<CursorPageResult<AuditLogResponse>> {
+  async list(query: AuditLogListQueryDto = new AuditLogListQueryDto()): Promise<CursorPageResult<AuditLogResponse>> {
     const cursor = query.cursor ? this.parseCursor(query.cursor) : null;
     if (this.dataSource?.isInitialized) {
       const repository = this.dataSource.getRepository(AuditLogEntity);
@@ -51,11 +68,13 @@ export class AuditService {
       if (cursor) {
         builder.where('(audit.createdAt < :createdAt OR (audit.createdAt = :createdAt AND audit.id < :id))', cursor);
       }
+      this.applyFilters(builder, query);
       const records = await builder.getMany();
       return this.toCursorResult(records, query.limit);
     }
 
     const records = [...this.memory]
+      .filter(item => this.matchesFilters(item, query))
       .filter(item => this.isAfterCursor(item, cursor))
       .sort(
         (left, right) =>
@@ -63,6 +82,40 @@ export class AuditService {
       )
       .slice(0, query.limit + 1);
     return this.toCursorResult(records, query.limit);
+  }
+
+  /** 将审计查询条件添加到数据库查询。 */
+  private applyFilters(builder: SelectQueryBuilder<AuditLogEntity>, query: AuditLogListQueryDto): void {
+    let hasCondition = Boolean(query.cursor);
+    const addCondition = (condition: string, parameters: Record<string, unknown>) => {
+      if (hasCondition) builder.andWhere(condition, parameters);
+      else builder.where(condition, parameters);
+      hasCondition = true;
+    };
+    const actorAdminId = query.actorAdminId?.trim();
+    const targetId = query.targetId?.trim();
+    if (actorAdminId) addCondition('audit.actorAdminId LIKE :actorAdminId', { actorAdminId: `%${actorAdminId}%` });
+    if (targetId) addCondition('audit.targetId LIKE :targetId', { targetId: `%${targetId}%` });
+    if (query.action) addCondition('audit.action = :action', { action: query.action });
+    if (query.resourceType) addCondition('audit.resourceType = :resourceType', { resourceType: query.resourceType });
+    if (query.succeeded !== undefined) addCondition('audit.succeeded = :succeeded', { succeeded: query.succeeded });
+    if (query.createdFrom)
+      addCondition('audit.createdAt >= :createdFrom', { createdFrom: new Date(query.createdFrom) });
+    if (query.createdTo) addCondition('audit.createdAt <= :createdTo', { createdTo: new Date(query.createdTo) });
+  }
+
+  /** 判断内存审计记录是否满足查询条件。 */
+  private matchesFilters(item: AuditLogEntity, query: AuditLogListQueryDto): boolean {
+    const actorAdminId = query.actorAdminId?.trim().toLocaleLowerCase();
+    const targetId = query.targetId?.trim().toLocaleLowerCase();
+    if (actorAdminId && !item.actorAdminId?.toLocaleLowerCase().includes(actorAdminId)) return false;
+    if (targetId && !item.targetId?.toLocaleLowerCase().includes(targetId)) return false;
+    if (query.action && item.action !== query.action) return false;
+    if (query.resourceType && item.resourceType !== query.resourceType) return false;
+    if (query.succeeded !== undefined && item.succeeded !== query.succeeded) return false;
+    if (query.createdFrom && item.createdAt < new Date(query.createdFrom)) return false;
+    if (query.createdTo && item.createdAt > new Date(query.createdTo)) return false;
+    return true;
   }
 
   /** parseCursor。 */

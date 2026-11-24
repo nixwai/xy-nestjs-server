@@ -112,7 +112,7 @@ export class TypeOrmAuthSessionRepository implements AuthSessionRepository {
       .limit(limit)
       .getRawMany<{ sessionFamilyId: string }>();
     const familyIds = families.map(item => item.sessionFamilyId).filter(Boolean);
-    if (familyIds.length === 0) {
+    if (!familyIds.length) {
       return 0;
     }
     const result = await this.sessions

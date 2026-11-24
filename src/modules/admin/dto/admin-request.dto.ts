@@ -1,4 +1,5 @@
 import { createValidationMessages } from '#/common/constants/index.js';
+import { Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PageQueryDto } from '#/common/dto/index.js';
 import { IsBase64, IsBoolean, IsNotEmpty, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
@@ -12,7 +13,43 @@ const roleIdValidation = createValidationMessages('角色 ID');
 const isActiveValidation = createValidationMessages('启用状态');
 const isRootValidation = createValidationMessages('根管理员标识');
 /** 管理员列表分页查询参数。 */
-export class AdminListQueryDto extends PageQueryDto {}
+export class AdminListQueryDto extends PageQueryDto {
+  /** 按管理员 ID 搜索。 */
+  @ApiPropertyOptional({ type: String, maxLength: 64, description: '按管理员 ID 搜索。' })
+  @IsOptional()
+  @IsString({ message: idValidation.isString })
+  @MaxLength(64, { message: idValidation.maxLength(64) })
+  id?: string;
+
+  /** 按登录用户名搜索。 */
+  @ApiPropertyOptional({ type: String, maxLength: 64, description: '按登录用户名搜索。' })
+  @IsOptional()
+  @IsString({ message: usernameValidation.isString })
+  @MaxLength(64, { message: usernameValidation.maxLength(64) })
+  username?: string;
+
+  /** 按启用状态筛选。 */
+  @ApiPropertyOptional({ type: Boolean, description: '是否只返回启用或停用管理员。' })
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return value;
+  })
+  @IsBoolean({ message: isActiveValidation.isBoolean })
+  isActive?: boolean;
+
+  /** 按管理员类型筛选。 */
+  @ApiPropertyOptional({ type: Boolean, description: '是否只返回根管理员。' })
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return value;
+  })
+  @IsBoolean({ message: isRootValidation.isBoolean })
+  isRoot?: boolean;
+}
 
 /** 创建管理员请求。 */
 export class AdminCreateRequestDto {

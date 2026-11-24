@@ -1,4 +1,4 @@
-import type { PageQueryDto } from '#/common/dto/index.js';
+import type { AdminListQueryDto } from '../dto/index.js';
 import type { PageResult } from '#/common/types/index.js';
 import type { AdminCreateInput, AdminRecord, AdminUpdateInput } from '../types/admin.types.js';
 /** 管理员仓储注入令牌。 */
@@ -10,7 +10,7 @@ export interface AdminRepository {
   /** 按标识查询记录 */
   findById(id: string): Promise<AdminRecord | null>;
   /** 查询记录列表 */
-  list(query: PageQueryDto): Promise<PageResult<AdminRecord>>;
+  list(query: AdminListQueryDto): Promise<PageResult<AdminRecord>>;
   /** 创建记录 */
   create(input: AdminCreateInput): Promise<AdminRecord>;
   /** 更新记录 */

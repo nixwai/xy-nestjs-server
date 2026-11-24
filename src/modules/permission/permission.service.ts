@@ -107,7 +107,7 @@ export class PermissionService implements OnModuleInit {
    */
   private warnUnregisteredPermissions(persistedCodes: string[]): void {
     const unregisteredCodes = persistedCodes.filter(code => !this.registeredCodes.has(code));
-    if (unregisteredCodes.length === 0) return;
+    if (!unregisteredCodes.length) return;
     this.logger.warn(`注册表之外的历史权限: ${unregisteredCodes.join(', ')}，启动同步不会删除，需通过 Migration 清理`);
   }
 }

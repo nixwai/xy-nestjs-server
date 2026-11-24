@@ -36,7 +36,7 @@ export class MenuService implements OnModuleInit {
   async update(actorId: string, id: string, input: MenuUpdateInput): Promise<MenuListItem> {
     const current = await this.repo.findById(id);
     if (!current) throw new NotFoundException('菜单不存在');
-    if (Object.keys(input).length === 0) throw new BadRequestException('至少需要更新一个菜单展示字段');
+    if (!Object.keys(input).length) throw new BadRequestException('至少需要更新一个菜单展示字段');
     const item = await this.repo.update(id, input);
     await this.audit.record({
       actorAdminId: actorId,

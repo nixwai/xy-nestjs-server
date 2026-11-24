@@ -135,7 +135,7 @@ export class GlobalExceptionFilter implements ExceptionFilter<unknown> {
   /** 从异常响应体中提取并安全转换客户端可见消息。 */
   private getClientMessage(body: unknown, meta: HttpStatusMeta): string {
     const messages = this.extractMessages(body);
-    if (messages.length === 0) {
+    if (!messages.length) {
       return meta.message;
     }
     return messages.map(message => this.translateClientMessage(message, meta)).join('; ');

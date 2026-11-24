@@ -1,5 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { createValidationMessages } from '#/common/constants/index.js';
+import { PageQueryDto } from '#/common/dto/index.js';
 import {
   ArrayNotEmpty,
   ArrayUnique,
@@ -19,6 +21,46 @@ const idValidation = createValidationMessages('ID');
 const isActiveValidation = createValidationMessages('启用状态');
 const roleIdValidation = createValidationMessages('角色 ID');
 const permissionIdValidation = createValidationMessages('权限 ID');
+const isSystemValidation = createValidationMessages('系统角色标识');
+/** 角色列表分页查询参数。 */
+export class RoleListQueryDto extends PageQueryDto {
+  /** 按角色编码搜索。 */
+  @ApiPropertyOptional({ type: String, maxLength: 64, description: '按角色编码搜索。' })
+  @IsOptional()
+  @IsString({ message: codeValidation.isString })
+  @MaxLength(64, { message: codeValidation.maxLength(64) })
+  code?: string;
+
+  /** 按角色名称搜索。 */
+  @ApiPropertyOptional({ type: String, maxLength: 128, description: '按角色名称搜索。' })
+  @IsOptional()
+  @IsString({ message: nameValidation.isString })
+  @MaxLength(128, { message: nameValidation.maxLength(128) })
+  name?: string;
+
+  /** 按启用状态筛选。 */
+  @ApiPropertyOptional({ type: Boolean, description: '是否只返回启用或停用角色。' })
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return value;
+  })
+  @IsBoolean({ message: isActiveValidation.isBoolean })
+  isActive?: boolean;
+
+  /** 按系统角色或自定义角色筛选。 */
+  @ApiPropertyOptional({ type: Boolean, description: '是否只返回系统角色。' })
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return value;
+  })
+  @IsBoolean({ message: isSystemValidation.isBoolean })
+  isSystem?: boolean;
+}
+
 /** 创建角色请求。 */
 export class RoleCreateRequestDto {
   /** 业务编码。 */

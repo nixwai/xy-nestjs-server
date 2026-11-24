@@ -107,6 +107,30 @@ describe('管理员授权与管理功能', () => {
     expect(denied.body).toMatchObject({ code: 40300, data: null });
   });
 
+  it('根管理员可以读取审计筛选项，未授权管理员不能读取', async () => {
+    const allowed = await request(app.getHttpServer())
+      .get('/api/audit/options')
+      .set('Authorization', `Bearer ${rootToken}`)
+      .expect(200);
+    expect(allowed.body).toMatchObject({
+      code: 0,
+      data: {
+        actions: expect.arrayContaining([{ value: 'admin.create', label: '创建管理员' }]),
+        resources: expect.arrayContaining([{ value: 'admin', label: '管理员' }]),
+        results: [
+          { value: 'succeeded', label: '成功' },
+          { value: 'failed', label: '失败' }
+        ]
+      }
+    });
+
+    const denied = await request(app.getHttpServer())
+      .get('/api/audit/options')
+      .set('Authorization', `Bearer ${operatorToken}`)
+      .expect(200);
+    expect(denied.body).toMatchObject({ code: 40300, data: null });
+  });
+
   it('动态权限允许访问对应资源，禁用权限后立即失效', async () => {
     const allowed = await request(app.getHttpServer())
       .get('/api/asset/folder/tree')

@@ -30,7 +30,7 @@ export class TypeOrmPermissionRepository implements PermissionRepository {
 
   /** 按标识批量查询记录 */
   async findByIds(ids: string[]): Promise<PermissionRecord[]> {
-    if (ids.length === 0) return [];
+    if (!ids.length) return [];
     const items = await this.permissions
       .createQueryBuilder('permission')
       .where('permission.id IN (:...ids)', { ids })

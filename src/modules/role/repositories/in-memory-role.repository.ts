@@ -1,5 +1,5 @@
 import { DomainConflictError, DomainNotFoundError } from '#/common/errors/index.js';
-import { PageQueryDto } from '#/common/dto/index.js';
+import { RoleListQueryDto } from '../dto/index.js';
 import type { PageResult } from '#/common/types/index.js';
 import type { RoleCreateInput, RoleRecord, RoleUpdateInput } from '../types/role.types.js';
 import type { RoleRepository } from './role-repository.port.js';
@@ -12,9 +12,18 @@ export class InMemoryRoleRepository implements RoleRepository {
   /** 下一个可分配的内存记录标识。 */
   private nextId = 1;
   /** 查询记录列表 */
-  async list(query: PageQueryDto = new PageQueryDto()): Promise<PageResult<RoleRecord>> {
+  async list(query: RoleListQueryDto = new RoleListQueryDto()): Promise<PageResult<RoleRecord>> {
+    const code = query.code?.trim().toLocaleLowerCase();
+    const name = query.name?.trim().toLocaleLowerCase();
     const items = [...this.roles.values()]
       .filter(item => item.deletedAt === null)
+      .filter(item => {
+        if (code && !item.code.toLocaleLowerCase().includes(code)) return false;
+        if (name && !item.name.toLocaleLowerCase().includes(name)) return false;
+        if (query.isActive !== undefined && item.isActive !== query.isActive) return false;
+        if (query.isSystem !== undefined && item.isSystem !== query.isSystem) return false;
+        return true;
+      })
       .sort((left, right) => Number(BigInt(right.id) - BigInt(left.id)));
     const total = items.length;
     const totalPages = total === 0 ? 0 : Math.ceil(total / query.pageSize);

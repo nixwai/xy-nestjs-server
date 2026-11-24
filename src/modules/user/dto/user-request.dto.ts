@@ -12,12 +12,33 @@ const isActiveValidation = createValidationMessages('启用状态');
 
 /** 后台用户列表分页查询参数。 */
 export class UserListQueryDto extends PageQueryDto {
-  /** 按用户 ID、微信身份标识或昵称搜索。 */
-  @ApiPropertyOptional({ type: String, maxLength: 64, description: '用户 ID、微信身份标识或昵称关键词。' })
+  /** 按用户 ID 搜索。 */
+  @ApiPropertyOptional({ type: String, maxLength: 64, description: '按用户 ID 搜索。' })
   @IsOptional()
   @IsString()
   @MaxLength(64)
-  keyword?: string;
+  id?: string;
+
+  /** 按微信 openId 搜索。 */
+  @ApiPropertyOptional({ type: String, maxLength: 128, description: '按微信 openId 搜索。' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(128)
+  openId?: string;
+
+  /** 按微信 unionId 搜索。 */
+  @ApiPropertyOptional({ type: String, maxLength: 128, description: '按微信 unionId 搜索。' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(128)
+  unionId?: string;
+
+  /** 按用户昵称搜索。 */
+  @ApiPropertyOptional({ type: String, maxLength: 128, description: '按用户昵称搜索。' })
+  @IsOptional()
+  @IsString({ message: nicknameValidation.isString })
+  @MaxLength(128, { message: nicknameValidation.maxLength(128) })
+  nickname?: string;
 
   /** 按启用状态筛选。 */
   @ApiPropertyOptional({ type: Boolean, description: '是否只返回启用或停用用户。' })
