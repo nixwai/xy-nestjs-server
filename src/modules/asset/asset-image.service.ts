@@ -10,6 +10,7 @@ import {
 import type { PageQueryDto } from '#/common/dto/index.js';
 import type { PageResult } from '#/common/types/index.js';
 import { PublicBusinessException } from '#/common/errors/index.js';
+import { createPageResult } from '#/common/utils/index.js';
 import { AuthorizationService } from '../authorization/authorization.service.js';
 import { PermissionCode } from '../authorization/constants/index.js';
 import { UploadService } from '../upload/upload.service.js';
@@ -20,7 +21,8 @@ import { ASSET_FOLDER_REPOSITORY } from './repositories/asset-repository.port.js
 import type { AssetFolderRepository } from './repositories/asset-repository.port.js';
 import { ASSET_IMAGE_REPOSITORY } from './repositories/asset-image-repository.port.js';
 import type { AssetImageRepository } from './repositories/asset-image-repository.port.js';
-import type { AssetFolderRecord, AssetImageRecord } from './types/index.js';
+import { collectFolderSubtreeIds } from './utils/index.js';
+import type { AssetFolderRecord, AssetImageRecord, AssetImageSearchQuery } from './types/index.js';
 
 /** 图片上传失败项。 */
 export interface AssetImageUploadFailure {
@@ -84,6 +86,31 @@ export class AssetImageService {
     return this.images.list(query);
   }
 
+  /**
+   * 按选中范围搜索图片原始文件名，范围优先级为文件夹、账号、查看范围。
+   *
+   * @param actorId - 当前操作者管理员 ID。
+   * @param query - 关键词、搜索范围与分页参数。
+   * @throws BadRequestException 关键词去除首尾空白后为空。
+   * @throws NotFoundException 限定的文件夹不存在。
+   * @throws ForbiddenException 目标范围超出当前账号的数据权限。
+   */
+  async search(actorId: string, query: AssetImageSearchQuery): Promise<PageResult<AssetImageRecord>> {
+    const keyword = query.keyword.trim();
+    if (!keyword) throw new BadRequestException('请输入搜索关键词');
+
+    const folderIds = await this.resolveSearchFolderIds(actorId, query);
+    if (!folderIds.length) return createPageResult([], 0, query);
+
+    return this.images.search({
+      folderIds,
+      keyword,
+      page: query.page,
+      pageSize: query.pageSize,
+      skip: query.skip
+    });
+  }
+
   /** 将批量图片上传到指定文件夹并保存图片元数据。 */
   async upload(actorId: string, folderId: string, files: readonly UploadImageFile[]): Promise<AssetImageUploadResult> {
     const folder = await this.requireFolder(folderId);
@@ -128,6 +155,43 @@ export class AssetImageService {
       throw new AssetImageBatchUploadException({ success: [], failed, totalCount: files.length, successCount: 0 });
     }
     return { success, failed, totalCount: files.length, successCount: success.length };
+  }
+
+  /**
+   * 解析搜索范围对应的文件夹 ID 集合，文件夹范围会递归展开为全部子孙文件夹。
+   *
+   * @param actorId - 当前操作者管理员 ID。
+   * @param query - 搜索范围参数。
+   * @throws NotFoundException 限定的文件夹不存在。
+   * @throws ForbiddenException 目标范围缺少素材读取或全局素材权限。
+   */
+  private async resolveSearchFolderIds(actorId: string, query: AssetImageSearchQuery): Promise<string[]> {
+    if (query.folderId) {
+      const folder = await this.requireFolder(query.folderId);
+      await this.assertFolderReadAccess(actorId, folder.ownerId);
+      const owned = await this.folders.list({ kind: 'owner', ownerId: folder.ownerId });
+      return collectFolderSubtreeIds(owned, folder.id);
+    }
+
+    if (query.ownerId) {
+      await this.assertFolderReadAccess(actorId, query.ownerId);
+      return (await this.folders.list({ kind: 'owner', ownerId: query.ownerId })).map(folder => folder.id);
+    }
+
+    if (query.all) {
+      await this.assertGlobalScopeAccess(actorId);
+      return (await this.folders.list({ kind: 'all' })).map(folder => folder.id);
+    }
+
+    await this.assertFolderReadAccess(actorId, actorId);
+    return (await this.folders.list({ kind: 'owner', ownerId: actorId })).map(folder => folder.id);
+  }
+
+  /** 校验跨账号的全量素材范围。 */
+  private async assertGlobalScopeAccess(actorId: string): Promise<void> {
+    if (!(await this.authorization.hasPermission(actorId, PermissionCode.ASSET_FOLDER_ALL))) {
+      throw new ForbiddenException('无权搜索全部账号素材');
+    }
   }
 
   /** 读取有效文件夹，不存在时按资源缺失处理。 */

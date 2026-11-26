@@ -1,10 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
+import type { PageQueryDto } from '#/common/dto/index.js';
 import type { PageResult } from '#/common/types/index.js';
+import { createPageResult } from '#/common/utils/index.js';
 import { AssetImageEntity } from '../entities/asset-image.entity.js';
-import type { AssetImageCreateInput, AssetImageRecord } from '../types/asset-image.types.js';
+import type {
+  AssetImageCreateInput,
+  AssetImageFolderSearchQuery,
+  AssetImageRecord
+} from '../types/asset-image.types.js';
 import type { AssetImageRepository } from './asset-image-repository.port.js';
+
+/** 归一化分页参数，避免非法值参与偏移计算。 */
+function toPageQuery(query: PageQueryDto): { page: number; pageSize: number; skip: number } {
+  const page = Number(query.page) || 1;
+  const pageSize = Number(query.pageSize) || 20;
+  return { page, pageSize, skip: (page - 1) * pageSize };
+}
 
 /** 使用 TypeORM 保存素材图片。 */
 @Injectable()
@@ -13,32 +26,44 @@ export class TypeOrmAssetImageRepository implements AssetImageRepository {
   constructor(@InjectRepository(AssetImageEntity) private readonly images: Repository<AssetImageEntity>) {}
 
   /** 按直属文件夹分页查询有效图片。 */
-  async list(query: {
-    folderId: string;
-    page: number;
-    pageSize: number;
-    skip: number;
-  }): Promise<PageResult<AssetImageRecord>> {
-    const page = Number(query.page) || 1;
-    const pageSize = Number(query.pageSize) || 20;
+  async list(query: PageQueryDto & { folderId: string }): Promise<PageResult<AssetImageRecord>> {
+    const pageQuery = toPageQuery(query);
     const builder = this.images
       .createQueryBuilder('image')
       .where('image.folderId = :folderId', { folderId: query.folderId })
       .orderBy('image.createdAt', 'DESC')
       .addOrderBy('image.id', 'DESC')
-      .skip((page - 1) * pageSize)
-      .take(pageSize);
+      .skip(pageQuery.skip)
+      .take(pageQuery.pageSize);
     const [items, total] = await builder.getManyAndCount();
-    const totalPages = total === 0 ? 0 : Math.ceil(total / pageSize);
-    return {
-      items: items.map(item => this.toRecord(item)),
+    return createPageResult(
+      items.map(item => this.toRecord(item)),
       total,
-      page,
-      pageSize,
-      totalPages,
-      hasNextPage: page < totalPages,
-      hasPreviousPage: page > 1 && total > 0
-    };
+      pageQuery
+    );
+  }
+
+  /** 在指定文件夹集合内按图片原始文件名分页搜索，名称匹配不区分大小写。 */
+  async search(query: AssetImageFolderSearchQuery): Promise<PageResult<AssetImageRecord>> {
+    const pageQuery = toPageQuery(query);
+    if (!query.folderIds.length) {
+      return createPageResult([], 0, pageQuery);
+    }
+
+    const builder = this.images
+      .createQueryBuilder('image')
+      .where('image.folderId IN (:...folderIds)', { folderIds: query.folderIds })
+      .andWhere('image.originalName LIKE :keyword', { keyword: `%${query.keyword}%` })
+      .orderBy('image.createdAt', 'DESC')
+      .addOrderBy('image.id', 'DESC')
+      .skip(pageQuery.skip)
+      .take(pageQuery.pageSize);
+    const [items, total] = await builder.getManyAndCount();
+    return createPageResult(
+      items.map(item => this.toRecord(item)),
+      total,
+      pageQuery
+    );
   }
 
   /** 统计直属文件夹中的有效图片数量。 */

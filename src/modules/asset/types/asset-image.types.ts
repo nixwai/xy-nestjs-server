@@ -56,3 +56,23 @@ export type AssetImageListQuery = PageQueryDto & { folderId: string };
 
 /** 素材图片分页查询结果。 */
 export type AssetImagePageResult = PageResult<AssetImageRecord>;
+
+/** 素材图片搜索条件，范围由服务解析为具体文件夹集合。 */
+export type AssetImageSearchQuery = PageQueryDto & {
+  /** 图片原始文件名关键词。 */
+  keyword: string;
+  /** 限定为该文件夹及其全部子孙文件夹。 */
+  folderId?: string;
+  /** 限定为该账号名下全部文件夹，folderId 存在时忽略。 */
+  ownerId?: string;
+  /** 未限定范围时是否覆盖全部账号，ownerId 与 folderId 存在时忽略。 */
+  all?: boolean;
+};
+
+/** 素材图片仓储搜索输入，范围已解析为明确的文件夹集合。 */
+export type AssetImageFolderSearchQuery = PageQueryDto & {
+  /** 参与搜索的文件夹 ID 集合。 */
+  folderIds: string[];
+  /** 已去除首尾空白且非空的图片名称关键词。 */
+  keyword: string;
+};

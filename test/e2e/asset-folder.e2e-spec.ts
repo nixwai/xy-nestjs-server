@@ -247,4 +247,101 @@ describe('素材文件夹管理功能', () => {
       .expect(200)
       .expect(response => expect(response.body).toMatchObject({ code: 40300, data: null }));
   });
+  it('搜索命中子文件夹图片，直属列表查询保持不变', async () => {
+    const parent = await request(app.getHttpServer())
+      .post('/api/asset/folder/create')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ name: '搜索父目录' })
+      .expect(200);
+    const child = await request(app.getHttpServer())
+      .post('/api/asset/folder/create')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ name: '搜索子目录', parentId: parent.body.data.id })
+      .expect(200);
+    const png = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+      'base64'
+    );
+
+    await request(app.getHttpServer())
+      .post('/api/asset/image/upload')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .field('folderId', parent.body.data.id)
+      .attach('files', png, 'shared-parent.png')
+      .expect(200);
+    await request(app.getHttpServer())
+      .post('/api/asset/image/upload')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .field('folderId', parent.body.data.id)
+      .attach('files', png, 'banner.png')
+      .expect(200);
+    await request(app.getHttpServer())
+      .post('/api/asset/image/upload')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .field('folderId', child.body.data.id)
+      .attach('files', png, 'shared-child.png')
+      .expect(200);
+
+    const searched = await request(app.getHttpServer())
+      .get('/api/asset/image/search')
+      .query({ keyword: 'shared', folderId: parent.body.data.id, page: 1, pageSize: 20 })
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .expect(200);
+    expect(searched.body.data.total).toBe(2);
+    expect(searched.body.data.items.map((item: { originalName: string }) => item.originalName).sort()).toEqual([
+      'shared-child.png',
+      'shared-parent.png'
+    ]);
+    expect(searched.body.data.items[0]).not.toHaveProperty('storageKey');
+
+    const direct = await request(app.getHttpServer())
+      .get('/api/asset/image/list')
+      .query({ folderId: parent.body.data.id, page: 1, pageSize: 20 })
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .expect(200);
+    expect(direct.body.data.total).toBe(2);
+    expect(direct.body.data.items.map((item: { originalName: string }) => item.originalName).sort()).toEqual([
+      'banner.png',
+      'shared-parent.png'
+    ]);
+  });
+
+  it('未选择文件夹时按个人范围搜索全部素材', async () => {
+    const folder = await request(app.getHttpServer())
+      .post('/api/asset/folder/create')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ name: '范围目录' })
+      .expect(200);
+    const png = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+      'base64'
+    );
+    await request(app.getHttpServer())
+      .post('/api/asset/image/upload')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .field('folderId', folder.body.data.id)
+      .attach('files', png, 'scoped-image.png')
+      .expect(200);
+
+    const personal = await request(app.getHttpServer())
+      .get('/api/asset/image/search')
+      .query({ keyword: 'scoped', page: 1, pageSize: 20, all: false })
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .expect(200);
+    expect(personal.body.data.total).toBe(1);
+
+    const missingKeyword = await request(app.getHttpServer())
+      .get('/api/asset/image/search')
+      .query({ page: 1, pageSize: 20 })
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .expect(200);
+    expect(missingKeyword.body).toMatchObject({ code: 40001, data: null });
+
+    await request(app.getHttpServer())
+      .get('/api/asset/image/search')
+      .query({ keyword: 'scoped' })
+      .set('Authorization', `Bearer ${limitedToken}`)
+      .expect(200)
+      .expect(response => expect(response.body).toMatchObject({ code: 40300, data: null }));
+  });
 });

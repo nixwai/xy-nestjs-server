@@ -1,6 +1,8 @@
 import { BadRequestException, ForbiddenException, InternalServerErrorException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import { AssetImageBatchUploadException, AssetImageService } from '#/modules/asset/asset-image.service.js';
+import { AssetImageSearchQueryDto } from '#/modules/asset/dto/index.js';
+import { InMemoryAssetFolderRepository } from '#/modules/asset/repositories/in-memory-asset.repository.js';
 import type { AssetFolderRepository } from '#/modules/asset/repositories/asset-repository.port.js';
 import type { AssetImageRepository } from '#/modules/asset/repositories/asset-image-repository.port.js';
 import type { AuthorizationService } from '#/modules/authorization/authorization.service.js';
@@ -150,5 +152,123 @@ describe('素材图片领域规则', () => {
       InternalServerErrorException
     );
     expect(deleteObject).toHaveBeenCalledWith(uploaded.storageKey);
+  });
+});
+
+describe('素材图片搜索数据范围', () => {
+  /** 使用真实内存文件夹仓储构造服务，图片仓储替身用于断言解析出的搜索范围。 */
+  async function createSearchService(permissions: string[]) {
+    const folders = new InMemoryAssetFolderRepository();
+    const root = await folders.create({ name: '搜索根目录', parentId: null, ownerId: '1', creatorId: '1' });
+    const child = await folders.create({ name: '一级子目录', parentId: root.id, ownerId: '1', creatorId: '1' });
+    const grandChild = await folders.create({ name: '二级子目录', parentId: child.id, ownerId: '1', creatorId: '1' });
+    const sibling = await folders.create({ name: '同级目录', parentId: null, ownerId: '1', creatorId: '1' });
+    const other = await folders.create({ name: '他人目录', parentId: null, ownerId: '2', creatorId: '2' });
+    const search = vi.fn().mockResolvedValue({
+      items: [],
+      total: 0,
+      page: 1,
+      pageSize: 6,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPreviousPage: false
+    });
+    const images: Partial<AssetImageRepository> = { search };
+    const authorization: Partial<AuthorizationService> = {
+      hasPermission: vi.fn(async (_adminId: string, code: string) => permissions.includes(code))
+    };
+    const service = new AssetImageService(
+      images as AssetImageRepository,
+      folders as AssetFolderRepository,
+      authorization as AuthorizationService,
+      {} as UploadService
+    );
+    return { service, search, folders, root, child, grandChild, sibling, other };
+  }
+
+  /** 组装带默认分页的搜索请求。 */
+  function searchQuery(overrides: Partial<AssetImageSearchQueryDto>): AssetImageSearchQueryDto {
+    return Object.assign(new AssetImageSearchQueryDto(), { keyword: 'logo', page: 1, pageSize: 6 }, overrides);
+  }
+
+  it('选中文件夹时递归命中该文件夹及其全部子孙', async () => {
+    const { service, search, root, child, grandChild, sibling, other } = await createSearchService([
+      PermissionCode.ASSET_FOLDER_READ
+    ]);
+
+    await service.search('1', searchQuery({ folderId: root.id }));
+
+    const [payload] = search.mock.calls[0];
+    expect(new Set(payload.folderIds)).toEqual(new Set([root.id, child.id, grandChild.id]));
+    expect(payload.folderIds).not.toContain(sibling.id);
+    expect(payload.folderIds).not.toContain(other.id);
+  });
+
+  it('选中账号根节点时命中该账号全部文件夹', async () => {
+    const { service, search, root, child, grandChild, sibling, other } = await createSearchService([
+      PermissionCode.ASSET_FOLDER_READ
+    ]);
+
+    await service.search('1', searchQuery({ ownerId: '1' }));
+
+    const [payload] = search.mock.calls[0];
+    expect(new Set(payload.folderIds)).toEqual(new Set([root.id, child.id, grandChild.id, sibling.id]));
+    expect(payload.folderIds).not.toContain(other.id);
+  });
+
+  it('未选范围的个人搜索只覆盖当前账号文件夹', async () => {
+    const { service, search, folders, other } = await createSearchService([PermissionCode.ASSET_FOLDER_READ]);
+    const list = vi.spyOn(folders, 'list');
+
+    await service.search('1', searchQuery({ all: false }));
+
+    expect(list).toHaveBeenCalledWith({ kind: 'owner', ownerId: '1' });
+    expect(search.mock.calls[0][0].folderIds).not.toContain(other.id);
+  });
+
+  it('全部范围搜索需要全局权限并覆盖所有账号文件夹', async () => {
+    const { service, search, folders, other } = await createSearchService([
+      PermissionCode.ASSET_FOLDER_READ,
+      PermissionCode.ASSET_FOLDER_ALL
+    ]);
+    const list = vi.spyOn(folders, 'list');
+
+    await service.search('1', searchQuery({ all: true }));
+
+    expect(list).toHaveBeenCalledWith({ kind: 'all' });
+    expect(search.mock.calls[0][0].folderIds).toContain(other.id);
+  });
+
+  it('缺少全局权限时拒绝全部范围、他人文件夹和他人账号', async () => {
+    const { service, other } = await createSearchService([PermissionCode.ASSET_FOLDER_READ]);
+
+    await expect(service.search('1', searchQuery({ all: true }))).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(service.search('1', searchQuery({ folderId: other.id }))).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(service.search('1', searchQuery({ ownerId: '2' }))).rejects.toBeInstanceOf(ForbiddenException);
+    expect(other.ownerId).toBe('2');
+  });
+
+  it('范围内没有文件夹时不查询图片', async () => {
+    const { service, search } = await createSearchService([PermissionCode.ASSET_FOLDER_READ]);
+
+    const result = await service.search('9', searchQuery({}));
+
+    expect(search).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ items: [], total: 0, page: 1, pageSize: 6 });
+  });
+
+  it('关键词只有空白时按参数无效拒绝', async () => {
+    const { service, search } = await createSearchService([PermissionCode.ASSET_FOLDER_READ]);
+
+    await expect(service.search('1', searchQuery({ keyword: '   ' }))).rejects.toBeInstanceOf(BadRequestException);
+    expect(search).not.toHaveBeenCalled();
+  });
+
+  it('关键词首尾空白在入库查询前被去除', async () => {
+    const { service, search, root } = await createSearchService([PermissionCode.ASSET_FOLDER_READ]);
+
+    await service.search('1', searchQuery({ keyword: ' logo ', folderId: root.id }));
+
+    expect(search.mock.calls[0][0].keyword).toBe('logo');
   });
 });

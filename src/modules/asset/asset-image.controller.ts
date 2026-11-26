@@ -11,6 +11,7 @@ import { RequirePermission } from '../authorization/decorators/index.js';
 import { AssetImageService } from './asset-image.service.js';
 import {
   AssetImageListQueryDto,
+  AssetImageSearchQueryDto,
   AssetImagePageResponseDto,
   AssetImageUploadDto,
   AssetImageUploadResultDto
@@ -41,6 +42,25 @@ export class AssetImageController {
     @Query() query: AssetImageListQueryDto = new AssetImageListQueryDto()
   ) {
     const result = await this.images.list(admin.sub, query);
+    return { ...result, items: this.resourceUrls.toPublicResources(result.items) };
+  }
+
+  /** 按选中范围搜索素材图片，文件夹范围会递归包含全部子孙文件夹。 */
+  @Get('search')
+  @RequirePermission(PermissionCode.ASSET_IMAGE_READ)
+  @ApiQuery({ name: 'keyword', required: true, type: String, description: '图片原始文件名关键词。' })
+  @ApiQuery({ name: 'folderId', required: false, type: String, description: '限定为该文件夹及其全部子孙文件夹。' })
+  @ApiQuery({ name: 'ownerId', required: false, type: String, description: '限定为该账号名下全部文件夹。' })
+  @ApiQuery({ name: 'all', required: false, type: Boolean, description: '未限定范围时是否覆盖全部账号。' })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: '页码，从 1 开始。' })
+  @ApiQuery({ name: 'pageSize', required: false, type: Number, description: '每页条数，范围 1-100。' })
+  @ApiOperation({ summary: '搜索素材图片' })
+  @ApiOkResponseData(AssetImagePageResponseDto)
+  async search(
+    @CurrentAdmin() admin: AdminJwtPayload,
+    @Query() query: AssetImageSearchQueryDto = new AssetImageSearchQueryDto()
+  ) {
+    const result = await this.images.search(admin.sub, query);
     return { ...result, items: this.resourceUrls.toPublicResources(result.items) };
   }
 
