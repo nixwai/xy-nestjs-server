@@ -14,7 +14,24 @@ export class ResourceUrlService {
     const config = this.configService.getOrThrow<OssConfig>(CONFIG_KEYS.oss);
     const baseUrl = config.publicBaseUrl || `https://${config.bucket}.${config.region}.aliyuncs.com`;
     const normalizedBaseUrl = baseUrl.replace(/\/+$/, '');
-    const normalizedKey = storageKey.replace(/^\/+/, '');
+    const normalizedKey = storageKey
+      .replace(/^\/+/, '')
+      .split('/')
+      .map(segment => encodeURIComponent(segment))
+      .join('/');
     return `${normalizedBaseUrl}/${normalizedKey}`;
+  }
+
+  /** 将内部存储记录转换为不暴露 storageKey 的公开资源记录。 */
+  toPublicResource<T extends { storageKey: string }>(resource: T): Omit<T, 'storageKey'> & { url: string } {
+    const { storageKey, ...publicResource } = resource;
+    return { ...publicResource, url: this.toPublicUrl(storageKey) };
+  }
+
+  /** 批量将内部存储记录转换为公开资源记录。 */
+  toPublicResources<T extends { storageKey: string }>(
+    resources: readonly T[]
+  ): Array<Omit<T, 'storageKey'> & { url: string }> {
+    return resources.map(resource => this.toPublicResource(resource));
   }
 }

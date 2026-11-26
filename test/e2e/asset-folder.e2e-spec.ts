@@ -175,4 +175,76 @@ describe('素材文件夹管理功能', () => {
       .expect(200);
     expect(invalidId.body).toMatchObject({ code: 40001, data: null });
   });
+
+  it('上传图片后仅返回当前文件夹直属素材，并支持分页查询', async () => {
+    const parent = await request(app.getHttpServer())
+      .post('/api/asset/folder/create')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ name: '图片父目录' })
+      .expect(200);
+    const child = await request(app.getHttpServer())
+      .post('/api/asset/folder/create')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ name: '图片子目录', parentId: parent.body.data.id })
+      .expect(200);
+    const png = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+      'base64'
+    );
+
+    const parentUpload = await request(app.getHttpServer())
+      .post('/api/asset/image/upload')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .field('folderId', parent.body.data.id)
+      .attach('files', png, 'parent.png')
+      .expect(200);
+    await request(app.getHttpServer())
+      .post('/api/asset/image/upload')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .field('folderId', child.body.data.id)
+      .attach('files', png, 'child.png')
+      .expect(200);
+
+    expect(parentUpload.body.data).toMatchObject({ totalCount: 1, successCount: 1 });
+    expect(parentUpload.body.data.success[0]).toMatchObject({ url: expect.stringContaining('https://test.local/') });
+    expect(parentUpload.body.data.success[0]).not.toHaveProperty('storageKey');
+
+    const parentImages = await request(app.getHttpServer())
+      .get('/api/asset/image/list')
+      .query({ folderId: parent.body.data.id, page: 1, pageSize: 20 })
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .expect(200);
+    expect(parentImages.body.data).toMatchObject({
+      total: 1,
+      items: [
+        expect.objectContaining({ originalName: 'parent.png', url: expect.stringContaining('https://test.local/') })
+      ]
+    });
+  });
+
+  it('图片权限缺失时拒绝查询和上传', async () => {
+    const folder = await request(app.getHttpServer())
+      .post('/api/asset/folder/create')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ name: '权限目录' })
+      .expect(200);
+    const png = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+      'base64'
+    );
+
+    await request(app.getHttpServer())
+      .get('/api/asset/image/list')
+      .query({ folderId: folder.body.data.id })
+      .set('Authorization', `Bearer ${limitedToken}`)
+      .expect(200)
+      .expect(response => expect(response.body).toMatchObject({ code: 40300, data: null }));
+    await request(app.getHttpServer())
+      .post('/api/asset/image/upload')
+      .set('Authorization', `Bearer ${limitedToken}`)
+      .field('folderId', folder.body.data.id)
+      .attach('files', png, 'no-permission.png')
+      .expect(200)
+      .expect(response => expect(response.body).toMatchObject({ code: 40300, data: null }));
+  });
 });

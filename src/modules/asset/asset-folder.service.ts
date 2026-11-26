@@ -11,6 +11,8 @@ import { AuthorizationService } from '../authorization/authorization.service.js'
 import { PermissionCode } from '../authorization/constants/index.js';
 import { ASSET_FOLDER_REPOSITORY } from './repositories/index.js';
 import type { AssetFolderRepository } from './repositories/index.js';
+import { ASSET_IMAGE_REPOSITORY } from './repositories/index.js';
+import type { AssetImageRepository } from './repositories/index.js';
 import type {
   AssetFolderCreateRequest,
   AssetFolderItem,
@@ -28,6 +30,7 @@ export class AssetFolderService {
   /** 创建当前实例。 */
   constructor(
     @Inject(ASSET_FOLDER_REPOSITORY) private readonly folders: AssetFolderRepository,
+    @Inject(ASSET_IMAGE_REPOSITORY) private readonly images: AssetImageRepository,
     @Inject(AuthorizationService) private readonly authorization: AuthorizationService,
     @Inject(AdminService) private readonly admins: AdminService
   ) {}
@@ -108,13 +111,14 @@ export class AssetFolderService {
    * @param actorId - 当前操作者管理员 ID。
    * @param id - 目标文件夹 ID。
    * @throws NotFoundException 文件夹不存在。
-   * @throws ConflictException 文件夹仍有子文件夹。
+   * @throws ConflictException 文件夹仍有子文件夹或直属素材图片。
    */
   async softDelete(actorId: string, id: string): Promise<null> {
     const current = await this.requireFolder(id);
     await this.assertCrossOwnerPermission(actorId, current.ownerId);
     const children = await this.folders.listChildren(id);
     if (children.length > 0) throw new ConflictException('文件夹包含子文件夹，请先删除子文件夹');
+    if ((await this.images.countByFolderId(id)) > 0) throw new ConflictException('文件夹包含素材图片，请先移除图片');
 
     await this.folders.softDelete(id);
     return null;

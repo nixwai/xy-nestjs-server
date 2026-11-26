@@ -1,11 +1,4 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-  ServiceUnavailableException
-} from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'node:crypto';
 import sharp from 'sharp';
@@ -25,28 +18,18 @@ const DEFAULT_CATEGORY = 'other';
 const UPLOAD_FAILURE_REASON = '图片上传失败，请稍后重试';
 const ALLOWED_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 const CATEGORY_PATTERN = /^[a-zA-Z0-9_-]+$/;
-type LegacyUrlService = { toPublicUrl(key: string): string };
-type StorageDependency = ObjectStorage | LegacyUrlService;
 
 /** 负责图片校验、处理和对象存储上传。 */
 @Injectable()
 export class UploadService {
   private readonly logger = new Logger(UploadService.name);
   private readonly storage: ObjectStorage;
-  private readonly legacy: boolean;
-  private client: {
-    put: (key: string, body: Buffer, options: object) => Promise<unknown>;
-    delete: (key: string) => Promise<unknown>;
-  } | null = null;
 
   constructor(
     @Inject(ConfigService) private readonly configService: ConfigService,
-    @Inject(OBJECT_STORAGE) dependency: StorageDependency
+    @Inject(OBJECT_STORAGE) storage: ObjectStorage
   ) {
-    this.legacy = !('put' in dependency);
-    this.storage = this.legacy
-      ? this.createLegacyStorage(dependency as LegacyUrlService)
-      : (dependency as ObjectStorage);
+    this.storage = storage;
   }
 
   /** 返回单次上传请求允许占用的最大内存。 */
@@ -55,12 +38,15 @@ export class UploadService {
   }
 
   /** 上传单张图片并返回内部结果，控制器负责映射公开字段。 */
-  async uploadImage(file: UploadImageFile, category = DEFAULT_CATEGORY): Promise<UploadImageResult> {
+  async uploadImage(
+    file: UploadImageFile,
+    category = DEFAULT_CATEGORY,
+    keyPrefix?: string
+  ): Promise<UploadImageResult> {
     const config = this.getImageConfig();
     const normalizedCategory = this.normalizeCategory(category);
-    this.assertLegacyStorageConfigured();
     const processed = await this.processImage(this.validateFile(file, config).buffer, config);
-    return this.uploadProcessedImage(processed, normalizedCategory);
+    return this.uploadProcessedImage(processed, normalizedCategory, keyPrefix);
   }
 
   /** 在处理和上传前校验整个批次。 */
@@ -81,7 +67,6 @@ export class UploadService {
   async batchUploadImages(files: UploadImageFile[], category = DEFAULT_CATEGORY): Promise<ImageBatchUploadResult> {
     this.validateBatch(files);
     const normalizedCategory = this.normalizeCategory(category);
-    this.assertLegacyStorageConfigured();
     const processed = await this.processBatch(files, this.getImageConfig());
     const results = await this.uploadBatch(processed, normalizedCategory);
     const success: UploadImageResult[] = [];
@@ -98,39 +83,6 @@ export class UploadService {
   /** 删除对象存储中的对象，用于入库失败补偿。 */
   deleteObject(storageKey: string): Promise<void> {
     return this.storage.delete(storageKey);
-  }
-
-  private createLegacyStorage(urls: LegacyUrlService): ObjectStorage {
-    return {
-      put: async (key, body, mimeType) => {
-        if (!this.client) throw new Error('图片存储服务未配置');
-        await this.client.put(key, body, { headers: { 'Content-Type': mimeType } });
-        try {
-          return { storageKey: key, url: urls.toPublicUrl(key) };
-        } catch (error) {
-          try {
-            await this.client.delete(key);
-            this.logger.warn(`公开地址构造失败，已补偿删除 OSS 对象: ${key}`);
-          } catch (cleanupError) {
-            this.logger.error(
-              `OSS 对象补偿删除失败，需人工处理: ${key}`,
-              cleanupError instanceof Error ? cleanupError.stack : undefined
-            );
-          }
-          throw error;
-        }
-      },
-      delete: async key => {
-        if (!this.client) throw new Error('图片存储服务未配置');
-        await this.client.delete(key);
-      }
-    };
-  }
-
-  private assertLegacyStorageConfigured(): void {
-    if (this.legacy && typeof this.configService.get === 'function' && !this.configService.get('oss')) {
-      throw new ServiceUnavailableException('图片存储服务未配置');
-    }
   }
 
   private async processBatch(files: readonly UploadImageFile[], config: ImageConfig): Promise<ProcessedImage[]> {
@@ -168,12 +120,16 @@ export class UploadService {
     return output;
   }
 
-  private async uploadProcessedImage(image: ProcessedImage, category: string): Promise<UploadImageResult> {
+  private async uploadProcessedImage(
+    image: ProcessedImage,
+    category: string,
+    keyPrefix?: string
+  ): Promise<UploadImageResult> {
     const { buffer, extension, ...metadata } = image;
-    const key = `images/${category}/${Date.now()}-${randomUUID().slice(0, 8)}.${extension}`;
+    const key = `${keyPrefix?.replace(/^\/+|\/+$/g, '') || `images/${category}`}/${Date.now()}-${randomUUID().slice(0, 8)}.${extension}`;
     try {
       const stored = await this.storage.put(key, buffer, metadata.mimeType);
-      return { ...metadata, category, storageKey: stored.storageKey, url: stored.url };
+      return { ...metadata, category, storageKey: stored.storageKey };
     } catch (error) {
       this.logger.error(`图片上传失败: ${key}`, error instanceof Error ? error.stack : undefined);
       throw new InternalServerErrorException(UPLOAD_FAILURE_REASON);

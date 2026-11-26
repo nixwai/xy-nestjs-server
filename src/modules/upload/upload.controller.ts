@@ -16,6 +16,7 @@ import { Authenticated } from '../authorization/decorators/index.js';
 import { BatchUploadImagesDto, BatchUploadResultDto, UploadImageDto, UploadImageResponseDto } from './dto/index.js';
 import { UploadService } from './upload.service.js';
 import type { UploadImageFile } from './types/upload-image-file.type.js';
+import { ResourceUrlService } from '#/common/services/index.js';
 import type { UploadImageResult } from './types/upload-result.type.js';
 
 /** 图片上传接口。 */
@@ -27,7 +28,10 @@ import type { UploadImageResult } from './types/upload-result.type.js';
 @Authenticated()
 export class UploadController {
   /** 创建当前实例。 */
-  constructor(@Inject(UploadService) private readonly uploadService: UploadService) {}
+  constructor(
+    @Inject(UploadService) private readonly uploadService: UploadService,
+    @Inject(ResourceUrlService) private readonly resourceUrls: ResourceUrlService
+  ) {}
 
   /** 上传单张图片。 */
   @Post('image')
@@ -50,11 +54,10 @@ export class UploadController {
   @ApiOkResponseData(BatchUploadResultDto, { description: '批量图片上传完成。' })
   async batchUploadImages(@Body() dto: BatchUploadImagesDto, @UploadedFiles() files?: UploadImageFile[]) {
     const result = await this.uploadService.batchUploadImages(files ?? [], dto.category);
-    return { ...result, success: result.success.map(item => this.toPublicImage(item)) };
+    return { ...result, success: this.resourceUrls.toPublicResources(result.success) };
   }
 
   private toPublicImage(item: UploadImageResult): UploadImageResponseDto {
-    const { storageKey: _storageKey, ...publicResult } = item;
-    return publicResult;
+    return this.resourceUrls.toPublicResource(item);
   }
 }

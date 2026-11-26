@@ -7,5 +7,7 @@ export const PermissionCode = {
   ASSET_FOLDER_ALL: 'asset.folder.all',
   ASSET_FOLDER_CREATE: 'asset.folder.create',
   ASSET_FOLDER_UPDATE: 'asset.folder.update',
-  ASSET_FOLDER_DELETE: 'asset.folder.delete'
+  ASSET_FOLDER_DELETE: 'asset.folder.delete',
+  ASSET_IMAGE_READ: 'asset.image.read',
+  ASSET_IMAGE_UPLOAD: 'asset.image.upload'
 } as const;

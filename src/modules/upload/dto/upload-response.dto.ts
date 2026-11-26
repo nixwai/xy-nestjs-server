@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 /** 单张图片上传的公开结果，不暴露对象存储内部 Key。 */
 export class UploadImageResponseDto {
-  @ApiProperty({ type: String, description: '当前环境下可访问的图片 URL。' }) url!: string;
+  @ApiProperty({ type: String, description: '根据当前环境资源域名动态生成的图片 URL。' }) url!: string;
   @ApiProperty({ type: String, description: '图片分类。' }) category!: string;
   @ApiProperty({ type: String, description: '实际存储图片的 MIME 类型。' }) mimeType!: string;
   @ApiProperty({ type: Number, description: '实际存储图片的字节数。' }) size!: number;

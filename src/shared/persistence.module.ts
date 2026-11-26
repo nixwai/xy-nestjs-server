@@ -11,6 +11,7 @@ import { RolePermissionAssignmentEntity } from '../modules/role/entities/role-pe
 import { RoleEntity } from '../modules/role/entities/role.entity.js';
 import { MenuEntity } from '../modules/menu/entities/menu.entity.js';
 import { AssetFolderEntity } from '../modules/asset/entities/asset-folder.entity.js';
+import { AssetImageEntity } from '../modules/asset/entities/asset-image.entity.js';
 import { UserEntity } from '../modules/user/entities/user.entity.js';
 import { UserSessionEntity } from '../modules/user/entities/user-session.entity.js';
 import { ADMIN_REPOSITORY, ADMIN_TRANSACTION_RUNNER } from '../modules/admin/repositories/admin-repository.port.js';
@@ -34,8 +35,11 @@ import { MENU_REPOSITORY } from '../modules/menu/repositories/menu-repository.po
 import { InMemoryMenuRepository } from '../modules/menu/repositories/in-memory-menu.repository.js';
 import { TypeOrmMenuRepository } from '../modules/menu/repositories/typeorm-menu.repository.js';
 import { ASSET_FOLDER_REPOSITORY } from '../modules/asset/repositories/asset-repository.port.js';
+import { ASSET_IMAGE_REPOSITORY } from '../modules/asset/repositories/asset-image-repository.port.js';
 import { InMemoryAssetFolderRepository } from '../modules/asset/repositories/in-memory-asset.repository.js';
 import { TypeOrmAssetFolderRepository } from '../modules/asset/repositories/typeorm-asset.repository.js';
+import { InMemoryAssetImageRepository } from '../modules/asset/repositories/in-memory-asset-image.repository.js';
+import { TypeOrmAssetImageRepository } from '../modules/asset/repositories/typeorm-asset-image.repository.js';
 import { USER_REPOSITORY } from '../modules/user/repositories/user-repository.port.js';
 import { InMemoryUserRepository } from '../modules/user/repositories/in-memory-user.repository.js';
 import { TypeOrmUserRepository } from '../modules/user/repositories/typeorm-user.repository.js';
@@ -51,6 +55,7 @@ const databaseEntities = [
   RoleEntity,
   MenuEntity,
   AssetFolderEntity,
+  AssetImageEntity,
   UserEntity,
   UserSessionEntity
 ];
@@ -98,6 +103,10 @@ const databaseEntities = [
     {
       provide: ASSET_FOLDER_REPOSITORY,
       useClass: databaseEnabled ? TypeOrmAssetFolderRepository : InMemoryAssetFolderRepository
+    },
+    {
+      provide: ASSET_IMAGE_REPOSITORY,
+      useClass: databaseEnabled ? TypeOrmAssetImageRepository : InMemoryAssetImageRepository
     }
   ],
   exports: [
@@ -109,7 +118,8 @@ const databaseEntities = [
     ROLE_REPOSITORY,
     PERMISSION_REPOSITORY,
     MENU_REPOSITORY,
-    ASSET_FOLDER_REPOSITORY
+    ASSET_FOLDER_REPOSITORY,
+    ASSET_IMAGE_REPOSITORY
   ]
 })
 export class PersistenceModule {}

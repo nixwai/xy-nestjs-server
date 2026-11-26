@@ -69,6 +69,20 @@ export const REGISTERED_PERMISSION_GROUPS: readonly RegisteredPermissionGroup[] 
         description: '删除空素材文件夹',
         isAssignable: true,
         isProtected: false
+      },
+      {
+        code: PermissionCode.ASSET_IMAGE_READ,
+        name: '查看素材图片',
+        description: '查看当前文件夹直属的素材图片',
+        isAssignable: true,
+        isProtected: false
+      },
+      {
+        code: PermissionCode.ASSET_IMAGE_UPLOAD,
+        name: '上传素材图片',
+        description: '向有权访问的素材文件夹上传图片',
+        isAssignable: true,
+        isProtected: false
       }
     ]
   }

@@ -2,6 +2,7 @@ import { BadRequestException, ConflictException, ForbiddenException, NotFoundExc
 import { describe, expect, it, vi } from 'vitest';
 import { AssetFolderService } from '#/modules/asset/asset-folder.service.js';
 import type { AssetFolderRepository } from '#/modules/asset/repositories/asset-repository.port.js';
+import type { AssetImageRepository } from '#/modules/asset/repositories/asset-image-repository.port.js';
 import type { AuthorizationService } from '#/modules/authorization/authorization.service.js';
 import type { AdminService } from '#/modules/admin/admin.service.js';
 import { PermissionCode } from '#/modules/authorization/constants/index.js';
@@ -51,9 +52,11 @@ function createService(options: { repository?: Partial<AssetFolderRepository>; p
         : null
     ) as unknown as AdminService['findById']
   };
+  const images: Partial<AssetImageRepository> = { countByFolderId: vi.fn().mockResolvedValue(0) };
   return {
     service: new AssetFolderService(
       repository as AssetFolderRepository,
+      images as AssetImageRepository,
       authorization as AuthorizationService,
       admins as AdminService
     ),
@@ -106,6 +109,28 @@ describe('素材文件夹领域规则', () => {
       repository: { listChildren: vi.fn().mockResolvedValue([folder]) }
     });
     await expect(nonEmpty.service.softDelete('1', 'folder-1')).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it('拒绝删除仍有直属素材图片的文件夹', async () => {
+    const images: Partial<AssetImageRepository> = { countByFolderId: vi.fn().mockResolvedValue(1) };
+    const repository: Partial<AssetFolderRepository> = {
+      findById: vi.fn().mockResolvedValue(folder),
+      listChildren: vi.fn().mockResolvedValue([])
+    };
+    const authorization: Partial<AuthorizationService> = {
+      hasPermission: vi.fn().mockResolvedValue(true)
+    };
+    const admins: Partial<AdminService> = {
+      findById: vi.fn().mockResolvedValue({ id: '1', username: 'owner' }) as never
+    };
+    const service = new AssetFolderService(
+      repository as AssetFolderRepository,
+      images as AssetImageRepository,
+      authorization as AuthorizationService,
+      admins as AdminService
+    );
+
+    await expect(service.softDelete('1', 'folder-1')).rejects.toBeInstanceOf(ConflictException);
   });
 
   it('无权限读取全部树和修改他人文件夹时拒绝', async () => {
