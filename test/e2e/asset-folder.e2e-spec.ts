@@ -306,6 +306,57 @@ describe('素材文件夹管理功能', () => {
     ]);
   });
 
+  it('支持重命名、移动、复制链接所需的图片操作接口并软删除图片', async () => {
+    const source = await request(app.getHttpServer())
+      .post('/api/asset/folder/create')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ name: '操作源目录' })
+      .expect(200);
+    const target = await request(app.getHttpServer())
+      .post('/api/asset/folder/create')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ name: '操作目标目录' })
+      .expect(200);
+    const png = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+      'base64'
+    );
+    const uploaded = await request(app.getHttpServer())
+      .post('/api/asset/image/upload')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .field('folderId', source.body.data.id)
+      .attach('files', png, 'operation.png')
+      .expect(200);
+    const image = uploaded.body.data.success[0];
+
+    const renamed = await request(app.getHttpServer())
+      .post('/api/asset/image/update')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ id: image.id, originalName: 'renamed.jpg' })
+      .expect(200);
+    expect(renamed.body.data.originalName).toBe('renamed.png');
+
+    const moved = await request(app.getHttpServer())
+      .post('/api/asset/image/move')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ id: image.id, folderId: target.body.data.id })
+      .expect(200);
+    expect(moved.body.data.folderId).toBe(target.body.data.id);
+
+    await request(app.getHttpServer())
+      .post('/api/asset/image/soft-delete')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ id: image.id })
+      .expect(200);
+
+    const list = await request(app.getHttpServer())
+      .get('/api/asset/image/list')
+      .query({ folderId: target.body.data.id, page: 1, pageSize: 20 })
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .expect(200);
+    expect(list.body.data.items).toHaveLength(0);
+  });
+
   it('未选择文件夹时按个人范围搜索全部素材', async () => {
     const folder = await request(app.getHttpServer())
       .post('/api/asset/folder/create')

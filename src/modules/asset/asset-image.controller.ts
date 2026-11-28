@@ -11,8 +11,12 @@ import { RequirePermission } from '../authorization/decorators/index.js';
 import { AssetImageService } from './asset-image.service.js';
 import {
   AssetImageListQueryDto,
+  AssetImageMoveDto,
+  AssetImageSoftDeleteDto,
+  AssetImageUpdateDto,
   AssetImageSearchQueryDto,
   AssetImagePageResponseDto,
+  AssetImageResponseDto,
   AssetImageUploadDto,
   AssetImageUploadResultDto
 } from './dto/index.js';
@@ -62,6 +66,37 @@ export class AssetImageController {
   ) {
     const result = await this.images.search(admin.sub, query);
     return { ...result, items: this.resourceUrls.toPublicResources(result.items) };
+  }
+
+  /** 重命名素材图片。 */
+  @Post('update')
+  @RequirePermission(PermissionCode.ASSET_IMAGE_UPDATE)
+  @ApiOperation({ summary: '重命名素材图片' })
+  @ApiBody({ type: AssetImageUpdateDto })
+  @ApiOkResponseData(AssetImageResponseDto)
+  async update(@CurrentAdmin() admin: AdminJwtPayload, @Body() dto: AssetImageUpdateDto) {
+    const result = await this.images.update(admin.sub, dto.id, dto.originalName);
+    return this.resourceUrls.toPublicResource(result);
+  }
+
+  /** 软删除素材图片。 */
+  @Post('soft-delete')
+  @RequirePermission(PermissionCode.ASSET_IMAGE_DELETE)
+  @ApiOperation({ summary: '删除素材图片' })
+  @ApiBody({ type: AssetImageSoftDeleteDto })
+  async softDelete(@CurrentAdmin() admin: AdminJwtPayload, @Body() dto: AssetImageSoftDeleteDto) {
+    await this.images.softDelete(admin.sub, dto.id);
+    return null;
+  }
+
+  /** 移动素材图片到其他文件夹。 */
+  @Post('move')
+  @RequirePermission(PermissionCode.ASSET_IMAGE_MOVE)
+  @ApiOperation({ summary: '移动素材图片' })
+  @ApiBody({ type: AssetImageMoveDto })
+  async move(@CurrentAdmin() admin: AdminJwtPayload, @Body() dto: AssetImageMoveDto) {
+    const result = await this.images.move(admin.sub, dto.id, dto.folderId);
+    return this.resourceUrls.toPublicResource(result);
   }
 
   /** 批量上传素材图片到指定文件夹。 */

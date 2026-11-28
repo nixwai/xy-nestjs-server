@@ -53,6 +53,9 @@ export function allAssetPermissions(): readonly string[] {
     PermissionCode.ASSET_FOLDER_UPDATE,
     PermissionCode.ASSET_FOLDER_DELETE,
     PermissionCode.ASSET_IMAGE_READ,
-    PermissionCode.ASSET_IMAGE_UPLOAD
+    PermissionCode.ASSET_IMAGE_UPLOAD,
+    PermissionCode.ASSET_IMAGE_UPDATE,
+    PermissionCode.ASSET_IMAGE_DELETE,
+    PermissionCode.ASSET_IMAGE_MOVE
   ];
 }

@@ -30,6 +30,12 @@ export interface AssetImageRecord {
 }
 
 /** 新建素材图片的持久化输入。 */
+/** 素材图片名称更新输入。 */
+export interface AssetImageUpdateInput {
+  /** 新的原始文件名。 */
+  originalName: string;
+}
+
 export interface AssetImageCreateInput {
   /** 直属文件夹主键。 */
   folderId: string;

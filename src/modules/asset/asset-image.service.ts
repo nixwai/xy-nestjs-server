@@ -111,6 +111,35 @@ export class AssetImageService {
     });
   }
 
+  /** 重命名图片，扩展名沿用原文件名且同一文件夹内不可重名。 */
+  async update(actorId: string, id: string, originalName: string): Promise<AssetImageRecord> {
+    const image = await this.requireImage(id);
+    await this.assertFolderReadAccess(actorId, image.ownerId);
+    const name = this.normalizeImageName(image.originalName, originalName);
+    const duplicated = await this.images.findByName(image.folderId, name, image.id);
+    if (duplicated) throw new BadRequestException('同一文件夹内图片名称不能重复');
+    return this.images.update(image.id, { originalName: name });
+  }
+
+  /** 软删除图片，数据库记录保留，后续由对象清理任务处理存储文件。 */
+  async softDelete(actorId: string, id: string): Promise<void> {
+    const image = await this.requireImage(id);
+    await this.assertFolderReadAccess(actorId, image.ownerId);
+    await this.images.softDelete(image.id);
+  }
+
+  /** 移动图片到目标文件夹，普通账号只能在自己的文件夹内移动。 */
+  async move(actorId: string, id: string, targetFolderId: string): Promise<AssetImageRecord> {
+    const image = await this.requireImage(id);
+    const target = await this.requireFolder(targetFolderId);
+    await this.assertFolderReadAccess(actorId, image.ownerId);
+    await this.assertFolderReadAccess(actorId, target.ownerId);
+    if (image.folderId === target.id) throw new BadRequestException('图片已在目标文件夹中');
+    const duplicated = await this.images.findByName(target.id, image.originalName);
+    if (duplicated) throw new BadRequestException('目标文件夹内已存在同名图片');
+    return this.images.move(image.id, target.id, target.ownerId);
+  }
+
   /** 将批量图片上传到指定文件夹并保存图片元数据。 */
   async upload(actorId: string, folderId: string, files: readonly UploadImageFile[]): Promise<AssetImageUploadResult> {
     const folder = await this.requireFolder(folderId);
@@ -155,6 +184,25 @@ export class AssetImageService {
       throw new AssetImageBatchUploadException({ success: [], failed, totalCount: files.length, successCount: 0 });
     }
     return { success, failed, totalCount: files.length, successCount: success.length };
+  }
+
+  /** 读取有效图片，不存在时按资源缺失处理。 */
+  private async requireImage(id: string): Promise<AssetImageRecord> {
+    const image = await this.images.findById(id);
+    if (!image) throw new NotFoundException('素材图片不存在');
+    return image;
+  }
+
+  /** 规范重命名结果，保持原扩展名不被用户输入覆盖。 */
+  private normalizeImageName(currentName: string, requestedName: string): string {
+    const name = requestedName.trim().replace(/[\\/]/g, '');
+    if (!name) throw new BadRequestException('请输入图片名称');
+    const extensionIndex = currentName.lastIndexOf('.');
+    const extension = extensionIndex > 0 ? currentName.slice(extensionIndex) : '';
+    const baseName = name.replace(/\.[^.]+$/, '').trim();
+    const normalized = `${baseName}${extension}`.slice(0, 255);
+    if (!baseName) throw new BadRequestException('请输入有效的图片名称');
+    return normalized;
   }
 
   /**

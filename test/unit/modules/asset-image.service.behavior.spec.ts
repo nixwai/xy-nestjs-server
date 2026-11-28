@@ -11,6 +11,21 @@ import type { UploadService } from '#/modules/upload/upload.service.js';
 import type { UploadImageFile } from '#/modules/upload/types/upload-image-file.type.js';
 import type { UploadImageResult } from '#/modules/upload/types/upload-result.type.js';
 
+const image = {
+  id: 'image-1',
+  folderId: '10',
+  ownerId: '1',
+  creatorId: '1',
+  originalName: 'banner.png',
+  storageKey: 'assets/1/10/banner.webp',
+  mimeType: 'image/webp',
+  size: 128,
+  width: 320,
+  height: 180,
+  createdAt: new Date(),
+  updatedAt: new Date()
+};
+
 const folder = {
   id: '10',
   name: '素材',
@@ -64,6 +79,11 @@ function createService(
       hasPreviousPage: false
     }),
     create: vi.fn().mockResolvedValue({ id: '1', folderId: folder.id, originalName: 'one.png' }),
+    findById: vi.fn().mockResolvedValue(image),
+    findByName: vi.fn().mockResolvedValue(null),
+    update: vi.fn().mockResolvedValue({ ...image, originalName: 'renamed.png' }),
+    softDelete: vi.fn().mockResolvedValue(undefined),
+    move: vi.fn().mockResolvedValue({ ...image, folderId: '11' }),
     ...options.imageRepository
   };
   const authorization: Partial<AuthorizationService> = {
@@ -87,6 +107,41 @@ function createService(
 }
 
 describe('素材图片领域规则', () => {
+  it('重命名时保留原扩展名并拒绝同目录重名', async () => {
+    const { service, images } = createService({ permissions: [PermissionCode.ASSET_FOLDER_READ] });
+    await service.update('1', 'image-1', '  renamed.jpg  ');
+    expect(images.update).toHaveBeenCalledWith('image-1', { originalName: 'renamed.png' });
+
+    images.findByName = vi.fn().mockResolvedValue(image);
+    await expect(service.update('1', 'image-1', 'banner')).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('软删除图片需要读取权限并委托仓储', async () => {
+    const { service, images } = createService({ permissions: [PermissionCode.ASSET_FOLDER_READ] });
+    await service.softDelete('1', 'image-1');
+    expect(images.softDelete).toHaveBeenCalledWith('image-1');
+  });
+
+  it('移动图片时校验目标文件夹并拒绝原位置', async () => {
+    const { images } = createService({ permissions: [PermissionCode.ASSET_FOLDER_READ] });
+    const targetFolder = { ...folder, id: '11' };
+    const folders = {
+      findById: vi
+        .fn()
+        .mockResolvedValueOnce(targetFolder)
+        .mockResolvedValueOnce({ ...folder, id: '10' })
+    } as unknown as AssetFolderRepository;
+    const custom = new AssetImageService(
+      images as AssetImageRepository,
+      folders,
+      { hasPermission: vi.fn().mockResolvedValue(true) } as unknown as AuthorizationService,
+      {} as UploadService
+    );
+    await custom.move('1', 'image-1', '11');
+    expect(images.move).toHaveBeenCalledWith('image-1', '11', '1');
+    await expect(custom.move('1', 'image-1', '10')).rejects.toBeInstanceOf(BadRequestException);
+  });
+
   it('只按当前文件夹 ID 查询直属图片，不递归读取子文件夹', async () => {
     const { service, images } = createService({ permissions: [PermissionCode.ASSET_FOLDER_READ] });
     await service.list('1', { folderId: '10', page: 2, pageSize: 10, skip: 10 });

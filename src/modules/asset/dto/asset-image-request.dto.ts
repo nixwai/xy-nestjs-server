@@ -65,3 +65,43 @@ export class AssetImageUploadDto {
   @Allow()
   files!: string[];
 }
+
+/** 重命名素材图片请求。 */
+export class AssetImageUpdateDto {
+  /** 图片主键。 */
+  @ApiProperty({ type: String, pattern: idPattern })
+  @IsString({ message: '图片 ID 必须为字符串' })
+  @Matches(idPattern, { message: '图片 ID 必须为正整数字符串' })
+  id!: string;
+
+  /** 新文件名。 */
+  @ApiProperty({ type: String, maxLength: 255 })
+  @IsString({ message: '图片名称必须为字符串' })
+  @IsNotEmpty({ message: '请输入图片名称' })
+  @MaxLength(255, { message: '图片名称长度不能超过255个字符' })
+  originalName!: string;
+}
+
+/** 软删除素材图片请求。 */
+export class AssetImageSoftDeleteDto {
+  /** 图片主键。 */
+  @ApiProperty({ type: String, pattern: idPattern })
+  @IsString({ message: '图片 ID 必须为字符串' })
+  @Matches(idPattern, { message: '图片 ID 必须为正整数字符串' })
+  id!: string;
+}
+
+/** 移动素材图片请求。 */
+export class AssetImageMoveDto {
+  /** 图片主键。 */
+  @ApiProperty({ type: String, pattern: idPattern })
+  @IsString({ message: '图片 ID 必须为字符串' })
+  @Matches(idPattern, { message: '图片 ID 必须为正整数字符串' })
+  id!: string;
+
+  /** 目标文件夹主键。 */
+  @ApiProperty({ type: String, pattern: idPattern })
+  @IsString({ message: '文件夹 ID 必须为字符串' })
+  @Matches(idPattern, { message: '文件夹 ID 必须为正整数字符串' })
+  folderId!: string;
+}

@@ -83,6 +83,27 @@ export const REGISTERED_PERMISSION_GROUPS: readonly RegisteredPermissionGroup[] 
         description: '向有权访问的素材文件夹上传图片',
         isAssignable: true,
         isProtected: false
+      },
+      {
+        code: PermissionCode.ASSET_IMAGE_UPDATE,
+        name: '编辑素材图片',
+        description: '重命名有权访问的素材图片',
+        isAssignable: true,
+        isProtected: false
+      },
+      {
+        code: PermissionCode.ASSET_IMAGE_DELETE,
+        name: '删除素材图片',
+        description: '删除有权访问的素材图片',
+        isAssignable: true,
+        isProtected: false
+      },
+      {
+        code: PermissionCode.ASSET_IMAGE_MOVE,
+        name: '移动素材图片',
+        description: '调整有权访问的素材图片所属文件夹',
+        isAssignable: true,
+        isProtected: false
       }
     ]
   }
